@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BrightMesh — Learn Together</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- PWA Meta Tags -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="BrightMesh">
+
 <style>
 /* ── THEME ── */
 :root {
@@ -37,14 +43,11 @@ input,textarea { font-family:inherit; }
 @keyframes pop { 0%{transform:scale(0.8)}60%{transform:scale(1.05)}100%{transform:scale(1)} }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
 @keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)} }
-@keyframes shimmer { 0%{background-position:200%}100%{background-position:-200%} }
-@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
 @keyframes xpfly { 0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-50px)} }
-@keyframes confettiFall { 0%{transform:translateY(-10px) rotate(0);opacity:1}100%{transform:translateY(100vh) rotate(540deg);opacity:0} }
 @keyframes notifIn { from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1} }
 
 /* ── SHARED ── */
-.card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);transition:all .2s; }
+.card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px;transition:all .2s; }
 .card:hover { border-color:var(--bd2); }
 .avatar { border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0; }
 .btn { padding:9px 18px;border-radius:var(--r2);border:none;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s; }
@@ -52,6 +55,7 @@ input,textarea { font-family:inherit; }
 .btn-primary:hover { background:var(--a2);transform:translateY(-1px); }
 .btn-secondary { background:var(--bg3);border:1px solid var(--bd);color:var(--text2); }
 .btn-secondary:hover { border-color:var(--a);color:var(--a); }
+.btn-danger { background:var(--rd);color:#fff; }
 .btn-sm { padding:6px 13px;font-size:.78rem; }
 .inp { width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r2);padding:10px 13px;font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s; }
 .inp:focus { border-color:var(--a); }
@@ -62,6 +66,12 @@ input,textarea { font-family:inherit; }
 .section-title { font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px; }
 .divider { height:1px;background:var(--bd);margin:10px 0; }
 
+/* ── AUTH AUTH OVERLAY ── */
+.auth-container { position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
+.auth-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:24px;width:100%;max-width:400px;box-shadow:var(--shadow-lg); }
+.auth-toggle { text-align:center;margin-top:14px;font-size:.85rem;color:var(--text3);cursor:pointer; }
+.auth-toggle span { color:var(--a);font-weight:600; }
+
 /* ── TOPBAR ── */
 .topbar { position:fixed;top:0;left:0;right:0;z-index:300;background:var(--bg);border-bottom:1px solid var(--bd);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;box-shadow:var(--shadow); }
 .logo { display:flex;align-items:center;gap:8px; }
@@ -71,8 +81,6 @@ input,textarea { font-family:inherit; }
 .tb-actions { display:flex;align-items:center;gap:6px; }
 .tb-icon-btn { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;position:relative;cursor:pointer;transition:all .2s; }
 .tb-icon-btn:hover { border-color:var(--a);color:var(--a); }
-.tb-badge { position:absolute;top:0;right:0;width:14px;height:14px;background:var(--rd);border-radius:50%;font-size:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg); }
-.theme-toggle { font-size:.85rem; }
 .tb-avatar { width:34px;height:34px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;cursor:pointer;border:2px solid var(--bd); }
 
 /* ── BOTTOM NAV ── */
@@ -80,464 +88,93 @@ input,textarea { font-family:inherit; }
 .bni { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.56rem;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;transition:all .2s;position:relative; }
 .bni.active { color:var(--a); }
 .bni .ni { font-size:1.2rem;line-height:1; }
-.bni .dot { position:absolute;top:8px;right:calc(50% - 14px);width:6px;height:6px;background:var(--rd);border-radius:50%;border:1.5px solid var(--bg); }
 
 /* ── MAIN ── */
-.main { padding:56px 0 60px;min-height:100vh; }
+.main { padding:72px 0 80px;min-height:100vh; }
 .panel { display:none; }
 .panel.active { display:block;animation:fadeIn .3s ease; }
 
-/* ── FULL SCREEN PANELS ── */
-.fullscreen { position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column; }
-.fullscreen.show { display:flex; }
-.fs-header { display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bg);position:sticky;top:0;z-index:10; }
-.fs-back { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer; }
-.fs-title { font-size:1rem;font-weight:700;flex:1; }
-.fs-actions { display:flex;gap:7px; }
-
-/* ══════════════════════════════
-   FEED
-══════════════════════════════ */
-.stories-row { display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px; }
-.stories-row::-webkit-scrollbar { display:none; }
-.story-item { flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer; }
-.story-ring { width:60px;height:60px;border-radius:50%;padding:2.5px;background:linear-gradient(45deg,var(--a),var(--pu)); }
-.story-ring.add { background:var(--bg3);border:2px dashed var(--bd2); }
-.story-ring.seen { background:var(--bd2); }
-.story-avatar { width:100%;height:100%;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;border:2.5px solid var(--bg); }
-.story-name { font-size:.6rem;color:var(--text3);max-width:60px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; }
-
-.create-post { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:14px; }
-.cp-top { display:flex;align-items:center;gap:10px;margin-bottom:11px; }
-.cp-input { flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:24px;padding:9px 16px;font-size:.88rem;color:var(--text3);cursor:pointer;transition:border-color .2s; }
-.cp-input:hover { border-color:var(--a); }
-.cp-actions { display:flex;gap:4px;border-top:1px solid var(--bd);padding-top:10px; }
-.cp-action { flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border-radius:var(--r2);font-size:.75rem;font-weight:500;border:none;background:none;color:var(--text3);cursor:pointer;transition:background .2s; }
-.cp-action:hover { background:var(--bg3); }
-
+/* ── PANELS & FEATURES ── */
+.search-container { margin-bottom:14px; position:relative; }
 .post-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:12px;overflow:hidden; }
 .post-header { display:flex;align-items:center;gap:10px;padding:13px 14px 8px; }
-.post-av { width:40px;height:40px; }
+.post-av { width:40px;height:40px;border-radius:50%;background:var(--a);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700; }
 .post-meta { flex:1; }
-.post-name { font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:6px; }
-.post-time { font-size:.7rem;color:var(--text3);margin-top:1px; }
-.post-more { width:30px;height:30px;border-radius:50%;border:none;background:none;font-size:1rem;color:var(--text3);cursor:pointer; }
-.post-text { padding:2px 14px 10px;font-size:.9rem;line-height:1.65;color:var(--text); }
-.post-tags { display:flex;flex-wrap:wrap;gap:5px;padding:0 14px 10px; }
-.post-media { width:100%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:3.5rem;aspect-ratio:16/9;border-top:1px solid var(--bd);border-bottom:1px solid var(--bd);cursor:pointer;position:relative; }
-.post-stats { padding:8px 14px;display:flex;justify-content:space-between;border-bottom:1px solid var(--bd);font-size:.72rem;color:var(--text3); }
-.post-actions { display:flex; }
-.post-action { flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;font-size:.78rem;font-weight:500;border:none;background:none;color:var(--text3);cursor:pointer;transition:background .2s; }
-.post-action:hover { background:var(--bg3); }
-.post-action.liked { color:var(--rd); }
+.post-name { font-size:.9rem;font-weight:600; }
+.post-time { font-size:.7rem;color:var(--text3); }
+.post-text { padding:10px 14px;font-size:.9rem;line-height:1.65;color:var(--text); }
+.post-stats { padding:8px 14px;display:flex;justify-content:space-between;border-top:1px solid var(--bd);font-size:.72rem;color:var(--text3); }
 
-/* ══════════════════════════════
-   GROUPS
-══════════════════════════════ */
-.group-tabs { display:flex;gap:6px;margin-bottom:14px;overflow-x:auto; }
-.group-tabs::-webkit-scrollbar { display:none; }
-.g-tab { flex-shrink:0;padding:7px 16px;border-radius:24px;border:1.5px solid var(--bd);background:var(--bg2);font-size:.8rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s; }
-.g-tab.on { background:var(--a);border-color:var(--a);color:#fff; }
+/* TIMER YPT STYLE */
+.timer-container { text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:14px; }
+.timer-display { font-family:'Fira Code',monospace;font-size:2.5rem;font-weight:700;color:var(--a);margin:10px 0; }
 
-.group-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s; }
-.group-card:hover { border-color:var(--a);box-shadow:var(--shadow); }
-.gc-header { display:flex;align-items:center;gap:12px;margin-bottom:10px; }
-.gc-icon { width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0; }
-.gc-info { flex:1; }
-.gc-name { font-size:.92rem;font-weight:700;margin-bottom:3px; }
-.gc-meta { font-size:.72rem;color:var(--text3);display:flex;align-items:center;gap:8px; }
-.gc-members { display:flex;margin-bottom:8px; }
-.gc-member-av { width:24px;height:24px;border-radius:50%;border:2px solid var(--bg2);margin-left:-6px;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff; }
-.gc-member-av:first-child { margin-left:0; }
-.gc-preview { font-size:.78rem;color:var(--text3);line-height:1.5; }
-.gc-actions { display:flex;gap:7px;margin-top:10px; }
-.joined-badge { background:var(--a-light);color:var(--a);border-radius:20px;padding:4px 12px;font-size:.72rem;font-weight:600; }
-
-/* CREATE GROUP */
-.create-group-btn { display:flex;align-items:center;gap:10px;background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;margin-bottom:14px; }
-.create-group-btn:hover { border-color:var(--a);background:var(--a-light); }
-.cgb-icon { width:44px;height:44px;border-radius:12px;background:var(--a-light);display:flex;align-items:center;justify-content:center;font-size:1.2rem; }
-.cgb-text { font-size:.88rem;font-weight:600;color:var(--a); }
-.cgb-sub { font-size:.72rem;color:var(--text3); }
-
-/* ══════════════════════════════
-   GROUP DETAIL + CHAT
-══════════════════════════════ */
-.group-detail-header { padding:0 14px 14px;border-bottom:1px solid var(--bd); }
-.gd-banner { width:100%;height:120px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:4rem;margin-bottom:12px; }
-.gd-name { font-size:1.2rem;font-weight:800;margin-bottom:4px; }
-.gd-desc { font-size:.82rem;color:var(--text3);margin-bottom:10px;line-height:1.5; }
-.gd-stats { display:flex;gap:16px; }
-.gd-stat { text-align:center; }
-.gd-stat-num { font-size:1.1rem;font-weight:700;color:var(--a); }
-.gd-stat-lbl { font-size:.62rem;color:var(--text3); }
-
-.group-tabs-2 { display:flex;background:var(--bg3);border-bottom:1px solid var(--bd); }
-.gt2-tab { flex:1;padding:11px;text-align:center;font-size:.8rem;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s; }
-.gt2-tab.on { color:var(--a);border-bottom-color:var(--a); }
-
-/* CHAT */
-.chat-area { flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px; }
-.chat-area::-webkit-scrollbar { width:3px; }
-.chat-message { display:flex;gap:8px;align-items:flex-start; }
-.chat-message.me { flex-direction:row-reverse; }
-.cm-avatar { width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff; }
-.cm-content { max-width:72%; }
-.cm-name { font-size:.65rem;font-weight:600;margin-bottom:3px;color:var(--text3); }
-.chat-message.me .cm-name { text-align:right; }
-.cm-bubble { padding:9px 13px;border-radius:4px 16px 16px 16px;font-size:.84rem;line-height:1.55;position:relative; }
-.chat-message.me .cm-bubble { border-radius:16px 4px 16px 16px;background:var(--a);color:#fff; }
-.chat-message:not(.me) .cm-bubble { background:var(--bg3);color:var(--text); }
-.cm-time { font-size:.6rem;color:var(--text4);margin-top:3px; }
-.chat-message.me .cm-time { text-align:right; }
-.cm-media { border-radius:10px;overflow:hidden;margin-bottom:4px; }
-.cm-media-thumb { width:180px;height:120px;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:2.5rem;border-radius:10px;cursor:pointer; }
-.cm-file { display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:8px;padding:8px 11px;font-size:.78rem; }
-.cm-react { display:flex;gap:4px;margin-top:4px; }
-.cm-react-btn { font-size:.72rem;background:var(--bg3);border:1px solid var(--bd);border-radius:20px;padding:2px 8px;cursor:pointer; }
-.date-separator { text-align:center;font-size:.68rem;color:var(--text3);font-weight:500;margin:8px 0;display:flex;align-items:center;gap:8px; }
-.date-separator::before,.date-separator::after { content:'';flex:1;height:1px;background:var(--bd); }
-.typing-indicator { display:flex;align-items:center;gap:8px;padding:6px 0; }
-.typing-dots { display:flex;gap:3px;background:var(--bg3);padding:8px 12px;border-radius:16px; }
-.typing-dot { width:7px;height:7px;border-radius:50%;background:var(--text3);animation:pulse .8s ease-in-out infinite; }
-.typing-dot:nth-child(2) { animation-delay:.15s; }
-.typing-dot:nth-child(3) { animation-delay:.3s; }
-
-.chat-input-area { border-top:1px solid var(--bd);padding:10px 14px;background:var(--bg);display:flex;flex-direction:column;gap:8px; }
-.cia-attachments { display:flex;gap:6px;overflow-x:auto; }
-.cia-attachments::-webkit-scrollbar { display:none; }
-.cia-attach-btn { flex-shrink:0;width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;transition:all .2s; }
-.cia-attach-btn:hover { border-color:var(--a);color:var(--a); }
-.cia-row { display:flex;align-items:flex-end;gap:8px; }
-.cia-input { flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:24px;padding:9px 15px;font-size:.85rem;color:var(--text);outline:none;resize:none;max-height:120px;min-height:40px;line-height:1.5;transition:border-color .2s; }
-.cia-input:focus { border-color:var(--a); }
-.cia-input::placeholder { color:var(--text4); }
-.cia-send { width:40px;height:40px;border-radius:50%;background:var(--a);border:none;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;cursor:pointer;transition:all .2s; }
-.cia-send:hover { background:var(--a2);transform:scale(1.05); }
-
-/* ══════════════════════════════
-   DIRECT MESSAGES
-══════════════════════════════ */
-.dm-search { position:relative;margin-bottom:12px; }
-.dm-search-icon { position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text4); }
-.dm-search .inp { padding-left:36px; }
-.dm-item { display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:all .2s; }
-.dm-item:hover { border-color:var(--a);background:var(--a-light); }
-.dm-item.unread { background:var(--a-light);border-color:rgba(0,102,255,.2); }
-.dmi-av { position:relative; }
-.dmi-status { position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2); }
-.dmi-status.online { background:var(--gr); }
-.dmi-status.offline { background:var(--text4); }
-.dmi-info { flex:1;min-width:0; }
-.dmi-name { font-size:.88rem;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:6px; }
-.dmi-preview { font-size:.76rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
-.dmi-right { text-align:right;flex-shrink:0; }
-.dmi-time { font-size:.65rem;color:var(--text4); }
-.dmi-unread-count { width:18px;height:18px;border-radius:50%;background:var(--a);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin-top:3px;margin-left:auto; }
-.online-indicator { display:inline-flex;align-items:center;gap:4px;font-size:.68rem;color:var(--gr); }
-.online-dot { width:6px;height:6px;border-radius:50%;background:var(--gr);animation:blink 2s infinite; }
-
-/* ══════════════════════════════
-   STUDY / DOPAMINE
-══════════════════════════════ */
-.xp-card { background:var(--a);border-radius:var(--r);padding:16px;margin-bottom:12px;color:#fff;position:relative;overflow:hidden; }
-.xp-card::before { content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1); }
-.xp-card::after { content:'';position:absolute;bottom:-30px;left:-10px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.07); }
-.xp-row { display:flex;align-items:center;gap:12px;margin-bottom:12px;position:relative;z-index:1; }
-.xp-badge { width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;cursor:pointer;flex-shrink:0; }
-.xp-bar-bg { height:10px;background:rgba(255,255,255,.25);border-radius:5px;overflow:hidden;position:relative;z-index:1; }
-.xp-bar-fill { height:100%;background:rgba(255,255,255,.9);border-radius:5px;transition:width .8s; }
-.xp-labels { display:flex;justify-content:space-between;font-size:.6rem;opacity:.8;margin-top:4px;position:relative;z-index:1; }
-
-.stat-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px; }
-.stat-box { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center; }
-.stat-num { font-size:1.4rem;font-weight:700;color:var(--a);display:block; }
-.stat-lbl { font-size:.68rem;color:var(--text3);margin-top:3px; }
-
-.streak-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:12px;border-left:4px solid var(--gd); }
-.streak-days-row { display:flex;justify-content:center;gap:5px;margin:10px 0; }
-.sd { width:30px;height:30px;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:600;color:var(--text3); }
-.sd.done { background:var(--gd);border-color:var(--gd);color:#fff; }
-.sd.today { border-color:var(--gd);color:var(--gd); }
-
-.mystery-box { background:linear-gradient(135deg,var(--pu),#4f46e5);border-radius:var(--r);padding:18px;text-align:center;color:#fff;cursor:pointer;transition:all .3s;margin-bottom:12px; }
-.mystery-box:hover { transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.3); }
-.mb-emoji { font-size:3rem;display:block;margin-bottom:8px;animation:float 3s ease-in-out infinite; }
-
-.quest-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:10px; }
-.quest-item { display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--bd); }
-.quest-item:last-child { border-bottom:none; }
-.qi-icon { font-size:1.3rem;flex-shrink:0; }
-.qi-info { flex:1; }
-.qi-name { font-size:.84rem;font-weight:500;margin-bottom:5px; }
-.qi-bar-bg { height:5px;background:var(--bg4);border-radius:3px;overflow:hidden; }
-.qi-bar-fill { height:100%;border-radius:3px;transition:width .5s; }
-.qi-pct { font-size:.62rem;color:var(--text3);margin-top:3px; }
-.qi-reward { font-size:.72rem;font-weight:600;color:var(--a);text-align:right; }
-.qi-claim { background:var(--gr);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:.7rem;font-weight:600;cursor:pointer;font-family:inherit; }
-
-.prog-item { margin-bottom:11px; }
-.prog-label { display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:5px; }
-.prog-bar-bg { height:8px;background:var(--bg3);border-radius:4px;overflow:hidden; }
-.prog-fill { height:100%;border-radius:4px;transition:width .6s; }
-
-/* ── SPIN WHEEL ── */
-#spinCanvas { display:block;margin:0 auto; }
-
-/* ── LEADERBOARD ── */
-.lb-item { display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;transition:all .2s; }
-.lb-item:hover { border-color:var(--a); }
-.lb-item.me { border-color:var(--a);background:var(--a-light); }
-.lb-rank { font-size:.82rem;font-weight:700;color:var(--text3);min-width:22px;text-align:center;font-family:'Fira Code',monospace; }
-.lb-rank.top { color:var(--gd); }
+/* LEADERBOARD */
+.lb-item { display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px; }
+.lb-rank { font-size:.82rem;font-weight:700;color:var(--gd);min-width:22px; }
 .lb-info { flex:1; }
 .lb-name { font-size:.86rem;font-weight:600; }
-.lb-detail { font-size:.7rem;color:var(--text3);margin-top:2px; }
-.lb-score { text-align:right; }
-.lb-hrs { font-size:.9rem;font-weight:700;color:var(--a);font-family:'Fira Code',monospace; }
-.lb-pts { font-size:.62rem;color:var(--text3); }
-.lb-up { font-size:.65rem;color:var(--gr); }
+.lb-score { font-family:'Fira Code',monospace;font-weight:700;color:var(--a); }
 
-/* PODIUM */
-.podium { display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:16px 0; }
-.pod { display:flex;flex-direction:column;align-items:center;gap:5px; }
-.pod-av { border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;position:relative; }
-.pod-crown { position:absolute;top:-13px;font-size:1rem; }
-.pod-block { display:flex;align-items:center;justify-content:center;border-radius:6px 6px 0 0;width:64px;font-size:.78rem;font-weight:700;font-family:'Fira Code',monospace; }
+/* FULL SCREEN PANELS */
+.fullscreen { position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column; }
+.fullscreen.show { display:flex; }
+.fs-header { display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bg); }
+.fs-back { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer; }
+.fs-title { font-size:1rem;font-weight:700;flex:1; }
 
-/* ── NOTIFICATIONS ── */
-#notifContainer { position:fixed;top:64px;right:12px;z-index:9999;display:flex;flex-direction:column;gap:7px;pointer-events:none;max-width:280px; }
-.notif-toast { background:var(--bg);border:1px solid var(--bd);border-radius:14px;padding:11px 14px;display:flex;align-items:flex-start;gap:9px;box-shadow:var(--shadow-lg);animation:notifIn .35s ease;pointer-events:auto; }
-.nt-icon { font-size:1.2rem;flex-shrink:0; }
-.nt-body { flex:1; }
-.nt-title { font-size:.8rem;font-weight:700;margin-bottom:2px; }
-.nt-text { font-size:.74rem;color:var(--text3); }
+/* CHAT SYSTEM */
+.chat-area { flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px; }
+.chat-message { display:flex;gap:8px;align-items:flex-start;max-width:85%; }
+.chat-message.me { align-self:flex-end;flex-direction:row-reverse; }
+.cm-bubble { padding:9px 13px;border-radius:14px;font-size:.84rem;line-height:1.55;background:var(--bg3); }
+.chat-message.me .cm-bubble { background:var(--a);color:#fff; }
+.chat-input-area { border-top:1px solid var(--bd);padding:10px 14px;display:flex;gap:8px; }
 
-/* XP POP */
-.xp-pop-el { position:fixed;pointer-events:none;z-index:9998;font-size:1rem;font-weight:700;font-family:'Fira Code',monospace;color:var(--gr);animation:xpfly 1.2s ease forwards; }
-
-/* CONFETTI */
-#confettiContainer { position:fixed;inset:0;pointer-events:none;z-index:9997;overflow:hidden; }
-
-/* LEVEL UP MODAL */
-#levelUpModal { position:fixed;inset:0;z-index:9996;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center; }
-#levelUpModal.show { display:flex; }
-.lu-card { background:var(--bg);border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;animation:pop .5s ease;box-shadow:var(--shadow-lg);border:1px solid var(--bd); }
-
-/* FOMO BANNER */
-.fomo-banner { border-radius:var(--r);padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:.82rem; }
-.fomo-banner.urgent { background:#fff5f5;border:1px solid #ffd0d0;color:var(--rd); }
-.fomo-banner.info { background:var(--a-light);border:1px solid rgba(0,102,255,.2);color:var(--a); }
-[data-theme="dark"] .fomo-banner.urgent { background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.25); }
-[data-theme="dark"] .fomo-banner.info { background:rgba(0,102,255,.1);border-color:rgba(0,102,255,.25); }
-.fomo-timer { font-family:'Fira Code',monospace;font-size:.88rem;font-weight:700;color:var(--rd); }
-
-/* VIDEO CATS */
-.v-cats { display:flex;gap:7px;overflow-x:auto;padding-bottom:5px;margin-bottom:12px; }
-.v-cats::-webkit-scrollbar { display:none; }
-.vcat { flex-shrink:0;padding:5px 14px;border-radius:24px;border:1.5px solid var(--bd);background:var(--bg2);font-size:.76rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s; }
-.vcat.on { background:var(--text);color:var(--bg);border-color:var(--text); }
-.vc-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
-.vc { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s; }
-.vc:hover { border-color:var(--a);transform:translateY(-2px);box-shadow:var(--shadow); }
-.vc-thumb { width:100%;aspect-ratio:16/9;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2rem;position:relative; }
-.vc-dur { position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.75);color:#fff;font-size:.6rem;padding:2px 6px;border-radius:4px;font-family:'Fira Code',monospace; }
-.vc-info { padding:9px; }
-.vc-title { font-size:.78rem;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3px; }
-.vc-meta { font-size:.65rem;color:var(--text3); }
-.vc-ch { display:flex;align-items:center;gap:5px;margin-bottom:3px; }
-.chav { width:17px;height:17px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.58rem;font-weight:700;color:#fff; }
-
-/* PROFILE */
-.p-cover { height:130px;background:linear-gradient(135deg,var(--a),var(--pu));display:flex;align-items:center;justify-content:center;font-size:3rem; }
-.p-stats { display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px; }
-.ps-item { background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center; }
-.ps-n { font-size:.9rem;font-weight:700;color:var(--a); }
-.ps-l { font-size:.58rem;color:var(--text3);margin-top:2px; }
-.badges-grid { display:flex;gap:8px;flex-wrap:wrap; }
-.badge-item { display:flex;flex-direction:column;align-items:center;gap:3px; }
-.badge-icon { width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid var(--bd); }
-.badge-icon.earned { border-color:var(--gd);box-shadow:0 0 10px rgba(245,166,35,.2); }
-.badge-icon.locked { opacity:.35;filter:grayscale(1); }
-.badge-nm { font-size:.56rem;color:var(--text3);text-align:center; }
-
-/* AI TUTOR */
-.ai-msgs { background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r);height:200px;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;margin-bottom:9px; }
-.ai-msg { padding:9px 13px;border-radius:10px;font-size:.84rem;line-height:1.62;max-width:85%; }
-.ai-msg.bot { background:var(--bg2);border:1px solid var(--bd);align-self:flex-start; }
-.ai-msg.user { background:var(--a);color:#fff;align-self:flex-end; }
-.ai-row { display:flex;gap:8px; }
-.ai-inp { flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:24px;padding:9px 14px;font-size:.84rem;color:var(--text);outline:none;transition:border-color .2s; }
-.ai-inp:focus { border-color:var(--a); }
-.ai-send { padding:9px 16px;border-radius:24px;background:var(--a);border:none;color:#fff;font-size:.78rem;font-weight:600;cursor:pointer; }
-
-/* SHOP */
-.shop-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
-.shop-item { background:var(--bg2);border:1.5px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;position:relative;transition:all .22s; }
-.shop-item:hover { border-color:var(--a);transform:translateY(-2px);box-shadow:var(--shadow); }
-.shop-item.feat { border-color:var(--gd); }
-.shop-hot { position:absolute;top:-7px;right:8px;background:var(--rd);color:#fff;font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:20px; }
-.shop-ic { font-size:1.8rem;margin-bottom:7px;display:block; }
-.shop-nm { font-size:.8rem;font-weight:600;margin-bottom:3px; }
-.shop-desc { font-size:.67rem;color:var(--text3);margin-bottom:8px;line-height:1.4; }
-.shop-price { font-size:.82rem;font-weight:700;color:var(--gd);font-family:'Fira Code',monospace; }
+/* PWA INSTALL BANNER */
+#pwaBanner { display:none;background:var(--a-light);border:1px solid var(--a);border-radius:var(--r);padding:12px;margin-bottom:14px;align-items:center;justify-content:between;justify-content:space-between; }
 </style>
 </head>
 <body>
 
+<!-- PWA INSTALL BANNER -->
+<div class="wrap" style="padding-top:60px; padding-bottom:0;">
+  <div id="pwaBanner">
+    <span style="font-size:.82rem; color:var(--text2); font-weight:600;">📱 BrightMesh অ্যাপটি ফোনে ডাউনলোড করুন!</span>
+    <button class="btn btn-primary btn-sm" id="pwaBtn">ইনস্টল</button>
+  </div>
+</div>
+
 <!-- FIXED OVERLAYS -->
-<div id="confettiContainer"></div>
 <div id="notifContainer"></div>
 
+<!-- LEVEL UP MODAL -->
 <div id="levelUpModal">
   <div class="lu-card">
     <div style="font-size:3rem;margin-bottom:10px;animation:float 2s ease-in-out infinite;">🎊</div>
     <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;" id="luNum">Level 9!</div>
     <div style="font-weight:700;margin-bottom:6px;">Expert Learner 🎓</div>
     <div style="font-size:.82rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">নতুন features unlock হয়েছে!</div>
-    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--gd);">+500🪙</div><div style="font-size:.6rem;color:var(--text3);">Coins</div></div>
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--a);">+100⭐</div><div style="font-size:.6rem;color:var(--text3);">XP</div></div>
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;">🏅</div><div style="font-size:.6rem;color:var(--text3);">Badge</div></div>
-    </div>
     <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="document.getElementById('levelUpModal').classList.remove('show')">🚀 চালিয়ে যাও!</button>
   </div>
 </div>
 
-<!-- GROUP DETAIL SCREEN -->
-<div class="fullscreen" id="groupDetail">
-  <div class="fs-header">
-    <button class="fs-back" onclick="closeGroupDetail()">←</button>
-    <div style="display:flex;align-items:center;gap:10px;flex:1;">
-      <div style="font-size:1.3rem;" id="gd-icon-hd">📚</div>
-      <div><div class="fs-title" id="gd-name-hd">Group</div><div style="font-size:.7rem;color:var(--text3);" id="gd-meta-hd">0 members</div></div>
-    </div>
-    <div class="fs-actions">
-      <div class="tb-icon-btn" onclick="showGdTab('members')">👥</div>
-      <div class="tb-icon-btn">🔍</div>
-      <div class="tb-icon-btn">⚙️</div>
-    </div>
+<!-- AUTH CONTAINER (LOGIN/SIGNUP) -->
+<div class="auth-container" id="authScreen">
+  <div class="auth-card" id="loginForm">
+    <h2 style="margin-bottom:16px; text-align:center;">BrightMesh লগইন</h2>
+    <input type="email" id="loginEmail" class="inp" placeholder="ইমেইল এড্রেস" style="margin-bottom:10px;">
+    <input type="password" id="loginPass" class="inp" placeholder="পাসওয়ার্ড" style="margin-bottom:14px;">
+    <button class="btn btn-primary" style="width:100%;" onclick="handleLogin()">লগইন করুন</button>
+    <div class="auth-toggle" onclick="toggleAuth(true)">অ্যাকাউন্ট নেই? <span>সাইন-আপ করুন</span></div>
   </div>
-  <!-- Sub tabs -->
-  <div class="group-tabs-2">
-    <div class="gt2-tab on" onclick="showGdTab('chat',this)">💬 Chat</div>
-    <div class="gt2-tab" onclick="showGdTab('posts',this)">📝 Posts</div>
-    <div class="gt2-tab" onclick="showGdTab('members',this)">👥 Members</div>
-    <div class="gt2-tab" onclick="showGdTab('media',this)">📎 Media</div>
-  </div>
-  <!-- GROUP CHAT -->
-  <div id="gd-chat" style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
-    <div class="chat-area" id="groupChatArea">
-      <div class="date-separator">Today</div>
-      <div class="chat-message">
-        <div class="cm-avatar" style="background:#1877f2;">As</div>
-        <div class="cm-content">
-          <div class="cm-name">Ashraf Ahmed</div>
-          <div class="cm-bubble">আজকে Newton's Laws শেষ করলাম! 🎉 কেউ help করতে পারবে Thermodynamics-এ?</div>
-          <div class="cm-react"><span class="cm-react-btn">👍 12</span><span class="cm-react-btn">❤️ 5</span></div>
-          <div class="cm-time">9:30 AM</div>
-        </div>
-      </div>
-      <div class="chat-message">
-        <div class="cm-avatar" style="background:#42b883;">Kh</div>
-        <div class="cm-content">
-          <div class="cm-name">Khadiza Juha</div>
-          <div class="cm-bubble">আমি help করতে পারবো! Thermodynamics আমার favorite subject 😊</div>
-          <div class="cm-time">9:32 AM</div>
-        </div>
-      </div>
-      <div class="chat-message">
-        <div class="cm-avatar" style="background:#ff5722;">Ji</div>
-        <div class="cm-content">
-          <div class="cm-name">Jisan Khan</div>
-          <div class="cm-bubble">এই resource টা দেখো 👇</div>
-          <div class="cm-media"><div class="cm-media-thumb">📄 Thermodynamics Notes.pdf</div></div>
-          <div class="cm-time">9:35 AM</div>
-        </div>
-      </div>
-      <div class="chat-message me">
-        <div class="cm-avatar" style="background:var(--a);">You</div>
-        <div class="cm-content">
-          <div class="cm-name">তুমি</div>
-          <div class="cm-bubble">ধন্যবাদ সবাইকে! অনেক helpful 🙏</div>
-          <div class="cm-time">9:37 AM ✓✓</div>
-        </div>
-      </div>
-      <div class="typing-indicator">
-        <div class="cm-avatar" style="background:#9c27b0;width:30px;height:30px;font-size:.65rem;">Ak</div>
-        <div class="typing-dots"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>
-        <div style="font-size:.68rem;color:var(--text3);">Akbor typing...</div>
-      </div>
-    </div>
-    <div class="chat-input-area">
-      <div class="cia-attachments">
-        <div class="cia-attach-btn" title="Image">🖼️</div>
-        <div class="cia-attach-btn" title="File">📎</div>
-        <div class="cia-attach-btn" title="GIF">GIF</div>
-        <div class="cia-attach-btn" title="Poll">📊</div>
-        <div class="cia-attach-btn" title="Emoji">😊</div>
-      </div>
-      <div class="cia-row">
-        <textarea class="cia-input" id="groupChatInput" placeholder="Message..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendGroupMsg();}"></textarea>
-        <button class="cia-send" onclick="sendGroupMsg()">➤</button>
-      </div>
-    </div>
-  </div>
-  <!-- MEMBERS TAB -->
-  <div id="gd-members" style="display:none;flex:1;overflow-y:auto;padding:14px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;"><div style="font-weight:700;">Members (<span id="memberCount">6</span>)</div><button class="btn btn-primary btn-sm" onclick="showNotif('📤','Invite!','Invite link copied!','var(--a)')">+ Invite</button></div>
-    <div id="membersList"></div>
-  </div>
-  <!-- POSTS TAB -->
-  <div id="gd-posts" style="display:none;flex:1;overflow-y:auto;padding:14px;">
-    <div class="post-card">
-      <div class="post-header"><div class="post-av avatar" style="width:38px;height:38px;background:#1877f2;font-size:.75rem;color:#fff;">As</div><div class="post-meta"><div class="post-name">Ashraf Ahmed</div><div class="post-time">2h ago</div></div></div>
-      <div class="post-text">Physics group-এর সবার জন্য — Newton's Laws-এর এই shortcut কাজে লাগবে! 🔥</div>
-      <div class="post-actions"><button class="post-action" onclick="this.classList.toggle('liked')">👍 Like</button><button class="post-action">💬 Comment</button><button class="post-action">🔗 Share</button></div>
-    </div>
-  </div>
-  <!-- MEDIA TAB -->
-  <div id="gd-media" style="display:none;flex:1;overflow-y:auto;padding:14px;">
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
-      <div style="aspect-ratio:1;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;">📄</div>
-      <div style="aspect-ratio:1;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;">🖼️</div>
-      <div style="aspect-ratio:1;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;">📊</div>
-      <div style="aspect-ratio:1;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;">🎵</div>
-      <div style="aspect-ratio:1;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;">📄</div>
-      <div style="aspect-ratio:1;background:var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;">🖼️</div>
-    </div>
-  </div>
-</div>
-
-<!-- DM CHAT SCREEN -->
-<div class="fullscreen" id="dmChat">
-  <div class="fs-header">
-    <button class="fs-back" onclick="closeDmChat()">←</button>
-    <div style="display:flex;align-items:center;gap:10px;flex:1;cursor:pointer;">
-      <div style="position:relative;">
-        <div class="avatar" id="dmChatAv" style="width:36px;height:36px;font-size:.8rem;color:#fff;"></div>
-        <div class="dmi-status online" id="dmChatStatus"></div>
-      </div>
-      <div><div class="fs-title" id="dmChatName">Name</div><div style="font-size:.7rem;color:var(--gr);" id="dmChatOnline">Online</div></div>
-    </div>
-    <div class="fs-actions">
-      <div class="tb-icon-btn">📞</div>
-      <div class="tb-icon-btn">📹</div>
-      <div class="tb-icon-btn">⋮</div>
-    </div>
-  </div>
-  <div class="chat-area" id="dmChatArea" style="flex:1;"></div>
-  <div class="chat-input-area">
-    <div class="cia-attachments">
-      <div class="cia-attach-btn">🖼️</div>
-      <div class="cia-attach-btn">📎</div>
-      <div class="cia-attach-btn">😊</div>
-      <div class="cia-attach-btn">🎤</div>
-    </div>
-    <div class="cia-row">
-      <textarea class="cia-input" id="dmInput" placeholder="Message..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDM();}"></textarea>
-      <button class="cia-send" onclick="sendDM()">➤</button>
-    </div>
+  <div class="auth-card" id="signupForm" style="display:none;">
+    <h2 style="margin-bottom:16px; text-align:center;">নতুন অ্যাকাউন্ট</h2>
+    <input type="text" id="signupName" class="inp" placeholder="আপনার নাম" style="margin-bottom:10px;">
+    <input type="email" id="signupEmail" class="inp" placeholder="ইমেইল এড্রেস" style="margin-bottom:10px;">
+    <input type="password" id="signupPass" class="inp" placeholder="পাসওয়ার্ড (মিনিমাম ৬ ডিজিট)" style="margin-bottom:14px;">
+    <button class="btn btn-primary" style="width:100%;" onclick="handleSignup()">সাইন-আপ করুন</button>
+    <div class="auth-toggle" onclick="toggleAuth(false)">অ্যাকাউন্ট আছে? <span>লগইন করুন</span></div>
   </div>
 </div>
 
@@ -548,865 +185,362 @@ input,textarea { font-family:inherit; }
     <div class="logo-text">Bright<span>Mesh</span></div>
   </div>
   <div class="tb-actions">
-    <div class="tb-icon-btn theme-toggle" onclick="toggleTheme()" title="Toggle theme">☀️</div>
-    <div class="tb-icon-btn">🔍</div>
-    <div class="tb-icon-btn">🔔<span class="tb-badge">5</span></div>
-    <div class="tb-avatar" onclick="showP('profile',document.querySelector('.bni:last-child'))">A</div>
+    <button class="tb-icon-btn" onclick="toggleTheme()">🌗</button>
+    <div class="tb-avatar" id="userAvatar" onclick="logout()">??</div>
   </div>
 </div>
 
-<!-- MAIN -->
-<div class="main">
+<!-- MAIN CONTENT PANELS -->
+<div class="main wrap">
+  
+  <!-- PANEL 1: FEED (POST SYSTEM) -->
+  <div id="panel-feed" class="panel active">
+    <!-- SEARCH BAR -->
+    <div class="search-container">
+      <input type="text" id="searchBar" class="inp" placeholder="🔍 শর্টকাট বা স্টাডি নোট খুঁজুন..." oninput="filterPosts()">
+    </div>
 
-<!-- FEED -->
-<div class="panel active" id="panel-feed">
-<div class="wrap">
-  <!-- FOMO -->
-  <div class="fomo-banner urgent">
-    <span>⏰</span>
-    <div style="flex:1;"><strong>Streak শেষ হচ্ছে!</strong> 🔥12 day streak রাত ১২টায় শেষ!</div>
-    <div class="fomo-timer" id="fomoTimer">03:24:15</div>
-  </div>
-  <div class="fomo-banner info">
-    <span>👀</span>
-    <div style="flex:1;">৫ জন তোমাকে <strong>group-এ invite</strong> করেছে!</div>
-    <button class="btn btn-primary btn-sm" onclick="showP('groups',document.querySelectorAll('.bni')[1])">View</button>
-  </div>
-  <!-- Stories -->
-  <div class="stories-row">
-    <div class="story-item"><div class="story-ring add"><div class="story-avatar" style="background:var(--bg4);color:var(--a);font-size:1.4rem;">+</div></div><div class="story-name">Add Story</div></div>
-    <div class="story-item"><div class="story-ring"><div class="story-avatar" style="background:#1877f2;font-size:.75rem;color:#fff;">As</div></div><div class="story-name">Ashraf</div></div>
-    <div class="story-item"><div class="story-ring"><div class="story-avatar" style="background:#42b883;font-size:.75rem;color:#fff;">Kh</div></div><div class="story-name">Khadiza</div></div>
-    <div class="story-item"><div class="story-ring seen"><div class="story-avatar" style="background:#ff5722;font-size:.75rem;color:#fff;">Ji</div></div><div class="story-name">Jisan</div></div>
-    <div class="story-item"><div class="story-ring seen"><div class="story-avatar" style="background:#9c27b0;font-size:.75rem;color:#fff;">Ak</div></div><div class="story-name">Akbor</div></div>
-    <div class="story-item"><div class="story-ring seen"><div class="story-avatar" style="background:#00bcd4;font-size:.75rem;color:#fff;">Am</div></div><div class="story-name">Amjad</div></div>
-  </div>
-  <!-- Create post -->
-  <div class="create-post">
-    <div class="cp-top">
-      <div class="avatar" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">A</div>
-      <div class="cp-input">আজকে কি পড়লে? শেয়ার করো! 📚</div>
+    <!-- CREATE POST -->
+    <div class="card">
+      <textarea id="postContent" class="inp" placeholder="নতুন কোনো শর্টকাট বা নোট শেয়ার করো..." style="min-height:70px; resize:none; margin-bottom:10px;"></textarea>
+      <button class="btn btn-primary btn-sm" onclick="createPost()">পোস্ট করুন</button>
     </div>
-    <div class="cp-actions">
-      <button class="cp-action" style="color:var(--rd);">📹 Live</button>
-      <button class="cp-action" style="color:var(--gr);">🖼️ Photo</button>
-      <button class="cp-action" style="color:var(--a);">📝 Note</button>
-      <button class="cp-action" style="color:var(--gd);">📊 Progress</button>
+
+    <!-- LIVE POSTS STREAM -->
+    <div class="section-title">স্টাডি ফিড</div>
+    <div id="postsStream"></div>
+  </div>
+
+  <!-- PANEL 2: YPT TIMER & LEADERBOARD -->
+  <div id="panel-study" class="panel">
+    <div class="timer-container">
+      <h3>⏱️ ফোকাস স্টাডি টাইমার (YPT)</h3>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+      <button class="btn btn-primary" id="timerBtn" onclick="toggleTimer()">স্টার্ট ট্র্যাকিং</button>
+    </div>
+
+    <div class="section-title">🏆 আজকের লিডারবোর্ড (Live)</div>
+    <div id="leaderboardList"></div>
+  </div>
+
+  <!-- PANEL 3: GROUPS CHAT PANEL -->
+  <div id="panel-groups" class="panel">
+    <div class="section-title">আমার স্টাডি গ্রুপ সমূহ</div>
+    <div class="card" style="cursor:pointer;" onclick="openGroupChat('[ 𝐕𝐈𝐏𝐄𝐑 𝐖𝐀𝐑𝐑𝐈𝐎𝐑 ]')">
+      <div style="font-weight:700; font-size:1.1rem; color:var(--pu);">[ 𝐕𝐈𝐏𝐄𝐑 𝐖𝐀𝐑𝐑𝐈𝐎𝐑 ]</div>
+      <p style="font-size:.8rem; color:var(--text3); margin-top:4px;">সবাই একসাথে লাইভ চ্যাট করো ও মিশন কমপ্লিট করো!</p>
+      <button class="btn btn-secondary btn-sm" style="margin-top:10px;">গ্রুপ চ্যাটে ঢুকুন 💬</button>
     </div>
   </div>
-  <!-- Posts -->
-  <div class="post-card">
-    <div class="post-header">
-      <div class="post-av avatar" style="width:40px;height:40px;background:linear-gradient(135deg,#ffd700,#ff8c00);font-size:.82rem;color:#fff;">As</div>
-      <div class="post-meta">
-        <div class="post-name">Ashraf Ahmed <span class="badge" style="background:var(--a-light);color:var(--a);">🏆 Top</span></div>
-        <div class="post-time">⚛️ Physics · 2 hrs ago</div>
-      </div>
-      <button class="post-more">•••</button>
-    </div>
-    <div class="post-text">আজকে Newton's Laws সম্পূর্ণ শেষ! 💪 Study streak 🔥25 days চলছে! BrightMesh community-র সবাই দোয়া করো।</div>
-    <div class="post-tags"><span class="tag">#Physics</span><span class="tag">#SSC2025</span><span class="tag">#BrightMesh</span></div>
-    <div class="post-media" style="font-size:3.5rem;">⚛️</div>
-    <div class="post-stats"><span>👍❤️🎉 Khadiza ও আরো ৮৭ জন</span><span>৩২ comments · ১২ shares</span></div>
-    <div class="post-actions">
-      <button class="post-action" onclick="this.classList.toggle('liked')">👍 Like</button>
-      <button class="post-action">💬 Comment</button>
-      <button class="post-action">🔁 Share</button>
-      <button class="post-action">🔖 Save</button>
-    </div>
-  </div>
-  <div class="post-card">
-    <div class="post-header">
-      <div class="post-av avatar" style="width:40px;height:40px;background:#42b883;font-size:.82rem;color:#fff;">Kh</div>
-      <div class="post-meta">
-        <div class="post-name">Khadiza Juha <span class="badge" style="background:#e8f5e9;color:#2e7d32;">🎓 Mentor</span></div>
-        <div class="post-time">🧮 Math · 5 hrs ago</div>
-      </div>
-    </div>
-    <div class="post-text">Integration shortcut-এ exam-এ ৫ মিনিট বাঁচাও! নিচের video দেখো 🔥</div>
-    <div class="post-media" style="cursor:pointer;font-size:3rem;">🧮<div style="position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">▶️</div></div>
-    <div class="post-stats"><span>❤️🔥 ২৪৫ reactions</span><span>৮৯ comments</span></div>
-    <div class="post-actions">
-      <button class="post-action" onclick="this.classList.toggle('liked')">👍 Like</button>
-      <button class="post-action">💬 Comment</button>
-      <button class="post-action">🔁 Share</button>
-      <button class="post-action">🔖 Save</button>
-    </div>
-  </div>
-</div>
+
 </div>
 
-<!-- GROUPS -->
-<div class="panel" id="panel-groups">
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
-    <div><div style="font-size:1.1rem;font-weight:800;">Groups</div><div style="font-size:.76rem;color:var(--text3);">Study together, grow together</div></div>
-    <button class="btn btn-primary btn-sm" onclick="createGroup()">+ Create</button>
+<!-- FULLSCREEN CHAT AREA -->
+<div class="fullscreen" id="groupChatScreen">
+  <div class="fs-header">
+    <button class="fs-back" onclick="closeGroupChat()">←</button>
+    <div class="fs-title" id="chatGroupTitle">[ 𝐕𝐈𝐏𝐄𝐑 𝐖𝐀𝐑𝐑𝐈𝐎𝐑 ]</div>
   </div>
-  <!-- Create Group Card -->
-  <div class="create-group-btn" onclick="createGroup()">
-    <div class="cgb-icon">➕</div>
-    <div><div class="cgb-text">নতুন Group তৈরি করো</div><div class="cgb-sub">Subject, class বা interest-based group বানাও</div></div>
-  </div>
-  <div class="group-tabs">
-    <button class="g-tab on" onclick="selGTab(this,'my')">My Groups</button>
-    <button class="g-tab" onclick="selGTab(this,'discover')">Discover</button>
-    <button class="g-tab" onclick="selGTab(this,'popular')">Popular</button>
-  </div>
-  <div id="groupsContainer"></div>
-</div>
-</div>
-
-<!-- MESSAGES -->
-<div class="panel" id="panel-messages">
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <div style="font-size:1.1rem;font-weight:800;">Messages</div>
-    <div style="display:flex;gap:6px;">
-      <button class="btn btn-secondary btn-sm">Requests (2)</button>
-      <button class="btn btn-primary btn-sm" onclick="showNotif('💬','New Chat','Select a contact to message!','var(--a)')">✏️</button>
-    </div>
-  </div>
-  <!-- Search -->
-  <div class="dm-search"><span class="dm-search-icon">🔍</span><input class="inp" placeholder="Search conversations..."/></div>
-  <!-- Online Friends -->
-  <div style="margin-bottom:14px;">
-    <div class="section-title">Online Now</div>
-    <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:4px;">
-      <div class="story-item" onclick="openDmChat('Khadiza Juha','Kh','#42b883',true)"><div class="story-ring"><div class="story-avatar" style="background:#42b883;font-size:.72rem;color:#fff;">Kh</div></div><div class="story-name">Khadiza</div></div>
-      <div class="story-item" onclick="openDmChat('Ahmod Hossain','Ah','#e91e63',true)"><div class="story-ring"><div class="story-avatar" style="background:#e91e63;font-size:.72rem;color:#fff;">Ah</div></div><div class="story-name">Ahmod</div></div>
-      <div class="story-item" onclick="openDmChat('Akbor Hossen','Ak','#9c27b0',false)"><div class="story-ring seen"><div class="story-avatar" style="background:#9c27b0;font-size:.72rem;color:#fff;">Ak</div></div><div class="story-name">Akbor</div></div>
-    </div>
-  </div>
-  <!-- Conversations -->
-  <div class="section-title">Recent</div>
-  <div id="dmList"></div>
-</div>
-</div>
-
-<!-- STUDY + DOPAMINE -->
-<div class="panel" id="panel-study">
-<div class="wrap">
-  <!-- XP -->
-  <div class="xp-card">
-    <div class="xp-row">
-      <div class="xp-badge" onclick="triggerLevelUp()">Lv.8</div>
-      <div style="flex:1;"><div style="font-size:.9rem;font-weight:700;">Advanced Learner</div><div style="font-size:.72rem;opacity:.85;">Level 9 হতে <strong>160 XP</strong> বাকি!</div></div>
-      <div style="font-family:'Fira Code',monospace;font-size:.88rem;font-weight:700;" id="xpPts">2,840</div>
-    </div>
-    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:94%;"></div></div>
-    <div class="xp-labels"><span>2,800</span><span id="xpLbl">2,840 / 3,000</span><span>Lv.9</span></div>
-  </div>
-  <!-- Coins display -->
-  <div style="display:flex;gap:8px;margin-bottom:12px;">
-    <div style="flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer;" onclick="coinRain()">
-      <span style="font-size:1.4rem;">🪙</span>
-      <div><div style="font-size:1rem;font-weight:700;font-family:'Fira Code',monospace;" id="coinDisp">2,840</div><div style="font-size:.66rem;color:var(--text3);">Study Coins</div></div>
-    </div>
-    <div style="flex:1;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:12px;display:flex;align-items:center;gap:10px;">
-      <span style="font-size:1.4rem;">⭐</span>
-      <div><div style="font-size:1rem;font-weight:700;font-family:'Fira Code',monospace;" id="xpDisp">2,840</div><div style="font-size:.66rem;color:var(--text3);">Total XP</div></div>
-    </div>
-  </div>
-  <!-- Streak -->
-  <div class="streak-card">
-    <div style="font-size:2.5rem;margin-bottom:6px;animation:float 3s ease-in-out infinite;">🔥</div>
-    <div style="font-size:1.8rem;font-weight:800;color:var(--gd);" id="streakNum">12</div>
-    <div style="font-size:.8rem;color:var(--text3);margin-bottom:10px;">দিনের Study Streak!</div>
-    <div class="streak-days-row">
-      <div class="sd done">S</div><div class="sd done">M</div><div class="sd done">T</div>
-      <div class="sd done">W</div><div class="sd today">T</div><div class="sd">F</div><div class="sd">S</div>
-    </div>
-    <div style="font-size:.76rem;color:var(--rd);margin-bottom:11px;">⚠️ Streak শেষ হবে: <span id="streakCd" style="font-family:'Fira Code',monospace;font-weight:700;">03:24:15</span></div>
-    <button class="btn btn-primary" onclick="studyNow()">📚 এখনই পড়ো!</button>
-  </div>
-  <!-- Mystery Box -->
-  <div class="mystery-box" onclick="openBox()">
-    <span class="mb-emoji" id="boxIcon">🎁</span>
-    <div style="font-size:1rem;font-weight:700;margin-bottom:5px;">Mystery Reward Box!</div>
-    <div style="font-size:.8rem;opacity:.85;margin-bottom:12px;">Study করলে random reward! কি আছে জানো না... 👀</div>
-    <button style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:24px;padding:9px 22px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;">🎲 Open Now!</button>
-    <div style="font-size:.65rem;opacity:.7;margin-top:8px;" id="boxCd">Available now!</div>
-  </div>
-  <!-- Spin Wheel -->
-  <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div style="font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:11px;">🎯 Daily Spin</div>
-    <canvas id="spinCanvas" width="240" height="240"></canvas>
-    <div style="text-align:center;margin-top:11px;">
-      <button class="btn btn-primary" id="spinBtn" onclick="doSpin()">🎯 Spin!</button>
-      <div id="spinRes" style="font-size:.84rem;font-weight:700;margin-top:9px;min-height:18px;"></div>
-    </div>
-  </div>
-  <!-- Random Bonus -->
-  <div style="background:var(--bg2);border:2px dashed var(--bd2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;margin-bottom:12px;" onclick="claimBonus(this)">
-    <div style="font-size:.65rem;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">🎰 Variable Reward</div>
-    <div style="font-size:2rem;font-weight:800;color:var(--a);font-family:'Fira Code',monospace;" id="bonusAmt">???</div>
-    <div style="font-size:.76rem;color:var(--text3);margin-top:4px;">Click → কখনো 10, কখনো 1000 XP 😈</div>
-  </div>
-  <!-- Timer -->
-  <div class="card" style="padding:16px;margin-bottom:12px;text-align:center;">
-    <div style="font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;">⏱️ Focus Timer</div>
-    <div style="display:flex;gap:5px;justify-content:center;margin-bottom:14px;">
-      <button class="btn btn-primary btn-sm on-mode" onclick="setTimer(25,this)">🍅 25m</button>
-      <button class="btn btn-secondary btn-sm" onclick="setTimer(5,this)">☕ 5m</button>
-      <button class="btn btn-secondary btn-sm" onclick="setTimer(50,this)">💪 50m</button>
-    </div>
-    <div style="font-family:'Fira Code',monospace;font-size:3.2rem;font-weight:700;color:var(--a);letter-spacing:4px;margin:10px 0;" id="tDisp">25:00</div>
-    <input class="inp" id="tTask" placeholder="এখন কি পড়ছ?" style="text-align:center;margin-bottom:12px;"/>
-    <div style="display:flex;gap:7px;justify-content:center;">
-      <button class="btn btn-primary" onclick="startTimer()">▶ শুরু</button>
-      <button class="btn btn-secondary" onclick="pauseTimer()">⏸ Pause</button>
-      <button class="btn btn-secondary" onclick="resetTimer()">🔄 Reset</button>
-    </div>
-  </div>
-  <!-- Quests -->
-  <div class="quest-card">
-    <div style="font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:11px;">🎯 Daily Quests</div>
-    <div class="quest-item">
-      <div class="qi-icon">⏱️</div>
-      <div class="qi-info"><div class="qi-name">২ ঘন্টা focus করো</div><div class="qi-bar-bg"><div class="qi-bar-fill" style="width:100%;background:var(--gr)"></div></div><div class="qi-pct">Complete! ✓</div></div>
-      <div class="qi-reward">+100⭐<br>+50🪙</div>
-      <div style="font-size:1.2rem;color:var(--gr);">✅</div>
-    </div>
-    <div class="quest-item">
-      <div class="qi-icon">📝</div>
-      <div class="qi-info"><div class="qi-name">৫টি flashcard review</div><div class="qi-bar-bg"><div class="qi-bar-fill" style="width:60%;background:var(--a)"></div></div><div class="qi-pct">3/5</div></div>
-      <div class="qi-reward">+50⭐<br>+30🪙</div>
-      <button class="qi-claim" onclick="claimQuest(this,50,30)">Claim</button>
-    </div>
-    <div class="quest-item">
-      <div class="qi-icon">👥</div>
-      <div class="qi-info"><div class="qi-name">Group-এ message পাঠাও</div><div class="qi-bar-bg"><div class="qi-bar-fill" style="width:0%;background:var(--gd)"></div></div><div class="qi-pct">0/1</div></div>
-      <div class="qi-reward">+75⭐<br>+40🪙</div>
-      <button class="qi-claim" onclick="claimQuest(this,75,40)">Claim</button>
-    </div>
-  </div>
-  <!-- Progress -->
-  <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div style="font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:12px;">📚 Subject Progress</div>
-    <div class="prog-item"><div class="prog-label"><span>⚛️ Physics</span><span style="color:var(--a);">72%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:72%;background:linear-gradient(90deg,var(--a),var(--pu))"></div></div></div>
-    <div class="prog-item"><div class="prog-label"><span>🧮 Math</span><span style="color:var(--a);">85%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:85%;background:linear-gradient(90deg,var(--gr),#00796b)"></div></div></div>
-    <div class="prog-item"><div class="prog-label"><span>🧪 Chemistry</span><span style="color:var(--a);">45%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:45%;background:linear-gradient(90deg,var(--gd),#e65100)"></div></div></div>
-    <div class="prog-item"><div class="prog-label"><span>🌿 Biology</span><span style="color:var(--a);">60%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:60%;background:linear-gradient(90deg,#56ab2f,#a8e063)"></div></div></div>
-  </div>
-  <!-- AI Tutor -->
-  <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div style="font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:11px;">🤖 AI Study Tutor</div>
-    <div class="ai-msgs" id="aiMsgs"><div class="ai-msg bot">👋 আমি BrightMesh AI Tutor! যেকোনো প্রশ্ন করো।</div></div>
-    <div class="ai-row">
-      <input class="ai-inp" id="aiInp" placeholder="প্রশ্ন করো..." onkeydown="if(event.key==='Enter')sendAI()"/>
-      <button class="ai-send" onclick="sendAI()">➤</button>
-    </div>
-  </div>
-  <!-- Shop -->
-  <div style="font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px;">🛒 Coins Shop</div>
-  <div class="shop-grid">
-    <div class="shop-item feat" onclick="buyItem(this,'Streak Freeze',500)"><div class="shop-hot">HOT</div><span class="shop-ic">🧊</span><div class="shop-nm">Streak Freeze</div><div class="shop-desc">Streak বাঁচাও!</div><div class="shop-price">🪙 500</div></div>
-    <div class="shop-item" onclick="buyItem(this,'XP Booster',800)"><span class="shop-ic">⚡</span><div class="shop-nm">XP Booster 2x</div><div class="shop-desc">24h double XP!</div><div class="shop-price">🪙 800</div></div>
-    <div class="shop-item" onclick="buyItem(this,'Gold Frame',300)"><span class="shop-ic">🎭</span><div class="shop-nm">Gold Frame</div><div class="shop-desc">Special avatar!</div><div class="shop-price">🪙 300</div></div>
-    <div class="shop-item feat" onclick="buyItem(this,'Mystery Box',600)"><div class="shop-hot">NEW</div><span class="shop-ic">🎁</span><div class="shop-nm">Mystery Box</div><div class="shop-desc">Random reward!</div><div class="shop-price">🪙 600</div></div>
-  </div>
-</div>
-</div>
-
-<!-- VIDEOS -->
-<div class="panel" id="panel-video">
-<div class="wrap">
-  <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px;">Videos</div>
-  <div class="v-cats">
-    <div class="vcat on" onclick="selCat(this)">🎯 All</div>
-    <div class="vcat" onclick="selCat(this)">⚛️ Physics</div>
-    <div class="vcat" onclick="selCat(this)">🧮 Math</div>
-    <div class="vcat" onclick="selCat(this)">🧪 Chemistry</div>
-    <div class="vcat" onclick="selCat(this)">💻 Coding</div>
-    <div class="vcat" onclick="selCat(this)">🌐 English</div>
-    <div class="vcat" onclick="selCat(this)">📖 BCS</div>
-  </div>
-  <!-- Featured -->
-  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:12px;cursor:pointer;">
-    <div style="width:100%;aspect-ratio:16/9;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative;">⚛️<div style="position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">▶️</div><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;font-size:.62rem;padding:2px 8px;border-radius:5px;font-family:'Fira Code',monospace;">15:32</div></div>
-    <div style="padding:12px;"><div style="font-size:.92rem;font-weight:700;margin-bottom:5px;">HSC Physics: Electrostatics সম্পূর্ণ গাইড</div><div style="font-size:.72rem;color:var(--text3);">Ashraf Ahmed · 1.2M views · 2 days ago</div></div>
-  </div>
-  <div class="vc-grid">
-    <div class="vc"><div class="vc-thumb">🧮<div class="vc-dur">12:45</div></div><div class="vc-info"><div class="vc-ch"><div class="chav" style="background:#42b883;">K</div><span style="font-size:.63rem;color:var(--text3);">Khadiza</span></div><div class="vc-title">Integration Tricks HSC</div><div class="vc-meta">892K · 1w</div></div></div>
-    <div class="vc"><div class="vc-thumb">💻<div class="vc-dur">35:00</div></div><div class="vc-info"><div class="vc-ch"><div class="chav" style="background:#ff5722;">J</div><span style="font-size:.63rem;color:var(--text3);">Jisan</span></div><div class="vc-title">Python Zero to Hero</div><div class="vc-meta">3.2M · 1mo</div></div></div>
-    <div class="vc"><div class="vc-thumb">🧪<div class="vc-dur">18:20</div></div><div class="vc-info"><div class="vc-ch"><div class="chav" style="background:#9c27b0;">A</div><span style="font-size:.63rem;color:var(--text3);">Akbor</span></div><div class="vc-title">Organic Chemistry</div><div class="vc-meta">456K · 3d</div></div></div>
-    <div class="vc"><div class="vc-thumb">📖<div class="vc-dur">45:20</div></div><div class="vc-info"><div class="vc-ch"><div class="chav" style="background:#00bcd4;">A</div><span style="font-size:.63rem;color:var(--text3);">Amjad</span></div><div class="vc-title">BCS Complete Strategy</div><div class="vc-meta">567K · 4d</div></div></div>
-  </div>
-</div>
-</div>
-
-<!-- PROFILE -->
-<div class="panel" id="panel-profile">
-  <div class="p-cover">🌆</div>
-  <div class="wrap">
-    <div class="card" style="padding:16px;margin-bottom:12px;margin-top:-40px;">
-      <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:12px;margin-top:-36px;">
-        <div class="avatar" style="width:76px;height:76px;background:var(--a);font-size:1.8rem;font-weight:700;color:#fff;border:3px solid var(--bg);">A</div>
-        <div style="padding-top:40px;">
-          <div style="font-size:1.05rem;font-weight:800;">Ashraf Ahmed</div>
-          <div style="font-size:.75rem;color:var(--text3);">@ashraf · Dhaka · Lv.8 ⭐</div>
-        </div>
-      </div>
-      <div class="p-stats">
-        <div class="ps-item"><div class="ps-n">348</div><div class="ps-l">Posts</div></div>
-        <div class="ps-item"><div class="ps-n">1.2K</div><div class="ps-l">Friends</div></div>
-        <div class="ps-item"><div class="ps-n">🔥12</div><div class="ps-l">Streak</div></div>
-        <div class="ps-item"><div class="ps-n" id="profCoins">2.8K</div><div class="ps-l">Coins</div></div>
-      </div>
-      <div style="display:flex;gap:8px;">
-        <button class="btn btn-primary" style="flex:1;padding:9px;">✏️ Edit Profile</button>
-        <button class="btn btn-secondary" style="flex:1;padding:9px;">📊 Share Stats</button>
-      </div>
-    </div>
-    <!-- Badges -->
-    <div class="card" style="padding:16px;margin-bottom:12px;">
-      <div class="section-title">Badges & Achievements</div>
-      <div class="badges-grid">
-        <div class="badge-item"><div class="badge-icon earned">🔥</div><div class="badge-nm">30-Day</div></div>
-        <div class="badge-item"><div class="badge-icon earned">⚛️</div><div class="badge-nm">Physics</div></div>
-        <div class="badge-item"><div class="badge-icon earned">📚</div><div class="badge-nm">100h</div></div>
-        <div class="badge-item"><div class="badge-icon earned">🏆</div><div class="badge-nm">Top 50</div></div>
-        <div class="badge-item"><div class="badge-icon locked">💎</div><div class="badge-nm">500h</div></div>
-        <div class="badge-item"><div class="badge-icon locked">👑</div><div class="badge-nm">Champion</div></div>
-        <div class="badge-item"><div class="badge-icon locked">🌟</div><div class="badge-nm">Top 10</div></div>
-        <div class="badge-item"><div class="badge-icon locked">🎓</div><div class="badge-nm">Mentor</div></div>
-      </div>
-    </div>
-    <div class="card" style="padding:16px;">
-      <div class="section-title">All-Time Stats</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;">
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--a);">547h</div><div style="font-size:.62rem;color:var(--text3);">Study</div></div>
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--gr);">12.8K</div><div style="font-size:.62rem;color:var(--text3);">Points</div></div>
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--gd);">8</div><div style="font-size:.62rem;color:var(--text3);">Wins</div></div>
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--pu);">128</div><div style="font-size:.62rem;color:var(--text3);">Videos</div></div>
-      </div>
-    </div>
+  <div class="chat-area" id="chatArea"></div>
+  <div class="chat-input-area">
+    <input type="text" id="chatInput" class="cia-input" placeholder="গ্রুপে মেসেজ লিখুন...">
+    <button class="cia-send" onclick="sendGroupMessage()">➔</button>
   </div>
 </div>
 
-</div><!-- /main -->
-
-<!-- BOTTOM NAV -->
+<!-- BOTTOM NAVIGATION -->
 <div class="bnav">
-  <button class="bni active" onclick="showP('feed',this)"><span class="ni">🏠</span>Feed</button>
-  <button class="bni" onclick="showP('groups',this)"><span class="ni">👥</span>Groups<span class="dot"></span></button>
-  <button class="bni" onclick="showP('messages',this)"><span class="ni">💬</span>Messages<span class="dot"></span></button>
-  <button class="bni" onclick="showP('study',this)"><span class="ni">📚</span>Study</button>
-  <button class="bni" onclick="showP('video',this)"><span class="ni">🎬</span>Videos</button>
-  <button class="bni" onclick="showP('profile',this)"><span class="ni">👤</span>Profile</button>
+  <button class="bni active" onclick="switchPanel('feed', this)"><span class="ni">📝</span>ফিড</button>
+  <button class="bni" onclick="switchPanel('study', this)"><span class="ni">⏱️</span>YPT টাইমার</button>
+  <button class="bni" onclick="switchPanel('groups', this)"><span class="ni">💬</span>গ্রুপ চ্যাট</button>
 </div>
+
+<!-- FIREBASE GLOBAL CORE SDKS -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+  import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+  // তোর আসল Firebase চাবি
+  const firebaseConfig = {
+    apiKey: "AIzaSyBahvYk6mX9OXsNUI7Hj2a06lcJZtFFy2c",
+    authDomain: "brightmesh-f93b3.firebaseapp.com",
+    projectId: "brightmesh-f93b3",
+    storageBucket: "brightmesh-f93b3.firebasestorage.app",
+    messagingSenderId: "458385343749",
+    appId: "1:458385343749:web:3dc84d60279a8cbe23e36c",
+    measurementId: "G-GLP8D97R4M"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let currentUser = null;
+  let allPosts = [];
+
+  // --- AUTH SYSTEM LOGIC ---
+  window.toggleAuth = function(showSignup) {
+    document.getElementById('loginForm').style.display = showSignup ? 'none' : 'block';
+    document.getElementById('signupForm').style.display = showSignup ? 'block' : 'none';
+  }
+
+  window.handleSignup = async function() {
+    const name = document.getElementById('signupName').value.trim();
+    const email = document.getElementById('signupEmail').value.trim();
+    const pass = document.getElementById('signupPass').value;
+    if(!name || !email || !pass) return alert("সবগুলো ঘর ঠিকঠাক পূরণ কর!");
+    
+    try {
+      const res = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(res.user, { displayName: name });
+      // সেভ ইনিশিয়াল টাইম ট্র্যাকিং সিস্টেম
+      await setDoc(doc(db, "users", res.user.uid), { name: name, totalStudyTime: 0 });
+      alert("অ্যাকাউন্ট তৈরি সফল হয়েছে!");
+    } catch (err) {
+      alert("ভুল হয়েছে: " + err.message);
+    }
+  }
+
+  window.handleLogin = async function() {
+    const email = document.getElementById('loginEmail').value.trim();
+    const pass = document.getElementById('loginPass').value;
+    if(!email || !pass) return alert("ইমেইল ও পাসওয়ার্ড দাও!");
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+    } catch (err) {
+      alert("লগইন ব্যর্থ: " + err.message);
+    }
+  }
+
+  window.logout = function() {
+    if(confirm("লগআউট করতে চাও?")) signOut(auth);
+  }
+
+  // Auth স্টেট ট্র্যাকিং ও রিয়েল-টাইম ট্রিগার
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      document.getElementById('authScreen').style.display = 'none';
+      document.getElementById('userAvatar').innerText = user.displayName ? user.displayName.substring(0,2).toUpperCase() : "US";
+      setupRealtimeFeeds();
+    } else {
+      currentUser = null;
+      document.getElementById('authScreen').style.display = 'flex';
+    }
+  });
+
+  // --- REAL-TIME DATA STREAMING ---
+  function setupRealtimeFeeds() {
+    // ১. রিয়েল-টাইম পোস্ট ফেচিং
+    const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+    onSnapshot(postsQuery, (snapshot) => {
+      allPosts = [];
+      snapshot.forEach(doc => allPosts.push({id: doc.id, ...doc.data()}));
+      renderPosts(allPosts);
+    });
+
+    // ২. রিয়েল-টাইম চ্যাট মেসেজ ফেচিং
+    const chatQuery = query(collection(db, "groupChats"), orderBy("createdAt", "asc"));
+    onSnapshot(chatQuery, (snapshot) => {
+      const chatArea = document.getElementById('chatArea');
+      chatArea.innerHTML = '';
+      snapshot.forEach(doc => {
+        const msg = doc.data();
+        const isMe = msg.uid === currentUser.uid;
+        const chatDiv = document.createElement('div');
+        chatDiv.className = `chat-message ${isMe ? 'me' : ''}`;
+        chatDiv.innerHTML = `
+          <div class="cm-bubble">
+            <div style="font-size: 0.68rem; font-weight:700; margin-bottom:2px; opacity:0.8;">${msg.userName}</div>
+            <div>${msg.text}</div>
+          </div>
+        `;
+        chatArea.appendChild(chatDiv);
+      });
+      chatArea.scrollTop = chatArea.scrollHeight;
+    });
+
+    // ৩. YPT লিডারবোর্ড ট্র্যাকিং
+    const leaderQuery = query(collection(db, "users"), orderBy("totalStudyTime", "desc"));
+    onSnapshot(leaderQuery, (snapshot) => {
+      const lbList = document.getElementById('leaderboardList');
+      lbList.innerHTML = '';
+      let rank = 1;
+      snapshot.forEach(doc => {
+        const u = doc.data();
+        const hrs = (u.totalStudyTime / 3600).toFixed(2);
+        lbList.innerHTML += `
+          <div class="lb-item">
+            <div class="lb-rank">#${rank++}</div>
+            <div class="lb-info"><div class="lb-name">${u.name}</div></div>
+            <div class="lb-score">${hrs} Hrs</div>
+          </div>
+        `;
+      });
+    });
+  }
+
+  // --- FEATURE ACTIONS ---
+  window.createPost = async function() {
+    const txt = document.getElementById('postContent').value.trim();
+    if(!txt) return alert("খালি পোস্ট করা যাবে না!");
+    try {
+      await addDoc(collection(db, "posts"), {
+        uid: currentUser.uid,
+        userName: currentUser.displayName || "Anonymous",
+        text: txt,
+        createdAt: serverTimestamp()
+      });
+      document.getElementById('postContent').value = '';
+    } catch(e) { alert("পোস্ট করা যায়নি!"); }
+  }
+
+  function renderPosts(postsArray) {
+    const container = document.getElementById('postsStream');
+    container.innerHTML = '';
+    postsArray.forEach(p => {
+      container.innerHTML += `
+        <div class="post-card">
+          <div class="post-header">
+            <div class="post-av">${p.userName.substring(0,2).toUpperCase()}</div>
+            <div class="post-meta">
+              <div class="post-name">${p.userName}</div>
+              <div class="post-time">স্টাডি মেট</div>
+            </div>
+          </div>
+          <div class="post-text">${p.text}</div>
+        </div>
+      `;
+    });
+  }
+
+  // লাইভ সার্চ ফিল্টারিং লজিক
+  window.filterPosts = function() {
+    const term = document.getElementById('searchBar').value.toLowerCase();
+    const filtered = allPosts.filter(p => p.text.toLowerCase().includes(term) || p.userName.toLowerCase().includes(term));
+    renderPosts(filtered);
+  }
+
+  window.sendGroupMessage = async function() {
+    const input = document.getElementById('chatInput');
+    const txt = input.value.trim();
+    if(!txt) return;
+    try {
+      await addDoc(collection(db, "groupChats"), {
+        uid: currentUser.uid,
+        userName: currentUser.displayName,
+        text: txt,
+        createdAt: serverTimestamp()
+      });
+      input.value = '';
+    } catch(e){}
+  }
+
+  // --- STUDY TIMER LOGIC ---
+  let timerInterval = null;
+  let totalSeconds = 0;
+  let isTimerRunning = false;
+
+  window.toggleTimer = async function() {
+    const btn = document.getElementById('timerBtn');
+    if(!isTimerRunning) {
+      // স্টার্ট টাইমার
+      isTimerRunning = true;
+      btn.innerText = "স্টপ ট্র্যাকিং";
+      btn.style.background = "var(--rd)";
+      timerInterval = setInterval(() => {
+        totalSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    } else {
+      // স্টপ ও সেভ ডেটাবেস
+      isTimerRunning = false;
+      btn.innerText = "স্টার্ট ট্র্যাকিং";
+      btn.style.background = "var(--a)";
+      clearInterval(timerInterval);
+      
+      // ডিরেক্টলি ফায়ারবেসে সেভ করো
+      try {
+        const userRef = doc(db, "users", currentUser.uid);
+        const userSnap = await getDoc(userRef);
+        let dbTime = 0;
+        if(userSnap.exists()) dbTime = userSnap.data().totalStudyTime || 0;
+        await setDoc(userRef, { totalStudyTime: dbTime + totalSeconds }, { merge: true });
+        totalSeconds = 0;
+        updateTimerDisplay();
+        alert("আজকের পড়ার সময় লাইভ ডাটাবেসে যোগ করা হয়েছে!");
+      } catch(e) { alert("টাইম সেভ করা যায়নি!"); }
+    }
+  }
+
+  function updateTimerDisplay() {
+    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
+    const secs = String(totalSeconds % 60).padStart(2, '0');
+    document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+  }
+</script>
 
 <script>
-// ── STATE ──
-let coins=2840, xp=2840, curXP=2840, maxXP=3000, baseXP=2800;
-let spinUsed=false, boxOnCd=false;
-let tTime=25*60, tRun=false, tInt=null, tSes=0;
-let isDark=false;
-
-// ── THEME ──
-function toggleTheme(){
-  isDark=!isDark;
-  document.documentElement.setAttribute('data-theme',isDark?'dark':'light');
-  document.querySelector('.theme-toggle').textContent=isDark?'🌙':'☀️';
-}
-
-// ── NAV ──
-function showP(id,el){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.bni').forEach(b=>b.classList.remove('active'));
-  document.getElementById('panel-'+id).classList.add('active');
-  el.classList.add('active');
-  window.scrollTo({top:0,behavior:'smooth'});
-  if(id==='groups') renderGroups();
-  if(id==='messages') renderDMList();
-}
-
-// ── UPDATE ──
-function upd(){
-  document.getElementById('coinDisp').textContent=coins.toLocaleString();
-  document.getElementById('xpDisp').textContent=xp.toLocaleString();
-  if(document.getElementById('xpPts'))document.getElementById('xpPts').textContent=curXP.toLocaleString();
-  if(document.getElementById('xpLbl'))document.getElementById('xpLbl').textContent=curXP+' / '+maxXP;
-  if(document.getElementById('profCoins'))document.getElementById('profCoins').textContent=Math.round(coins/100)/10+'K';
-  const pct=Math.min(100,Math.round(((curXP-baseXP)/(maxXP-baseXP))*100));
-  if(document.getElementById('xpFill'))document.getElementById('xpFill').style.width=pct+'%';
-}
-
-// ── NOTIF ──
-function showNotif(icon,title,text,color='var(--a)'){
-  const c=document.getElementById('notifContainer');
-  const n=document.createElement('div');
-  n.className='notif-toast';
-  n.style.borderColor=color;
-  n.innerHTML=`<div class="nt-icon">${icon}</div><div class="nt-body"><div class="nt-title" style="color:${color}">${title}</div><div class="nt-text">${text}</div></div>`;
-  c.appendChild(n);
-  setTimeout(()=>{n.style.transition='all .4s';n.style.opacity='0';n.style.transform='translateX(110%)';setTimeout(()=>n.remove(),450);},3800);
-}
-
-// ── XP POP ──
-function showXPPop(amt){
-  const p=document.createElement('div');
-  p.className='xp-pop-el';
-  p.style.left=(20+Math.random()*55)+'%';
-  p.style.top='35%';
-  p.textContent='+'+amt+' XP ⭐';
-  document.body.appendChild(p);
-  setTimeout(()=>p.remove(),1300);
-}
-
-// ── CONFETTI ──
-function spawnConfetti(n){
-  const c=document.getElementById('confettiContainer');
-  const cols=['#0066ff','#00a651','#dc3545','#f5a623','#7c3aed','#00bcd4'];
-  for(let i=0;i<n;i++){
-    const el=document.createElement('div');
-    const sz=Math.random()*8+5,col=cols[Math.floor(Math.random()*cols.length)];
-    el.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;background:${col};border-radius:${Math.random()>.5?'50%':'2px'};left:${Math.random()*100}%;top:-15px;animation:confettiFall ${Math.random()*2+1.5}s ${Math.random()*1}s linear forwards;`;
-    c.appendChild(el);
-    setTimeout(()=>el.remove(),3500);
+  // --- UI INTERACTION LOGIC ---
+  function switchPanel(panelId, btnEl) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.bnav .bni').forEach(b => b.classList.remove('active'));
+    document.getElementById(`panel-${panelId}`).classList.add('active');
+    btnEl.classList.add('active');
   }
-}
 
-// ── EARN ──
-function earnXP(amt){
-  xp+=amt;curXP+=amt;
-  showXPPop(amt);
-  if(curXP>=maxXP){curXP=baseXP+(curXP-maxXP);maxXP=Math.round(maxXP*1.2);setTimeout(triggerLevelUp,600);}
-  upd();
-}
-function earnCoins(amt){
-  coins+=amt;upd();
-  showNotif('🪙','Coins!','+'+amt+' coins earned!','var(--gd)');
-}
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+  }
 
-// ── LEVEL UP ──
-function triggerLevelUp(){
-  spawnConfetti(70);
-  document.getElementById('levelUpModal').classList.add('show');
-  earnCoins(500);
-  showNotif('🎊','Level Up!','নতুন level! অভিনন্দন!','var(--pu)');
-}
-function coinRain(){for(let i=0;i<6;i++)setTimeout(()=>showXPPop('🪙'),i*80);}
+  function openGroupChat(groupName) {
+    document.getElementById('groupChatScreen').classList.add('show');
+  }
+  function closeGroupChat() {
+    document.getElementById('groupChatScreen').classList.remove('show');
+  }
 
-// ── TIMER ──
-function setTimer(m,el){
-  tTime=m*60;tRun=false;clearInterval(tInt);
-  if(document.getElementById('tDisp'))document.getElementById('tDisp').textContent=fmt(tTime);
-}
-function startTimer(){
-  if(tRun)return;tRun=true;
-  tInt=setInterval(()=>{
-    tTime--;
-    if(document.getElementById('tDisp'))document.getElementById('tDisp').textContent=fmt(tTime);
-    if(tTime<=0){
-      clearInterval(tInt);tRun=false;tSes++;
-      earnXP(50);spawnConfetti(20);
-      showNotif('⏱️','Session Done!','+50 XP! চালিয়ে যাও!','var(--gr)');
-      tTime=25*60;
+  // --- PWA NATIVE DOWNLOAD LOGIC ---
+  let deferredPrompt;
+  const pwaBanner = document.getElementById('pwaBanner');
+  const pwaBtn = document.getElementById('pwaBtn');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    pwaBanner.style.display = 'flex'; // পপ-আপ ইনস্টল বাটন দেখাবে
+  });
+
+  pwaBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') {
+        pwaBanner.style.display = 'none';
+      }
+      deferredPrompt = null;
     }
-  },1000);
-}
-function pauseTimer(){tRun=false;clearInterval(tInt);}
-function resetTimer(){pauseTimer();tTime=25*60;if(document.getElementById('tDisp'))document.getElementById('tDisp').textContent='25:00';}
-function fmt(s){return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');}
-
-// ── STREAK TIMER ──
-let ss=3*3600+24*60+15;
-setInterval(()=>{
-  ss=Math.max(0,ss-1);
-  const h=String(Math.floor(ss/3600)).padStart(2,'0'),m=String(Math.floor((ss%3600)/60)).padStart(2,'0'),s=String(ss%60).padStart(2,'0');
-  const t=`${h}:${m}:${s}`;
-  ['fomoTimer','streakCd'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=t;});
-},1000);
-
-// ── STUDY NOW ──
-function studyNow(){
-  earnXP(Math.floor(Math.random()*50)+20);
-  earnCoins(Math.floor(Math.random()*30)+10);
-  const n=parseInt(document.getElementById('streakNum').textContent)||12;
-  document.getElementById('streakNum').textContent=n+1;
-  spawnConfetti(15);
-}
-
-// ── MYSTERY BOX ──
-const bxRwds=[
-  {ic:'🪙',lb:'+10 Coins',t:'c',v:10,w:25},{ic:'🪙',lb:'+50 Coins',t:'c',v:50,w:20},
-  {ic:'🪙',lb:'+200 Coins',t:'c',v:200,w:12},{ic:'🪙',lb:'+1000 Coins',t:'c',v:1000,w:2},
-  {ic:'⭐',lb:'+50 XP',t:'x',v:50,w:18},{ic:'⭐',lb:'+200 XP',t:'x',v:200,w:8},
-  {ic:'🧊',lb:'Streak Freeze!',t:'f',v:1,w:10},{ic:'🏅',lb:'Rare Badge!',t:'b',v:1,w:5},
-];
-function openBox(){
-  if(boxOnCd){showNotif('⏰','Wait!','Box আসতে সময় লাগবে!','#888');return;}
-  const ic=document.getElementById('boxIcon');
-  setTimeout(()=>{
-    const tot=bxRwds.reduce((s,r)=>s+r.w,0);
-    let rnd=Math.random()*tot,rwd=bxRwds[0];
-    for(const r of bxRwds){rnd-=r.w;if(rnd<=0){rwd=r;break;}}
-    ic.textContent=rwd.ic;
-    spawnConfetti(30);
-    showNotif(rwd.ic,'Mystery Box!',rwd.lb+' পেয়েছ!','var(--pu)');
-    if(rwd.t==='c')earnCoins(rwd.v);
-    else if(rwd.t==='x')earnXP(rwd.v);
-    boxOnCd=true;
-    let cd=3600;
-    const iv=setInterval(()=>{
-      cd--;
-      const m2=Math.floor(cd/60),s2=cd%60;
-      if(document.getElementById('boxCd'))document.getElementById('boxCd').textContent=m2+'m '+s2+'s';
-      if(cd<=0){clearInterval(iv);boxOnCd=false;ic.textContent='🎁';if(document.getElementById('boxCd'))document.getElementById('boxCd').textContent='Available now!';}
-    },1000);
-  },1000);
-}
-
-// ── SPIN WHEEL ──
-const spinItems=[
-  {lbl:'+10🪙',t:'c',v:10,clr:'#4da6ff'},{lbl:'+50⭐',t:'x',v:50,clr:'#7c3aed'},
-  {lbl:'+100🪙',t:'c',v:100,clr:'#00a651'},{lbl:'+25⭐',t:'x',v:25,clr:'#dc3545'},
-  {lbl:'+500🪙',t:'c',v:500,clr:'#f5a623'},{lbl:'🧊Freeze',t:'f',v:1,clr:'#00bcd4'},
-  {lbl:'+200🪙',t:'c',v:200,clr:'#9c27b0'},{lbl:'+100⭐',t:'x',v:100,clr:'#e91e63'},
-];
-let wAng=0,wSpin=false;
-function drawWheel(){
-  const cv=document.getElementById('spinCanvas');if(!cv)return;
-  const ctx=cv.getContext('2d'),cx=120,cy=120,r=108;
-  ctx.clearRect(0,0,240,240);
-  const sl=(2*Math.PI)/spinItems.length;
-  spinItems.forEach((it,i)=>{
-    const s=wAng+i*sl,e=s+sl;
-    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,s,e);
-    ctx.fillStyle=it.clr+'22';ctx.fill();
-    ctx.strokeStyle=it.clr;ctx.lineWidth=1.5;ctx.stroke();
-    ctx.save();ctx.translate(cx,cy);ctx.rotate(s+sl/2);
-    ctx.fillStyle=isDark?'#f0f0f5':'#0a0a0a';
-    ctx.font='bold 9px Inter,sans-serif';ctx.textAlign='right';
-    ctx.fillText(it.lbl,r-7,3);ctx.restore();
   });
-  ctx.beginPath();ctx.arc(cx,cy,11,0,2*Math.PI);
-  ctx.fillStyle=isDark?'#111118':'#ffffff';ctx.fill();
-  ctx.strokeStyle='#0066ff';ctx.lineWidth=2;ctx.stroke();
-  ctx.beginPath();ctx.moveTo(cx+r+2,cy-7);ctx.lineTo(cx+r+2,cy+7);ctx.lineTo(cx+r+16,cy);
-  ctx.closePath();ctx.fillStyle='#f5a623';ctx.fill();
-}
-function doSpin(){
-  if(wSpin||spinUsed){if(spinUsed)showNotif('⏰','Done!','আজকের spin শেষ! কাল আবার।','#888');return;}
-  wSpin=true;document.getElementById('spinBtn').disabled=true;
-  document.getElementById('spinRes').textContent='';
-  const target=wAng+(Math.random()*3+5)*2*Math.PI,dur=3800,s0=wAng,t0=performance.now();
-  function fr(now){
-    const p=Math.min((now-t0)/dur,1),e=1-Math.pow(1-p,4);
-    wAng=s0+(target-s0)*e;drawWheel();
-    if(p<1){requestAnimationFrame(fr);return;}
-    wSpin=false;spinUsed=true;
-    const sl2=(2*Math.PI)/spinItems.length;
-    const norm=(((-wAng)%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
-    const won=spinItems[Math.floor(norm/sl2)%spinItems.length];
-    document.getElementById('spinRes').innerHTML='🎉 Won: <span style="color:'+won.clr+';font-weight:700;">'+won.lbl+'</span>';
-    document.getElementById('spinBtn').textContent='✓ Done!';
-    spawnConfetti(35);showNotif('🎰','Spin Won!',won.lbl+' জিতেছ!','var(--gr)');
-    if(won.t==='c')earnCoins(won.v);else if(won.t==='x')earnXP(won.v);
-  }
-  requestAnimationFrame(fr);
-}
 
-// ── RANDOM BONUS ──
-function claimBonus(el){
-  const amts=[10,15,25,50,75,100,150,200,500,1000];
-  const wts=[20,15,12,10,9,8,7,5,3,1];
-  let tot=wts.reduce((a,b)=>a+b,0),rnd=Math.random()*tot,amt=amts[0];
-  for(let i=0;i<amts.length;i++){rnd-=wts[i];if(rnd<=0){amt=amts[i];break;}}
-  document.getElementById('bonusAmt').textContent='+'+amt+' XP!';
-  earnXP(amt);
-  if(amt>=500){spawnConfetti(60);showNotif('🎊','JACKPOT!','+'+amt+' XP!!!','var(--a)');}
-  setTimeout(()=>document.getElementById('bonusAmt').textContent='???',2000);
-}
-
-// ── QUEST CLAIM ──
-function claimQuest(btn,xpA,coinA){
-  const item=btn.closest('.quest-item');
-  btn.outerHTML='<div style="font-size:1.1rem;color:var(--gr)">✅</div>';
-  earnXP(xpA);earnCoins(coinA);spawnConfetti(18);
-  showNotif('✅','Quest Done!','+'+xpA+' XP +'+coinA+'🪙','var(--gr)');
-}
-
-// ── SHOP ──
-function buyItem(el,name,cost){
-  if(coins<cost){showNotif('❌','Coins নেই!','Need 🪙'+cost+', have 🪙'+coins,'var(--rd)');return;}
-  coins-=cost;upd();spawnConfetti(20);
-  showNotif('✅','Purchased!',name+' কিনেছ! 🎉','var(--gr)');
-}
-
-// ── VIDEO CATS ──
-function selCat(el){document.querySelectorAll('.vcat').forEach(v=>v.classList.remove('on'));el.classList.add('on');}
-
-// ── AI TUTOR ──
-async function sendAI(){
-  const inp=document.getElementById('aiInp'),msg=inp.value.trim();if(!msg)return;
-  inp.value='';
-  const msgs=document.getElementById('aiMsgs');
-  const um=document.createElement('div');um.className='ai-msg user';um.textContent=msg;msgs.appendChild(um);
-  const load=document.createElement('div');load.className='ai-msg bot';load.textContent='💭 ভাবছি...';msgs.appendChild(load);
-  msgs.scrollTop=msgs.scrollHeight;
-  try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,system:'তুমি BrightMesh-এর AI Study Tutor। সহজ বাংলায় বা English-এ সংক্ষিপ্ত উত্তর দাও।',messages:[{role:'user',content:msg}]})});
-    const data=await r.json();
-    load.textContent=(data.content&&data.content[0]?.text)||'// আবার চেষ্টা করো।';
-  }catch{load.textContent='// Connection error.';}
-  msgs.scrollTop=msgs.scrollHeight;
-}
-document.addEventListener('keydown',e=>{
-  const ai=document.getElementById('aiInp');
-  if(ai&&document.activeElement===ai&&e.key==='Enter')sendAI();
-});
-
-// ── GROUPS DATA ──
-const groupsData=[
-  {id:1,name:'HSC Physics 2025',icon:'⚛️',color:'#e8f0ff',desc:'HSC Physics নিয়ে আলোচনা, doubt clear, notes share',members:1234,posts:89,joined:true,category:'Physics'},
-  {id:2,name:'Math Warriors BD',icon:'🧮',color:'#e8f5e9',desc:'Math problem solve করো একসাথে!',members:987,posts:234,joined:true,category:'Math'},
-  {id:3,name:'BCS Dream Team',icon:'📖',color:'#fff8e1',desc:'BCS preparation — together we rise!',members:4521,posts:567,joined:true,category:'BCS'},
-  {id:4,name:'Python Coders BD',icon:'💻',color:'#f3e5f5',desc:'Python শিখি একসাথে, project বানাই',members:2134,posts:345,joined:false,category:'Coding'},
-  {id:5,name:'Chemistry Lab',icon:'🧪',color:'#e0f7fa',desc:'Organic, Inorganic Chemistry discussion',members:876,posts:123,joined:false,category:'Chemistry'},
-  {id:6,name:'IELTS Achievers',icon:'🌐',color:'#fce4ec',desc:'IELTS preparation, tips, mock tests',members:3456,posts:789,joined:false,category:'English'},
-];
-const membersData=[
-  {name:'Ashraf Ahmed',av:'As',bg:'#1877f2',role:'Admin',streak:25,online:true},
-  {name:'Khadiza Juha',av:'Kh',bg:'#42b883',role:'Moderator',streak:18,online:true},
-  {name:'Ahmod Hossain',av:'Ah',bg:'#e91e63',role:'Member',streak:12,online:false},
-  {name:'Akbor Hossen',av:'Ak',bg:'#9c27b0',role:'Member',streak:8,online:true},
-  {name:'Jisan Khan',av:'Ji',bg:'#ff5722',role:'Member',streak:30,online:false},
-  {name:'Amjad Hossain',av:'Am',bg:'#00bcd4',role:'Member',streak:15,online:true},
-];
-
-function renderGroups(filter='my'){
-  const container=document.getElementById('groupsContainer');
-  if(!container)return;
-  const filtered=filter==='my'?groupsData.filter(g=>g.joined):filter==='popular'?[...groupsData].sort((a,b)=>b.members-a.members):groupsData;
-  container.innerHTML=filtered.map(g=>`
-    <div class="group-card" onclick="openGroupDetail(${g.id})">
-      <div class="gc-header">
-        <div class="gc-icon" style="background:${g.color}">${g.icon}</div>
-        <div class="gc-info">
-          <div class="gc-name">${g.name}</div>
-          <div class="gc-meta"><span>👥 ${g.members.toLocaleString()}</span><span>📝 ${g.posts} posts</span><span class="tag" style="font-size:.6rem;">${g.category}</span></div>
-        </div>
-        ${g.joined?'<div class="joined-badge">✓ Joined</div>':''}
-      </div>
-      <div class="gc-members">
-        ${membersData.slice(0,4).map(m=>`<div class="gc-member-av" style="background:${m.bg}">${m.av}</div>`).join('')}
-        <div class="gc-member-av" style="background:var(--bg4);color:var(--text3);font-size:.55rem;">+${g.members-4}</div>
-      </div>
-      <div class="gc-preview">${g.desc}</div>
-      <div class="gc-actions">
-        <button class="btn ${g.joined?'btn-secondary':'btn-primary'} btn-sm" onclick="event.stopPropagation();toggleJoin(this,${g.id})">${g.joined?'✓ Joined':'+ Join'}</button>
-        <button class="btn btn-secondary btn-sm" onclick="event.stopPropagation();openGroupDetail(${g.id})">💬 Chat</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-function selGTab(el,filter){
-  document.querySelectorAll('.g-tab').forEach(t=>t.classList.remove('on'));
-  el.classList.add('on');
-  renderGroups(filter);
-}
-
-function toggleJoin(btn,id){
-  const g=groupsData.find(g=>g.id===id);if(!g)return;
-  g.joined=!g.joined;
-  btn.textContent=g.joined?'✓ Joined':'+ Join';
-  btn.className=`btn ${g.joined?'btn-secondary':'btn-primary'} btn-sm`;
-  if(g.joined){earnXP(20);showNotif('👥','Joined!','Group-এ যোগ দিলে! +20 XP','var(--gr)');}
-}
-
-function openGroupDetail(id){
-  const g=groupsData.find(g=>g.id===id);if(!g)return;
-  document.getElementById('gd-icon-hd').textContent=g.icon;
-  document.getElementById('gd-name-hd').textContent=g.name;
-  document.getElementById('gd-meta-hd').textContent=g.members.toLocaleString()+' members';
-  document.getElementById('memberCount').textContent=membersData.length;
-  document.getElementById('membersList').innerHTML=membersData.map(m=>`
-    <div style="display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--bd);">
-      <div style="position:relative;">
-        <div class="avatar" style="width:40px;height:40px;background:${m.bg};font-size:.8rem;color:#fff;">${m.av}</div>
-        <div style="position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;background:${m.online?'var(--gr)':'var(--text4)'};border:2px solid var(--bg2);"></div>
-      </div>
-      <div style="flex:1;">
-        <div style="font-size:.88rem;font-weight:600;">${m.name}</div>
-        <div style="font-size:.7rem;color:var(--text3);">🔥${m.streak} streak · ${m.role}</div>
-      </div>
-      <button class="btn btn-secondary btn-sm" onclick="openDmChat('${m.name}','${m.av}','${m.bg}',${m.online})">💬</button>
-    </div>
-  `).join('');
-  document.getElementById('groupDetail').classList.add('show');
-  showGdTab('chat');
-}
-
-function closeGroupDetail(){document.getElementById('groupDetail').classList.remove('show');}
-
-function showGdTab(tab,el){
-  ['chat','members','posts','media'].forEach(t=>{
-    const el2=document.getElementById('gd-'+t);
-    if(el2)el2.style.display='none';
+  window.addEventListener('appinstalled', () => {
+    pwaBanner.style.display = 'none';
+    alert("BrightMesh সফলভাবে আপনার মোবাইলের হোম স্ক্রিনে ইনস্টল হয়েছে!");
   });
-  document.querySelectorAll('.gt2-tab').forEach(t=>t.classList.remove('on'));
-  const target=document.getElementById('gd-'+tab);
-  if(target)target.style.display=tab==='chat'?'flex':'block';
-  if(el)el.classList.add('on');
-}
 
-function createGroup(){
-  showNotif('✨','Create Group','Group creation form আসছে!','var(--a)');
-}
-
-// ── GROUP CHAT ──
-function sendGroupMsg(){
-  const inp=document.getElementById('groupChatInput');
-  const msg=inp.value.trim();if(!msg)return;
-  inp.value='';
-  const area=document.getElementById('groupChatArea');
-  const el=document.createElement('div');
-  el.className='chat-message me';
-  el.innerHTML=`
-    <div class="cm-avatar" style="background:var(--a);">You</div>
-    <div class="cm-content">
-      <div class="cm-name">তুমি</div>
-      <div class="cm-bubble">${msg}</div>
-      <div class="cm-time">${new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'})} ✓✓</div>
-    </div>`;
-  area.appendChild(el);
-  area.scrollTop=area.scrollHeight;
-  earnXP(5);
-  // Auto reply
-  setTimeout(()=>{
-    const replies=['Good point! 👍','Agree! 💯','Help করতে পারবো! 😊','Interesting! 🤔','Thanks for sharing! 🙏'];
-    const reply=replies[Math.floor(Math.random()*replies.length)];
-    const m=membersData[Math.floor(Math.random()*membersData.length)];
-    const el2=document.createElement('div');
-    el2.className='chat-message';
-    el2.innerHTML=`
-      <div class="cm-avatar" style="background:${m.bg};">${m.av}</div>
-      <div class="cm-content">
-        <div class="cm-name">${m.name}</div>
-        <div class="cm-bubble">${reply}</div>
-        <div class="cm-time">${new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'})}</div>
-      </div>`;
-    area.appendChild(el2);
-    area.scrollTop=area.scrollHeight;
-  },1500+Math.random()*2000);
-}
-
-// ── DM CHAT ──
-const dmConversations={};
-let currentDm=null;
-
-const dmList=[
-  {name:'Khadiza Juha',av:'Kh',bg:'#42b883',online:true,preview:'Integration শেষ! 🎉',time:'2m',unread:3},
-  {name:'Ahmod Hossain',av:'Ah',bg:'#e91e63',online:true,preview:'Physics class কখন?',time:'15m',unread:1},
-  {name:'Akbor Hossen',av:'Ak',bg:'#9c27b0',online:false,preview:'Notes পাঠিয়েছি 📄',time:'1h',unread:0},
-  {name:'Jisan Khan',av:'Ji',bg:'#ff5722',online:false,preview:'Python project done!',time:'3h',unread:0},
-  {name:'Amjad Hossain',av:'Am',bg:'#00bcd4',online:true,preview:'BCS prep কেমন চলছে?',time:'5h',unread:2},
-];
-
-function renderDMList(){
-  const c=document.getElementById('dmList');if(!c)return;
-  c.innerHTML=dmList.map(d=>`
-    <div class="dm-item ${d.unread?'unread':''}" onclick="openDmChat('${d.name}','${d.av}','${d.bg}',${d.online})">
-      <div class="dmi-av" style="position:relative;">
-        <div class="avatar" style="width:46px;height:46px;background:${d.bg};font-size:.85rem;color:#fff;">${d.av}</div>
-        <div class="dmi-status ${d.online?'online':'offline'}"></div>
-      </div>
-      <div class="dmi-info">
-        <div class="dmi-name">${d.name} ${d.online?'<span class="online-indicator"><span class="online-dot"></span>online</span>':''}</div>
-        <div class="dmi-preview">${d.preview}</div>
-      </div>
-      <div class="dmi-right">
-        <div class="dmi-time">${d.time}</div>
-        ${d.unread?`<div class="dmi-unread-count">${d.unread}</div>`:''}
-      </div>
-    </div>
-  `).join('');
-}
-
-function openDmChat(name,av,bg,online){
-  currentDm={name,av,bg,online};
-  document.getElementById('dmChatName').textContent=name;
-  document.getElementById('dmChatAv').textContent=av;
-  document.getElementById('dmChatAv').style.background=bg;
-  document.getElementById('dmChatAv').style.color='#fff';
-  document.getElementById('dmChatOnline').textContent=online?'Online now':'Last seen recently';
-  document.getElementById('dmChatOnline').style.color=online?'var(--gr)':'var(--text3)';
-  document.getElementById('dmChatStatus').style.background=online?'var(--gr)':'var(--text4)';
-  const area=document.getElementById('dmChatArea');
-  if(!dmConversations[name]){
-    dmConversations[name]=[
-      {type:'date',text:'Today'},
-      {type:'them',text:'Assalamu Alaikum! কেমন আছ?',time:'9:00 AM'},
-      {type:'me',text:'Alhamdulillah ভালো আছি! তুমি?',time:'9:02 AM'},
-      {type:'them',text:'ভালো! আজকে Physics পড়ছ?',time:'9:03 AM'},
-    ];
+  // সার্ভিস ওয়ার্কার ইনলাইন রেজিস্টার (PWA রিকোয়ারমেন্ট)
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+      self.addEventListener('install', e => self.skipWaiting());
+      self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
+    `;
+    const blob = new Blob([swCode], { type: 'text/javascript' });
+    navigator.serviceWorker.register(URL.createObjectURL(blob));
   }
-  renderDmMessages(area,name);
-  document.getElementById('dmChat').classList.add('show');
-}
-
-function renderDmMessages(area,name){
-  area.innerHTML=dmConversations[name].map(m=>{
-    if(m.type==='date')return`<div class="date-separator">${m.text}</div>`;
-    const isMe=m.type==='me';
-    return`<div class="chat-message ${isMe?'me':''}">
-      <div class="cm-avatar" style="background:${isMe?'var(--a)':currentDm.bg};">${isMe?'You':currentDm.av}</div>
-      <div class="cm-content">
-        <div class="cm-name">${isMe?'তুমি':currentDm.name}</div>
-        <div class="cm-bubble">${m.text}</div>
-        <div class="cm-time">${m.time}${isMe?' ✓✓':''}</div>
-      </div>
-    </div>`;
-  }).join('');
-  area.scrollTop=area.scrollHeight;
-}
-
-function sendDM(){
-  const inp=document.getElementById('dmInput');
-  const msg=inp.value.trim();if(!msg||!currentDm)return;
-  inp.value='';
-  const time=new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'});
-  if(!dmConversations[currentDm.name])dmConversations[currentDm.name]=[];
-  dmConversations[currentDm.name].push({type:'me',text:msg,time});
-  renderDmMessages(document.getElementById('dmChatArea'),currentDm.name);
-  earnXP(2);
-  // Auto reply
-  const replies=[
-    'Haha! 😄',`${currentDm.name.split(' ')[0]} বুঝেছি!`,'Ok! ✓','অবশ্যই! 💯','Thanks! 🙏',
-    'Really? 🤔','Great idea! 💡','Let me check...',`Sure! কাল কথা হবে 📚`,
-  ];
-  setTimeout(()=>{
-    if(!currentDm)return;
-    const reply=replies[Math.floor(Math.random()*replies.length)];
-    const t2=new Date().toLocaleTimeString('bn-BD',{hour:'2-digit',minute:'2-digit'});
-    dmConversations[currentDm.name].push({type:'them',text:reply,time:t2});
-    renderDmMessages(document.getElementById('dmChatArea'),currentDm.name);
-  },1200+Math.random()*2500);
-}
-
-function closeDmChat(){
-  document.getElementById('dmChat').classList.remove('show');
-  currentDm=null;
-}
-
-// ── NOTIFICATIONS ──
-const randNotifs=[
-  {ic:'🏆',t:'Leaderboard!',tx:'তুমি Khadiza-কে ছাড়িয়ে #2!',c:'var(--gd)'},
-  {ic:'🔥',t:'Streak!',tx:'Top 10% students আজকে!',c:'var(--gr)'},
-  {ic:'👥',t:'Group!',tx:'HSC Physics group-এ নতুন message!',c:'var(--a)'},
-  {ic:'💬',t:'Message!',tx:'Khadiza তোমাকে message করেছে!',c:'var(--pu)'},
-  {ic:'📊',t:'Progress!',tx:'৮০% daily goal complete!',c:'var(--gr)'},
-];
-let nIdx=0;
-setTimeout(()=>showNotif(randNotifs[0].ic,randNotifs[0].t,randNotifs[0].tx,randNotifs[0].c),2000);
-setInterval(()=>{nIdx=(nIdx+1)%randNotifs.length;const n=randNotifs[nIdx];showNotif(n.ic,n.t,n.tx,n.c);},12000);
-
-// ── INIT ──
-drawWheel();upd();renderGroups();renderDMList();
 </script>
+
 </body>
 </html>
