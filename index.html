@@ -5,12 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>BrightMesh — Learn Together</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
-
-<!-- PWA Meta Tags -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BrightMesh">
-
 <style>
 /* ── THEME ── */
 :root {
@@ -31,7 +25,7 @@
 }
 * { margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent; }
 html { scroll-behavior:smooth; }
-body { background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;transition:background .3s,color .3s; }
+body { background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;transition:background .3s,color .3s; padding-top: 56px; padding-bottom: 60px;}
 button { cursor:pointer;font-family:inherit; }
 input,textarea { font-family:inherit; }
 ::-webkit-scrollbar { width:4px;height:4px; }
@@ -43,11 +37,12 @@ input,textarea { font-family:inherit; }
 @keyframes pop { 0%{transform:scale(0.8)}60%{transform:scale(1.05)}100%{transform:scale(1)} }
 @keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
 @keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)} }
+@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
 @keyframes xpfly { 0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-50px)} }
 @keyframes notifIn { from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1} }
 
 /* ── SHARED ── */
-.card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px;transition:all .2s; }
+.card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);transition:all .2s; }
 .card:hover { border-color:var(--bd2); }
 .avatar { border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0; }
 .btn { padding:9px 18px;border-radius:var(--r2);border:none;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s; }
@@ -55,7 +50,6 @@ input,textarea { font-family:inherit; }
 .btn-primary:hover { background:var(--a2);transform:translateY(-1px); }
 .btn-secondary { background:var(--bg3);border:1px solid var(--bd);color:var(--text2); }
 .btn-secondary:hover { border-color:var(--a);color:var(--a); }
-.btn-danger { background:var(--rd);color:#fff; }
 .btn-sm { padding:6px 13px;font-size:.78rem; }
 .inp { width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r2);padding:10px 13px;font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s; }
 .inp:focus { border-color:var(--a); }
@@ -66,12 +60,6 @@ input,textarea { font-family:inherit; }
 .section-title { font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px; }
 .divider { height:1px;background:var(--bd);margin:10px 0; }
 
-/* ── AUTH AUTH OVERLAY ── */
-.auth-container { position:fixed;inset:0;background:var(--bg);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px; }
-.auth-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:24px;width:100%;max-width:400px;box-shadow:var(--shadow-lg); }
-.auth-toggle { text-align:center;margin-top:14px;font-size:.85rem;color:var(--text3);cursor:pointer; }
-.auth-toggle span { color:var(--a);font-weight:600; }
-
 /* ── TOPBAR ── */
 .topbar { position:fixed;top:0;left:0;right:0;z-index:300;background:var(--bg);border-bottom:1px solid var(--bd);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;box-shadow:var(--shadow); }
 .logo { display:flex;align-items:center;gap:8px; }
@@ -81,6 +69,7 @@ input,textarea { font-family:inherit; }
 .tb-actions { display:flex;align-items:center;gap:6px; }
 .tb-icon-btn { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;position:relative;cursor:pointer;transition:all .2s; }
 .tb-icon-btn:hover { border-color:var(--a);color:var(--a); }
+.tb-badge { position:absolute;top:0;right:0;width:14px;height:14px;background:var(--rd);border-radius:50%;font-size:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg); }
 .tb-avatar { width:34px;height:34px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;cursor:pointer;border:2px solid var(--bd); }
 
 /* ── BOTTOM NAV ── */
@@ -89,458 +78,417 @@ input,textarea { font-family:inherit; }
 .bni.active { color:var(--a); }
 .bni .ni { font-size:1.2rem;line-height:1; }
 
-/* ── MAIN ── */
-.main { padding:72px 0 80px;min-height:100vh; }
+/* ── PANELS ── */
 .panel { display:none; }
 .panel.active { display:block;animation:fadeIn .3s ease; }
 
-/* ── PANELS & FEATURES ── */
-.search-container { margin-bottom:14px; position:relative; }
-.post-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:12px;overflow:hidden; }
-.post-header { display:flex;align-items:center;gap:10px;padding:13px 14px 8px; }
-.post-av { width:40px;height:40px;border-radius:50%;background:var(--a);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700; }
-.post-meta { flex:1; }
-.post-name { font-size:.9rem;font-weight:600; }
-.post-time { font-size:.7rem;color:var(--text3); }
-.post-text { padding:10px 14px;font-size:.9rem;line-height:1.65;color:var(--text); }
-.post-stats { padding:8px 14px;display:flex;justify-content:space-between;border-top:1px solid var(--bd);font-size:.72rem;color:var(--text3); }
-
-/* TIMER YPT STYLE */
-.timer-container { text-align:center;padding:20px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:14px; }
-.timer-display { font-family:'Fira Code',monospace;font-size:2.5rem;font-weight:700;color:var(--a);margin:10px 0; }
-
-/* LEADERBOARD */
-.lb-item { display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px; }
-.lb-rank { font-size:.82rem;font-weight:700;color:var(--gd);min-width:22px; }
-.lb-info { flex:1; }
-.lb-name { font-size:.86rem;font-weight:600; }
-.lb-score { font-family:'Fira Code',monospace;font-weight:700;color:var(--a); }
-
-/* FULL SCREEN PANELS */
+/* ── FULL SCREEN / MODALS ── */
 .fullscreen { position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column; }
 .fullscreen.show { display:flex; }
-.fs-header { display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bg); }
-.fs-back { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer; }
+.fs-header { display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bg);position:sticky;top:0;z-index:10; }
+.fs-back { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer; border:none; color:var(--text); }
 .fs-title { font-size:1rem;font-weight:700;flex:1; }
+.group-tabs-2 { display:flex;background:var(--bg3);border-bottom:1px solid var(--bd); }
+.gt2-tab { flex:1;padding:11px;text-align:center;font-size:.8rem;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s; }
+.gt2-tab.on { color:var(--a);border-bottom-color:var(--a); }
+.chat-area { flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px; background: var(--bg); }
 
-/* CHAT SYSTEM */
-.chat-area { flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px; }
-.chat-message { display:flex;gap:8px;align-items:flex-start;max-width:85%; }
-.chat-message.me { align-self:flex-end;flex-direction:row-reverse; }
-.cm-bubble { padding:9px 13px;border-radius:14px;font-size:.84rem;line-height:1.55;background:var(--bg3); }
-.chat-message.me .cm-bubble { background:var(--a);color:#fff; }
-.chat-input-area { border-top:1px solid var(--bd);padding:10px 14px;display:flex;gap:8px; }
+/* AUTH SCREEN */
+#auth-screen { position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px; }
+.auth-card { background:var(--bg2);border:1px solid var(--bd);padding:25px;border-radius:var(--r);width:100%;max-width:360px;box-shadow:var(--shadow-lg); }
 
-/* PWA INSTALL BANNER */
-#pwaBanner { display:none;background:var(--a-light);border:1px solid var(--a);border-radius:var(--r);padding:12px;margin-bottom:14px;align-items:center;justify-content:between;justify-content:space-between; }
+/* FEED INTERFACES */
+.stories-row { display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px; }
+.story-item { flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px; }
+.story-ring { width:60px;height:60px;border-radius:50%;padding:2.5px;background:linear-gradient(45deg,var(--a),var(--pu)); }
+.story-avatar { width:100%;height:100%;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;border:2.5px solid var(--bg); }
+.story-name { font-size:.6rem;color:var(--text3); }
+.create-post { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:14px; }
+.cp-top { display:flex;align-items:center;gap:10px;margin-bottom:11px; }
+.cp-input { flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:24px;padding:9px 16px;font-size:.88rem;color:var(--text3);outline:none; }
+.post-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:12px;overflow:hidden; padding:14px; }
+.post-header { display:flex;align-items:center;gap:10px; margin-bottom: 10px;}
+.post-name { font-size:.9rem;font-weight:600; }
+.post-time { font-size:.7rem;color:var(--text3); }
+.post-text { font-size:.9rem;line-height:1.65;color:var(--text); }
+
+/* CHAT MESSAGES ELEMENTS */
+.chat-message { display:flex;gap:8px;align-items:flex-start; margin-bottom: 8px; }
+.chat-message.me { flex-direction:row-reverse; }
+.cm-avatar { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff; background: var(--pu); }
+.cm-content { max-width:72%; }
+.cm-bubble { padding:9px 13px;border-radius:4px 16px 16px 16px;font-size:.84rem;line-height:1.55; }
+.chat-message.me .cm-bubble { border-radius:16px 4px 16px 16px;background:var(--a);color:#fff; }
+.chat-message:not(.me) .cm-bubble { background:var(--bg3);color:var(--text); }
+.chat-input-area { border-top:1px solid var(--bd);padding:10px 14px;background:var(--bg);display:flex;gap:8px; align-items: center; }
+
+/* LEADERBOARD & PODIUM */
+.podium { display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:16px 0; height: 130px; }
+.pod { display:flex;flex-direction:column;align-items:center;gap:5px; }
+.pod-av { width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;background: var(--gd); }
+.pod-block { display:flex;align-items:center;justify-content:center;border-radius:6px 6px 0 0;width:64px;font-size:.78rem;font-weight:700;color: #fff; }
+.lb-item { display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px; }
+.lb-rank { font-size:.82rem;font-weight:700;min-width:22px; }
+.lb-info { flex:1; }
+.lb-name { font-size:.86rem;font-weight:600; }
+.lb-score { text-align:right; font-family:'Fira Code',monospace; font-weight: 700; color: var(--a);}
+
+/* DOPAMINE / QUESTS / SHOP DESIGN PARTS HELD */
+.xp-card { background:var(--a);border-radius:var(--r);padding:16px;margin-bottom:12px;color:#fff; }
+.stat-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px; }
+.stat-box { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center; }
+.stat-num { font-size:1.4rem;font-weight:700;color:var(--a);display:block; }
+.quest-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:10px; }
+.shop-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
+.shop-item { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center; }
+
+#levelUpModal { position:fixed;inset:0;z-index:9996;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center; }
+#levelUpModal.show { display:flex; }
+.lu-card { background:var(--bg);border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;box-shadow:var(--shadow-lg);border:1px solid var(--bd); }
 </style>
 </head>
 <body>
 
-<!-- PWA INSTALL BANNER -->
-<div class="wrap" style="padding-top:60px; padding-bottom:0;">
-  <div id="pwaBanner">
-    <span style="font-size:.82rem; color:var(--text2); font-weight:600;">📱 BrightMesh অ্যাপটি ফোনে ডাউনলোড করুন!</span>
-    <button class="btn btn-primary btn-sm" id="pwaBtn">ইনস্টল</button>
+<div id="auth-screen">
+  <div class="auth-card">
+    <h2 style="margin-bottom:10px; font-weight:800; text-align:center;">BrightMesh Auth</h2>
+    <p style="font-size:0.8rem; color:var(--text3); margin-bottom:15px; text-align:center;">রিয়েল-টাইম ডাটা কানেক্ট করার জন্য নিজের নাম দিয়ে প্রবেশ কর।</p>
+    <input type="text" id="auth-name" class="inp" placeholder="তোমার নাম লেখ (যেমন: Ashu)" style="margin-bottom:12px;">
+    <button class="btn btn-primary" style="width:100%; padding:11px;" onclick="handleLogin()">প্রবেশ করুন 🚀</button>
   </div>
 </div>
 
-<!-- FIXED OVERLAYS -->
-<div id="notifContainer"></div>
-
-<!-- LEVEL UP MODAL -->
-<div id="levelUpModal">
-  <div class="lu-card">
-    <div style="font-size:3rem;margin-bottom:10px;animation:float 2s ease-in-out infinite;">🎊</div>
-    <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;" id="luNum">Level 9!</div>
-    <div style="font-weight:700;margin-bottom:6px;">Expert Learner 🎓</div>
-    <div style="font-size:.82rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">নতুন features unlock হয়েছে!</div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="document.getElementById('levelUpModal').classList.remove('show')">🚀 চালিয়ে যাও!</button>
-  </div>
-</div>
-
-<!-- AUTH CONTAINER (LOGIN/SIGNUP) -->
-<div class="auth-container" id="authScreen">
-  <div class="auth-card" id="loginForm">
-    <h2 style="margin-bottom:16px; text-align:center;">BrightMesh লগইন</h2>
-    <input type="email" id="loginEmail" class="inp" placeholder="ইমেইল এড্রেস" style="margin-bottom:10px;">
-    <input type="password" id="loginPass" class="inp" placeholder="পাসওয়ার্ড" style="margin-bottom:14px;">
-    <button class="btn btn-primary" style="width:100%;" onclick="handleLogin()">লগইন করুন</button>
-    <div class="auth-toggle" onclick="toggleAuth(true)">অ্যাকাউন্ট নেই? <span>সাইন-আপ করুন</span></div>
-  </div>
-  <div class="auth-card" id="signupForm" style="display:none;">
-    <h2 style="margin-bottom:16px; text-align:center;">নতুন অ্যাকাউন্ট</h2>
-    <input type="text" id="signupName" class="inp" placeholder="আপনার নাম" style="margin-bottom:10px;">
-    <input type="email" id="signupEmail" class="inp" placeholder="ইমেইল এড্রেস" style="margin-bottom:10px;">
-    <input type="password" id="signupPass" class="inp" placeholder="পাসওয়ার্ড (মিনিমাম ৬ ডিজিট)" style="margin-bottom:14px;">
-    <button class="btn btn-primary" style="width:100%;" onclick="handleSignup()">সাইন-আপ করুন</button>
-    <div class="auth-toggle" onclick="toggleAuth(false)">অ্যাকাউন্ট আছে? <span>লগইন করুন</span></div>
-  </div>
-</div>
-
-<!-- TOPBAR -->
 <div class="topbar">
   <div class="logo">
     <div class="logo-icon">B</div>
     <div class="logo-text">Bright<span>Mesh</span></div>
   </div>
   <div class="tb-actions">
-    <button class="tb-icon-btn" onclick="toggleTheme()">🌗</button>
-    <div class="tb-avatar" id="userAvatar" onclick="logout()">??</div>
+    <button class="tb-icon-btn" onclick="toggleTheme()">🌓</button>
+    <div class="tb-avatar" id="top-user-avatar">?</div>
   </div>
 </div>
 
-<!-- MAIN CONTENT PANELS -->
-<div class="main wrap">
+<div class="wrap main">
   
-  <!-- PANEL 1: FEED (POST SYSTEM) -->
-  <div id="panel-feed" class="panel active">
-    <!-- SEARCH BAR -->
-    <div class="search-container">
-      <input type="text" id="searchBar" class="inp" placeholder="🔍 শর্টকাট বা স্টাডি নোট খুঁজুন..." oninput="filterPosts()">
+  <div id="p-feed" class="panel active">
+    <div class="stories-row">
+      <div class="story-item"><div class="story-ring"><div class="story-avatar">🔥</div></div><div class="story-name">Live Hub</div></div>
+    </div>
+    
+    <div class="create-post">
+      <div class="cp-top">
+        <input type="text" id="post-input" class="cp-input" placeholder="আজকে কী পড়া শেষ করলা? শেয়ার করো...">
+        <button class="btn btn-primary btn-sm" onclick="submitPost()">পোস্ট</button>
+      </div>
     </div>
 
-    <!-- CREATE POST -->
-    <div class="card">
-      <textarea id="postContent" class="inp" placeholder="নতুন কোনো শর্টকাট বা নোট শেয়ার করো..." style="min-height:70px; resize:none; margin-bottom:10px;"></textarea>
-      <button class="btn btn-primary btn-sm" onclick="createPost()">পোস্ট করুন</button>
-    </div>
-
-    <!-- LIVE POSTS STREAM -->
-    <div class="section-title">স্টাডি ফিড</div>
-    <div id="postsStream"></div>
+    <div class="section-title">সাম্প্রতিক ফিড ও আপডেট</div>
+    <div id="feed-container">
+      </div>
   </div>
 
-  <!-- PANEL 2: YPT TIMER & LEADERBOARD -->
-  <div id="panel-study" class="panel">
-    <div class="timer-container">
-      <h3>⏱️ ফোকাস স্টাডি টাইমার (YPT)</h3>
-      <div class="timer-display" id="timerDisplay">00:00:00</div>
-      <button class="btn btn-primary" id="timerBtn" onclick="toggleTimer()">স্টার্ট ট্র্যাকিং</button>
+  <div id="p-leaderboard" class="panel">
+    <div class="section-title" style="text-align:center;">🏆 গ্লোবাল র‍্যাঙ্কিং (Live)</div>
+    
+    <div class="podium">
+      <div class="pod" style="order:2;">
+        <div class="pod-av" id="pod-1-av">1st</div>
+        <div style="font-size:.75rem;font-weight:600;" id="pod-1-name">-</div>
+        <div class="pod-block" style="height:70px;background:var(--gd);">1st</div>
+      </div>
+      <div class="pod" style="order:1;">
+        <div class="pod-av" id="pod-2-av" style="background:var(--text4);">2nd</div>
+        <div style="font-size:.75rem;font-weight:600;" id="pod-2-name">-</div>
+        <div class="pod-block" style="height:50px;background:var(--text4);">2nd</div>
+      </div>
+      <div class="pod" style="order:3;">
+        <div class="pod-av" id="pod-3-av" style="background:#cd7f32;">3rd</div>
+        <div style="font-size:.75rem;font-weight:600;" id="pod-3-name">-</div>
+        <div class="pod-block" style="height:35px;background:#cd7f32;">3rd</div>
+      </div>
     </div>
 
-    <div class="section-title">🏆 আজকের লিডারবোর্ড (Live)</div>
-    <div id="leaderboardList"></div>
+    <div id="leaderboard-list">
+      </div>
   </div>
 
-  <!-- PANEL 3: GROUPS CHAT PANEL -->
-  <div id="panel-groups" class="panel">
-    <div class="section-title">আমার স্টাডি গ্রুপ সমূহ</div>
-    <div class="card" style="cursor:pointer;" onclick="openGroupChat('[ 𝐕𝐈𝐏𝐄𝐑 𝐖𝐀𝐑𝐑𝐈𝐎𝐑 ]')">
-      <div style="font-weight:700; font-size:1.1rem; color:var(--pu);">[ 𝐕𝐈𝐏𝐄𝐑 𝐖𝐀𝐑𝐑𝐈𝐎𝐑 ]</div>
-      <p style="font-size:.8rem; color:var(--text3); margin-top:4px;">সবাই একসাথে লাইভ চ্যাট করো ও মিশন কমপ্লিট করো!</p>
-      <button class="btn btn-secondary btn-sm" style="margin-top:10px;">গ্রুপ চ্যাটে ঢুকুন 💬</button>
+  <div id="p-chat" class="panel">
+    <div class="section-title">💬 গ্লোবাল চ্যাট রুম</div>
+    <div class="card" style="height:calc(100vh - 200px); display:flex; flex-direction:column; overflow:hidden;">
+      <div class="chat-area" id="chat-messages-container"></div>
+      <div class="chat-input-area">
+        <input type="text" id="chat-input-field" class="cia-input" placeholder="মেসেজ টাইপ কর...">
+        <button class="cia-send" onclick="submitChatMessage()">➔</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="p-quests" class="panel">
+    <div class="xp-card">
+      <div style="font-size:1.1rem; font-weight:800; margin-bottom:5px;">ডেইলি প্রোগ্রেস হাব</div>
+      <p style="font-size:0.8rem; opacity:0.9;">কয়েন এবং এক্সপি আর্ন করে নিজেকে লিডারবোর্ডের শীর্ষে নিয়ে যাও!</p>
+    </div>
+    
+    <div class="stat-grid">
+      <div class="stat-box"><span class="stat-num" id="stat-xp">120</span><span class="stat-lbl">XP অর্জিত</span></div>
+      <div class="stat-box"><span class="stat-num" id="stat-coins">450</span><span class="stat-lbl">🪙 কয়েন ব্যালেন্স</span></div>
+    </div>
+
+    <div class="section-title">আজকের চ্যালেঞ্জসমূহ</div>
+    <div class="quest-card">
+      <div style="font-size:0.85rem; font-weight:600; margin-bottom:8px;">🔥 মিশন কমপ্লিট করো</div>
+      <p style="font-size:0.75rem; color:var(--text3);">প্রতিটি পোস্ট এবং চ্যাট মেসেজে এক্সপি বুস্ট হবে।</p>
+    </div>
+  </div>
+
+  <div id="p-profile" class="panel">
+    <div class="card" style="padding:20px; text-align:center; margin-bottom:15px;">
+      <div class="avatar" id="pro-big-av" style="width:70px; height:70px; background:var(--a); color:#fff; font-size:1.8rem; margin:0 auto 12px;">?</div>
+      <h3 id="pro-name">User Name</h3>
+      <p style="font-size:0.75rem; color:var(--text3); margin-top:4px;">Rank: Active Learner</p>
+    </div>
+
+    <div class="section-title">স্টোর / রিওয়ার্ড আইটেম</div>
+    <div class="shop-grid">
+      <div class="shop-item">
+        <span class="shop-ic">⚡</span>
+        <div class="shop-nm">XP Booster</div>
+        <div class="shop-price">200 🪙</div>
+      </div>
+      <div class="shop-item">
+        <span class="shop-ic">👑</span>
+        <div class="shop-nm">Viper Title</div>
+        <div class="shop-price">500 🪙</div>
+      </div>
     </div>
   </div>
 
 </div>
 
-<!-- FULLSCREEN CHAT AREA -->
-<div class="fullscreen" id="groupChatScreen">
-  <div class="fs-header">
-    <button class="fs-back" onclick="closeGroupChat()">←</button>
-    <div class="fs-title" id="chatGroupTitle">[ 𝐕𝐈𝐏𝐄𝐑 𝐖𝐀𝐑𝐑𝐈𝐎𝐑 ]</div>
-  </div>
-  <div class="chat-area" id="chatArea"></div>
-  <div class="chat-input-area">
-    <input type="text" id="chatInput" class="cia-input" placeholder="গ্রুপে মেসেজ লিখুন...">
-    <button class="cia-send" onclick="sendGroupMessage()">➔</button>
-  </div>
-</div>
-
-<!-- BOTTOM NAVIGATION -->
 <div class="bnav">
-  <button class="bni active" onclick="switchPanel('feed', this)"><span class="ni">📝</span>ফিড</button>
-  <button class="bni" onclick="switchPanel('study', this)"><span class="ni">⏱️</span>YPT টাইমার</button>
-  <button class="bni" onclick="switchPanel('groups', this)"><span class="ni">💬</span>গ্রুপ চ্যাট</button>
+  <button class="bni active" onclick="switchTab('feed', this)"><span class="ni">🏠</span>হোম</button>
+  <button class="bni" onclick="switchTab('leaderboard', this)"><span class="ni">📊</span>র‍্যাঙ্ক</button>
+  <button class="bni" onclick="switchTab('chat', this)"><span class="ni">💬</span>চ্যাট</button>
+  <button class="bni" onclick="switchTab('quests', this)"><span class="ni">🎯</span>মিশন</button>
+  <button class="bni" onclick="switchTab('profile', this)"><span class="ni">👤</span>প্রোফাইল</button>
 </div>
 
-<!-- FIREBASE GLOBAL CORE SDKS -->
+<div id="levelUpModal">
+  <div class="lu-card">
+    <div style="font-size:3rem;margin-bottom:10px;">🎊</div>
+    <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;">Level Up!</div>
+    <div style="font-weight:700;margin-bottom:6px; color:var(--gr)">অভিনন্দন! 🎉</div>
+    <p style="font-size:.82rem;color:var(--text3);margin-bottom:14px;">তুমি নতুন এক্সপি টার্গেট ছুঁয়ে ফেলেছ!</p>
+    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="document.getElementById('levelUpModal').classList.remove('show')">🚀 চালিয়ে যাও</button>
+  </div>
+</div>
+
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, updateProfile, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-  import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  // তোর আসল Firebase চাবি
+  // তোর দেওয়া ফায়ারবেস কনফিগারেশন
   const firebaseConfig = {
     apiKey: "AIzaSyBahvYk6mX9OXsNUI7Hj2a06lcJZtFFy2c",
     authDomain: "brightmesh-f93b3.firebaseapp.com",
     projectId: "brightmesh-f93b3",
     storageBucket: "brightmesh-f93b3.firebasestorage.app",
     messagingSenderId: "458385343749",
-    appId: "1:458385343749:web:3dc84d60279a8cbe23e36c",
-    measurementId: "G-GLP8D97R4M"
+    appId: "1:458385343749:web:3dc84d60279a8cbe23e36c"
   };
 
-  // Initialize Firebase
   const app = initializeApp(firebaseConfig);
-  const auth = getAuth(app);
   const db = getFirestore(app);
 
-  let currentUser = null;
-  let allPosts = [];
+  let currentUserName = "";
+  let userCoins = 100;
+  let userXP = 50;
 
-  // --- AUTH SYSTEM LOGIC ---
-  window.toggleAuth = function(showSignup) {
-    document.getElementById('loginForm').style.display = showSignup ? 'none' : 'block';
-    document.getElementById('signupForm').style.display = showSignup ? 'block' : 'none';
-  }
-
-  window.handleSignup = async function() {
-    const name = document.getElementById('signupName').value.trim();
-    const email = document.getElementById('signupEmail').value.trim();
-    const pass = document.getElementById('signupPass').value;
-    if(!name || !email || !pass) return alert("সবগুলো ঘর ঠিকঠাক পূরণ কর!");
-    
-    try {
-      const res = await createUserWithEmailAndPassword(auth, email, pass);
-      await updateProfile(res.user, { displayName: name });
-      // সেভ ইনিশিয়াল টাইম ট্র্যাকিং সিস্টেম
-      await setDoc(doc(db, "users", res.user.uid), { name: name, totalStudyTime: 0 });
-      alert("অ্যাকাউন্ট তৈরি সফল হয়েছে!");
-    } catch (err) {
-      alert("ভুল হয়েছে: " + err.message);
-    }
-  }
-
+  // লগইন হ্যান্ডলার
   window.handleLogin = async function() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const pass = document.getElementById('loginPass').value;
-    if(!email || !pass) return alert("ইমেইল ও পাসওয়ার্ড দাও!");
-    try {
-      await signInWithEmailAndPassword(auth, email, pass);
-    } catch (err) {
-      alert("লগইন ব্যর্থ: " + err.message);
+    const nameInput = document.getElementById('auth-name').value.trim();
+    if(!nameInput) {
+      alert("দয়া করে একটি নাম টাইপ করো!");
+      return;
+    }
+    currentUserName = nameInput;
+    document.getElementById('auth-screen').style.display = 'none';
+    
+    // লোকাল ইউআই আপডেট
+    document.getElementById('top-user-avatar').innerText = currentUserName.substring(0,2).toUpperCase();
+    document.getElementById('pro-big-av').innerText = currentUserName.substring(0,2).toUpperCase();
+    document.getElementById('pro-name').innerText = currentUserName;
+
+    // ডাটাবেসে মেম্বার সিঙ্ক বা রেজিস্টার করা (নাম ছাড়া কোনো হার্ডকোড ভ্যালু নেই)
+    await setDoc(doc(db, "brightMeshUsers", currentUserName), {
+      username: currentUserName,
+      xp: userXP,
+      coins: userCoins,
+      lastActive: serverTimestamp()
+    }, { merge: true });
+
+    initDatabaseListeners();
+  }
+
+  // পোস্ট সাবমিট করা
+  window.submitPost = async function() {
+    const postTxt = document.getElementById('post-input').value.trim();
+    if(!postTxt) return;
+
+    await addDoc(collection(db, "brightMeshPosts"), {
+      author: currentUserName,
+      text: postTxt,
+      createdAt: serverTimestamp()
+    });
+
+    document.getElementById('post-input').value = '';
+    boostReward(20, 50); // পোস্ট করলে এক্সপি ও কয়েন রিওয়ার্ড
+  }
+
+  // চ্যাট মেসেজ সাবমিট করা
+  window.submitChatMessage = async function() {
+    const msgInput = document.getElementById('chat-input-field');
+    const msgText = msgInput.value.trim();
+    if(!msgText) return;
+
+    await addDoc(collection(db, "brightMeshChats"), {
+      sender: currentUserName,
+      text: msgText,
+      createdAt: serverTimestamp()
+    });
+
+    msgInput.value = '';
+    boostReward(5, 10); // চ্যাট মেসেজ দিলে ছোট এক্সপি বোনাস
+  }
+
+  // রিওয়ার্ড বুস্টার মেকানিজম
+  async function boostReward(xpGain, coinGain) {
+    userXP += xpGain;
+    userCoins += coinGain;
+    
+    document.getElementById('stat-xp').innerText = userXP;
+    document.getElementById('stat-coins').innerText = userCoins;
+
+    await setDoc(doc(db, "brightMeshUsers", currentUserName), {
+      xp: userXP,
+      coins: userCoins
+    }, { merge: true });
+
+    if(userXP % 100 === 0) {
+      document.getElementById('levelUpModal').classList.add('show');
     }
   }
 
-  window.logout = function() {
-    if(confirm("লগআউট করতে চাও?")) signOut(auth);
-  }
-
-  // Auth স্টেট ট্র্যাকিং ও রিয়েল-টাইম ট্রিগার
-  onAuthStateChanged(auth, (user) => {
-    if (user) {
-      currentUser = user;
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('userAvatar').innerText = user.displayName ? user.displayName.substring(0,2).toUpperCase() : "US";
-      setupRealtimeFeeds();
-    } else {
-      currentUser = null;
-      document.getElementById('authScreen').style.display = 'flex';
-    }
-  });
-
-  // --- REAL-TIME DATA STREAMING ---
-  function setupRealtimeFeeds() {
-    // ১. রিয়েল-টাইম পোস্ট ফেচিং
-    const postsQuery = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-    onSnapshot(postsQuery, (snapshot) => {
-      allPosts = [];
-      snapshot.forEach(doc => allPosts.push({id: doc.id, ...doc.data()}));
-      renderPosts(allPosts);
-    });
-
-    // ২. রিয়েল-টাইম চ্যাট মেসেজ ফেচিং
-    const chatQuery = query(collection(db, "groupChats"), orderBy("createdAt", "asc"));
-    onSnapshot(chatQuery, (snapshot) => {
-      const chatArea = document.getElementById('chatArea');
-      chatArea.innerHTML = '';
+  // রিয়েল-টাইম ডাটা লিসেনার
+  function initDatabaseListeners() {
+    // ১. ফিড বা পোস্ট ট্র্যাকিং রিয়েল-টাইম রেন্ডার
+    const qPosts = query(collection(db, "brightMeshPosts"), orderBy("createdAt", "desc"));
+    onSnapshot(qPosts, (snapshot) => {
+      const container = document.getElementById('feed-container');
+      container.innerHTML = '';
+      if(snapshot.empty) {
+        container.innerHTML = `<p style="font-size:0.8rem; color:var(--text3); text-align:center; padding:20px;">এখনো কোনো পোস্ট নেই!</p>`;
+        return;
+      }
       snapshot.forEach(doc => {
-        const msg = doc.data();
-        const isMe = msg.uid === currentUser.uid;
-        const chatDiv = document.createElement('div');
-        chatDiv.className = `chat-message ${isMe ? 'me' : ''}`;
-        chatDiv.innerHTML = `
-          <div class="cm-bubble">
-            <div style="font-size: 0.68rem; font-weight:700; margin-bottom:2px; opacity:0.8;">${msg.userName}</div>
-            <div>${msg.text}</div>
-          </div>
-        `;
-        chatArea.appendChild(chatDiv);
-      });
-      chatArea.scrollTop = chatArea.scrollHeight;
-    });
-
-    // ৩. YPT লিডারবোর্ড ট্র্যাকিং
-    const leaderQuery = query(collection(db, "users"), orderBy("totalStudyTime", "desc"));
-    onSnapshot(leaderQuery, (snapshot) => {
-      const lbList = document.getElementById('leaderboardList');
-      lbList.innerHTML = '';
-      let rank = 1;
-      snapshot.forEach(doc => {
-        const u = doc.data();
-        const hrs = (u.totalStudyTime / 3600).toFixed(2);
-        lbList.innerHTML += `
-          <div class="lb-item">
-            <div class="lb-rank">#${rank++}</div>
-            <div class="lb-info"><div class="lb-name">${u.name}</div></div>
-            <div class="lb-score">${hrs} Hrs</div>
+        const p = doc.data();
+        container.innerHTML += `
+          <div class="post-card">
+            <div class="post-header">
+              <div class="avatar" style="width:32px; height:32px; background:var(--a); color:#fff; font-size:0.75rem;">${p.author ? p.author.substring(0,2).toUpperCase() : '??'}</div>
+              <div class="post-meta">
+                <div class="post-name">${p.author}</div>
+                <div class="post-time">সদ্য পোস্ট করা হয়েছে</div>
+              </div>
+            </div>
+            <div class="post-text">${p.text}</div>
           </div>
         `;
       });
     });
-  }
 
-  // --- FEATURE ACTIONS ---
-  window.createPost = async function() {
-    const txt = document.getElementById('postContent').value.trim();
-    if(!txt) return alert("খালি পোস্ট করা যাবে না!");
-    try {
-      await addDoc(collection(db, "posts"), {
-        uid: currentUser.uid,
-        userName: currentUser.displayName || "Anonymous",
-        text: txt,
-        createdAt: serverTimestamp()
-      });
-      document.getElementById('postContent').value = '';
-    } catch(e) { alert("পোস্ট করা যায়নি!"); }
-  }
-
-  function renderPosts(postsArray) {
-    const container = document.getElementById('postsStream');
-    container.innerHTML = '';
-    postsArray.forEach(p => {
-      container.innerHTML += `
-        <div class="post-card">
-          <div class="post-header">
-            <div class="post-av">${p.userName.substring(0,2).toUpperCase()}</div>
-            <div class="post-meta">
-              <div class="post-name">${p.userName}</div>
-              <div class="post-time">স্টাডি মেট</div>
+    // ২. চ্যাট মেসেজ রিয়েল-টাইম রেন্ডার
+    const qChats = query(collection(db, "brightMeshChats"), orderBy("createdAt", "asc"));
+    onSnapshot(qChats, (snapshot) => {
+      const container = document.getElementById('chat-messages-container');
+      container.innerHTML = '';
+      snapshot.forEach(doc => {
+        const c = doc.data();
+        const isMe = c.sender === currentUserName;
+        container.innerHTML += `
+          <div class="chat-message ${isMe ? 'me' : ''}">
+            <div class="cm-avatar">${c.sender ? c.sender.substring(0,2).toUpperCase() : '??'}</div>
+            <div class="cm-content">
+              <div class="cm-name">${c.sender}</div>
+              <div class="cm-bubble">${c.text}</div>
             </div>
           </div>
-          <div class="post-text">${p.text}</div>
-        </div>
-      `;
-    });
-  }
-
-  // লাইভ সার্চ ফিল্টারিং লজিক
-  window.filterPosts = function() {
-    const term = document.getElementById('searchBar').value.toLowerCase();
-    const filtered = allPosts.filter(p => p.text.toLowerCase().includes(term) || p.userName.toLowerCase().includes(term));
-    renderPosts(filtered);
-  }
-
-  window.sendGroupMessage = async function() {
-    const input = document.getElementById('chatInput');
-    const txt = input.value.trim();
-    if(!txt) return;
-    try {
-      await addDoc(collection(db, "groupChats"), {
-        uid: currentUser.uid,
-        userName: currentUser.displayName,
-        text: txt,
-        createdAt: serverTimestamp()
+        `;
       });
-      input.value = '';
-    } catch(e){}
-  }
+      container.scrollTop = container.scrollHeight;
+    });
 
-  // --- STUDY TIMER LOGIC ---
-  let timerInterval = null;
-  let totalSeconds = 0;
-  let isTimerRunning = false;
-
-  window.toggleTimer = async function() {
-    const btn = document.getElementById('timerBtn');
-    if(!isTimerRunning) {
-      // স্টার্ট টাইমার
-      isTimerRunning = true;
-      btn.innerText = "স্টপ ট্র্যাকিং";
-      btn.style.background = "var(--rd)";
-      timerInterval = setInterval(() => {
-        totalSeconds++;
-        updateTimerDisplay();
-      }, 1000);
-    } else {
-      // স্টপ ও সেভ ডেটাবেস
-      isTimerRunning = false;
-      btn.innerText = "স্টার্ট ট্র্যাকিং";
-      btn.style.background = "var(--a)";
-      clearInterval(timerInterval);
+    // ৩. লিডারবোর্ড ও পোডিয়াম রিয়েল-টাইম ডাইনামিক রেন্ডার
+    const qUsers = query(collection(db, "brightMeshUsers"), orderBy("xp", "desc"));
+    onSnapshot(qUsers, (snapshot) => {
+      const listContainer = document.getElementById('leaderboard-list');
+      listContainer.innerHTML = '';
       
-      // ডিরেক্টলি ফায়ারবেসে সেভ করো
-      try {
-        const userRef = doc(db, "users", currentUser.uid);
-        const userSnap = await getDoc(userRef);
-        let dbTime = 0;
-        if(userSnap.exists()) dbTime = userSnap.data().totalStudyTime || 0;
-        await setDoc(userRef, { totalStudyTime: dbTime + totalSeconds }, { merge: true });
-        totalSeconds = 0;
-        updateTimerDisplay();
-        alert("আজকের পড়ার সময় লাইভ ডাটাবেসে যোগ করা হয়েছে!");
-      } catch(e) { alert("টাইম সেভ করা যায়নি!"); }
-    }
-  }
+      let index = 1;
+      let topThree = [];
 
-  function updateTimerDisplay() {
-    const hrs = String(Math.floor(totalSeconds / 3600)).padStart(2, '0');
-    const mins = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, '0');
-    const secs = String(totalSeconds % 60).padStart(2, '0');
-    document.getElementById('timerDisplay').innerText = `${hrs}:${mins}:${secs}`;
+      snapshot.forEach(doc => {
+        const u = doc.data();
+        if(index <= 3) {
+          topThree.push({ name: u.username, xp: u.xp });
+        }
+
+        const isMe = u.username === currentUserName;
+        listContainer.innerHTML += `
+          <div class="lb-item" style="${isMe ? 'border-color:var(--a); background:var(--a-light);' : ''}">
+            <div class="lb-rank">${index}</div>
+            <div class="lb-info">
+              <div class="lb-name">${u.username} ${isMe ? '(তুমি)' : ''}</div>
+              <div class="lb-detail">🪙 ${u.coins || 0} Coins</div>
+            </div>
+            <div class="lb-score">${u.xp || 0} XP</div>
+          </div>
+        `;
+        index++;
+      });
+
+      // পোডিয়াম ১ম, ২য়, ৩য় প্লেস লাইভ আপডেট লজিক
+      if(topThree[0]) {
+        document.getElementById('pod-1-name').innerText = topThree[0].name;
+        document.getElementById('pod-1-av').innerText = topThree[0].name.substring(0,2).toUpperCase();
+      }
+      if(topThree[1]) {
+        document.getElementById('pod-2-name').innerText = topThree[1].name;
+        document.getElementById('pod-2-av').innerText = topThree[1].name.substring(0,2).toUpperCase();
+      }
+      if(topThree[2]) {
+        document.getElementById('pod-3-name').innerText = topThree[2].name;
+        document.getElementById('pod-3-av').innerText = topThree[2].name.substring(0,2).toUpperCase();
+      }
+    });
   }
 </script>
 
 <script>
-  // --- UI INTERACTION LOGIC ---
-  function switchPanel(panelId, btnEl) {
+  function switchTab(panelId, element) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.bnav .bni').forEach(b => b.classList.remove('active'));
-    document.getElementById(`panel-${panelId}`).classList.add('active');
-    btnEl.classList.add('active');
+    document.querySelectorAll('.bni').forEach(b => b.classList.remove('active'));
+    
+    document.getElementById(`p-${panelId}`).classList.add('active');
+    element.classList.add('active');
   }
 
   function toggleTheme() {
-    const current = document.documentElement.getAttribute('data-theme');
-    document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
-  }
-
-  function openGroupChat(groupName) {
-    document.getElementById('groupChatScreen').classList.add('show');
-  }
-  function closeGroupChat() {
-    document.getElementById('groupChatScreen').classList.remove('show');
-  }
-
-  // --- PWA NATIVE DOWNLOAD LOGIC ---
-  let deferredPrompt;
-  const pwaBanner = document.getElementById('pwaBanner');
-  const pwaBtn = document.getElementById('pwaBtn');
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    pwaBanner.style.display = 'flex'; // পপ-আপ ইনস্টল বাটন দেখাবে
-  });
-
-  pwaBtn.addEventListener('click', async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        pwaBanner.style.display = 'none';
-      }
-      deferredPrompt = null;
-    }
-  });
-
-  window.addEventListener('appinstalled', () => {
-    pwaBanner.style.display = 'none';
-    alert("BrightMesh সফলভাবে আপনার মোবাইলের হোম স্ক্রিনে ইনস্টল হয়েছে!");
-  });
-
-  // সার্ভিস ওয়ার্কার ইনলাইন রেজিস্টার (PWA রিকোয়ারমেন্ট)
-  if ('serviceWorker' in navigator) {
-    const swCode = `
-      self.addEventListener('install', e => self.skipWaiting());
-      self.addEventListener('fetch', e => e.respondWith(fetch(e.request)));
-    `;
-    const blob = new Blob([swCode], { type: 'text/javascript' });
-    navigator.serviceWorker.register(URL.createObjectURL(blob));
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
   }
 </script>
-
 </body>
 </html>
