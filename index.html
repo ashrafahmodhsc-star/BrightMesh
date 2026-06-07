@@ -1,294 +1,260 @@
 <!DOCTYPE html>
-<html lang="bn" data-theme="light">
+<html lang="bn" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BrightMesh — Learn Together</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
+<title>BrightMesh — HSC Ultra Database & Search Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-/* ── THEME ── */
+/* ── THEME & VARIABLES ── */
 :root {
   --bg:#ffffff;--bg2:#f8f9fa;--bg3:#f1f3f5;--bg4:#e9ecef;
   --text:#0a0a0a;--text2:#343a40;--text3:#6c757d;--text4:#adb5bd;
   --a:#0066ff;--a2:#3385ff;--a-light:#e8f0ff;
   --gr:#00a651;--rd:#dc3545;--gd:#f5a623;--pu:#7c3aed;
   --bd:#dee2e6;--bd2:#ced4da;
-  --shadow:0 2px 12px rgba(0,0,0,.08);--shadow-lg:0 8px 32px rgba(0,0,0,.12);
-  --r:12px;--r2:8px;--r3:20px;
+  --shadow:0 4px 12px rgba(0,0,0,.05);--shadow-lg:0 12px 36px rgba(0,0,0,.1);
+  --r:16px;--r2:12px;
 }
 [data-theme="dark"] {
-  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bg4:#22222f;
-  --text:#f0f0f5;--text2:#c8c8d8;--text3:#8888a8;--text4:#555570;
-  --a:#4d9fff;--a2:#77b8ff;--a-light:#0f1f3f;
-  --bd:#2a2a3a;--bd2:#333348;
-  --shadow:0 2px 12px rgba(0,0,0,.4);--shadow-lg:0 8px 32px rgba(0,0,0,.5);
+  --bg:#080810;--bg2:#0f0f1b;--bg3:#171726;--bg4:#202035;
+  --text:#f5f5fa;--text2:#d0d0e0;--text3:#8b8baa;--text4:#555575;
+  --a:#3b82f6;--a2:#60a5fa;--a-light:#0f1e36;
+  --bd:#222236;--bd2:#333352;
+  --shadow:0 4px 20px rgba(0,0,0,.4);--shadow-lg:0 16px 48px rgba(0,0,0,.6);
 }
 * { margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent; }
 html { scroll-behavior:smooth; }
-body { background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;transition:background .3s,color .3s; padding-top: 56px; padding-bottom: 60px;}
-button { cursor:pointer;font-family:inherit; }
+body { background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;transition:background .3s,color .3s; padding-top: 65px; padding-bottom: 75px; overflow-x:hidden;}
+button { cursor:pointer;font-family:inherit; outline: none; }
 input,textarea { font-family:inherit; }
-::-webkit-scrollbar { width:4px;height:4px; }
-::-webkit-scrollbar-thumb { background:var(--bd2);border-radius:2px; }
+::-webkit-scrollbar { width:5px;height:5px; }
+::-webkit-scrollbar-thumb { background:var(--bd2);border-radius:3px; }
 
 /* ── ANIMATIONS ── */
-@keyframes fadeIn { from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)} }
-@keyframes slideIn { from{transform:translateX(100%)}to{transform:translateX(0)} }
-@keyframes pop { 0%{transform:scale(0.8)}60%{transform:scale(1.05)}100%{transform:scale(1)} }
-@keyframes pulse { 0%,100%{opacity:1}50%{opacity:0.4} }
-@keyframes float { 0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)} }
-@keyframes blink { 0%,100%{opacity:1}50%{opacity:0.3} }
-@keyframes xpfly { 0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-50px)} }
-@keyframes notifIn { from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)} }
+@keyframes pop { 0%{transform:scale(0.8)}60%{transform:scale(1.1)}100%{transform:scale(1)} }
+@keyframes xpfly { 0%{opacity:1;transform:translateY(0) scale(1);} 100%{opacity:0;transform:translateY(-100px) scale(1.4);} }
+@keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+@keyframes spinWheel { from { transform: rotate(0deg); } to { transform: rotate(3600deg); } }
 
-/* ── SHARED ── */
-.card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);transition:all .2s; }
-.card:hover { border-color:var(--bd2); }
-.avatar { border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0; }
-.btn { padding:9px 18px;border-radius:var(--r2);border:none;font-family:inherit;font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s; }
-.btn-primary { background:var(--a);color:#fff; }
-.btn-primary:hover { background:var(--a2);transform:translateY(-1px); }
+/* ── GLOBAL CARDS & BTNS ── */
+.card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);transition:all .25s cubic-bezier(0.4, 0, 0.2, 1); position:relative; overflow:hidden; }
+.card:hover { border-color:var(--bd2); transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+.avatar { border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;flex-shrink:0; background: linear-gradient(135deg, var(--a), var(--pu)); color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.2); }
+.btn { padding:12px 24px;border-radius:var(--r2);border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s; display:inline-flex; align-items:center; gap:8px; justify-content:center;}
+.btn-primary { background:linear-gradient(135deg, var(--a), var(--a2));color:#fff; box-shadow: 0 4px 14px rgba(59,130,246,0.3); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.4); }
 .btn-secondary { background:var(--bg3);border:1px solid var(--bd);color:var(--text2); }
 .btn-secondary:hover { border-color:var(--a);color:var(--a); }
-.btn-sm { padding:6px 13px;font-size:.78rem; }
-.inp { width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r2);padding:10px 13px;font-size:.88rem;color:var(--text);outline:none;transition:border-color .2s; }
-.inp:focus { border-color:var(--a); }
-.inp::placeholder { color:var(--text4); }
-.badge { display:inline-block;padding:2px 8px;border-radius:20px;font-size:.65rem;font-weight:600; }
-.tag { display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;background:var(--a-light);color:var(--a); }
-.wrap { max-width:680px;margin:0 auto;padding:12px 14px; }
-.section-title { font-size:.72rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:10px; }
-.divider { height:1px;background:var(--bd);margin:10px 0; }
+.btn-sm { padding:8px 16px;font-size:.82rem; border-radius: 8px; }
+.inp { width:100%;background:var(--bg3);border:2px solid var(--bd);border-radius:var(--r2);padding:12px 16px;font-size:.92rem;color:var(--text);outline:none;transition:all .2s; }
+.inp:focus { border-color:var(--a); background: var(--bg); }
+.badge { display:inline-block;padding:4px 10px;border-radius:20px;font-size:.7rem;font-weight:800; color:#fff; text-transform: uppercase; }
+.wrap { max-width:680px;margin:0 auto;padding:12px 16px; }
+.section-title { font-size:.8rem;font-weight:800;color:var(--text3);letter-spacing:1.2px;text-transform:uppercase;margin:24px 0 12px; display:flex; align-items:center; gap:8px; }
 
-/* ── TOPBAR ── */
-.topbar { position:fixed;top:0;left:0;right:0;z-index:300;background:var(--bg);border-bottom:1px solid var(--bd);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;box-shadow:var(--shadow); }
-.logo { display:flex;align-items:center;gap:8px; }
-.logo-icon { width:32px;height:32px;border-radius:9px;background:var(--a);display:flex;align-items:center;justify-content:center;font-size:.9rem;color:#fff;font-weight:800; }
-.logo-text { font-size:1.05rem;font-weight:800;color:var(--text); }
+/* PROGRESS BAR */
+.progress-container { width:100%; background:var(--bg4); height:10px; border-radius:6px; overflow:hidden; margin-top:8px; border: 1px solid var(--bd); }
+.progress-bar { height:100%; background:linear-gradient(90deg, var(--a), #ec4899, var(--pu)); width:0%; transition:width .5s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* TOPBAR & NAVIGATION */
+.topbar { position:fixed;top:0;left:0;right:0;z-index:300;background:var(--bg);border-bottom:1px solid var(--bd);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;box-shadow:var(--shadow); }
+.logo { display:flex;align-items:center;gap:10px; }
+.logo-icon { width:36px;height:36px;border-radius:12px;background:linear-gradient(135deg, var(--a), var(--pu));display:flex;align-items:center;justify-content:center;font-size:1.1rem;color:#fff;font-weight:900; animation: float 3s infinite ease-in-out; }
+.logo-text { font-size:1.2rem;font-weight:900;color:var(--text); letter-spacing:-0.5px; }
 .logo-text span { color:var(--a); }
-.tb-actions { display:flex;align-items:center;gap:6px; }
-.tb-icon-btn { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;position:relative;cursor:pointer;transition:all .2s; }
-.tb-icon-btn:hover { border-color:var(--a);color:var(--a); }
-.tb-badge { position:absolute;top:0;right:0;width:14px;height:14px;background:var(--rd);border-radius:50%;font-size:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg); }
-.tb-avatar { width:34px;height:34px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:#fff;cursor:pointer;border:2px solid var(--bd); }
+.tb-actions { display:flex;align-items:center;gap:10px; }
+.tb-icon-btn { width:40px;height:40px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:1.05rem;cursor:pointer;transition:all .2s; }
+.tb-icon-btn:hover { border-color:var(--a); transform: scale(1.08); }
+.streak-badge { background: linear-gradient(45deg, #ef4444, #eab308); padding:6px 12px; border-radius:20px; color:#fff; font-size:0.78rem; font-weight:900; display:flex; align-items:center; gap:5px; box-shadow:0 4px 12px rgba(234,179,8,0.25); }
 
-/* ── BOTTOM NAV ── */
-.bnav { position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--bg);border-top:1px solid var(--bd);display:flex;height:60px;box-shadow:0 -2px 12px rgba(0,0,0,.06); }
-.bni { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.56rem;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;transition:all .2s;position:relative; }
-.bni.active { color:var(--a); }
-.bni .ni { font-size:1.2rem;line-height:1; }
+.bnav { position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--bg);border-top:1px solid var(--bd);display:flex;height:68px;box-shadow:0 -4px 20px rgba(0,0,0,0.03); padding-bottom:env(safe-area-inset-bottom); }
+.bni { flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-size:.68rem;font-weight:700;color:var(--text3);border:none;background:none;cursor:pointer;transition:all .2s; }
+.bni.active { color:var(--a); transform: translateY(-3px); }
+.bni .ni { font-size:1.4rem;line-height:1; transition: transform 0.2s; }
 
-/* ── PANELS ── */
 .panel { display:none; }
-.panel.active { display:block;animation:fadeIn .3s ease; }
+.panel.active { display:block;animation:fadeIn .4s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
-/* ── FULL SCREEN / MODALS ── */
-.fullscreen { position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column; }
-.fullscreen.show { display:flex; }
-.fs-header { display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--bd);background:var(--bg);position:sticky;top:0;z-index:10; }
-.fs-back { width:36px;height:36px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer; border:none; color:var(--text); }
-.fs-title { font-size:1rem;font-weight:700;flex:1; }
-.group-tabs-2 { display:flex;background:var(--bg3);border-bottom:1px solid var(--bd); }
-.gt2-tab { flex:1;padding:11px;text-align:center;font-size:.8rem;font-weight:500;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s; }
-.gt2-tab.on { color:var(--a);border-bottom-color:var(--a); }
-.chat-area { flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:10px; background: var(--bg); }
+/* SEARCH BAR & FILTER */
+.search-box-wrapper { margin-bottom: 16px; position: relative; }
+.search-icon-inside { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 1.1rem; }
+.search-inp { padding-left: 44px !important; }
 
-/* AUTH SCREEN */
+/* DATABASE CARDS */
+.db-card { background: var(--bg2); border: 1px solid var(--bd); border-radius: var(--r); padding: 16px; margin-bottom: 12px; transition: all 0.2s; }
+.db-subject-tag { font-size: 0.65rem; font-weight: 900; color: #fff; padding: 3px 8px; border-radius: 6px; text-transform: uppercase; display: inline-block; margin-bottom: 6px; }
+.db-title { font-size: 1.05rem; font-weight: 800; margin-bottom: 6px; color: var(--text); }
+.db-shortcut { background: var(--bg3); border-left: 4px solid var(--pu); padding: 10px; border-radius: 4px; font-family: 'Fira Code', monospace; font-size: 0.85rem; color: var(--text2); margin-top: 8px; }
+
+/* FEED INTERFACE */
+.create-post { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:18px;margin-bottom:16px; box-shadow: var(--shadow); }
+.cp-top { display:flex;align-items:center;gap:12px; }
+.cp-input { flex:1;background:var(--bg3);border:2px solid var(--bd);border-radius:30px;padding:12px 20px;font-size:.92rem;color:var(--text);outline:none; }
+.post-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:14px;padding:18px; box-shadow: var(--shadow); }
+.post-header { display:flex;align-items:center;gap:12px; margin-bottom:12px;}
+
+/* CHAT ROOM */
+.chat-area { flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:14px; background: var(--bg); }
+.chat-message { display:flex;gap:12px;align-items:flex-start; max-width: 85%; }
+.chat-message.me { flex-direction:row-reverse; align-self: flex-end; }
+.cm-bubble { padding:12px 16px;border-radius:4px 18px 18px 18px;font-size:.9rem;line-height:1.55; box-shadow: var(--shadow); }
+.chat-message.me .cm-bubble { border-radius:18px 4px 18px 18px;background:linear-gradient(135deg, var(--a), var(--a2));color:#fff; }
+.chat-message:not(.me) .cm-bubble { background:var(--bg3);color:var(--text); border: 1px solid var(--bd); }
+.chat-input-area { border-top:1px solid var(--bd);padding:14px 16px;background:var(--bg);display:flex;gap:10px; }
+
+/* SPIN WHEEL */
+.spin-section { background: var(--bg2); border: 1px solid var(--bd); border-radius: var(--r); padding: 20px; text-align: center; margin-bottom: 16px; }
+.wheel-container { width: 140px; height: 140px; margin: 15px auto; position: relative; border-radius: 50%; border: 5px solid var(--bd2); background: conic-gradient(var(--a) 0deg 90deg, var(--pu) 90deg 180deg, var(--gr) 180deg 270deg, var(--gd) 270deg 360deg); transition: transform 4s cubic-bezier(0.1, 0.8, 0.1, 1); }
+.wheel-pointer { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 15px solid var(--rd); z-index: 10; }
+.wheel-center { position: absolute; inset: 45px; background: var(--bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+
+/* TOASTS & FLYERS */
+.xp-flyer { position: fixed; pointer-events: none; z-index: 9999; font-weight: 900; font-family: 'Fira Code', monospace; font-size: 1.5rem; text-shadow: 0 2px 10px rgba(0,0,0,0.4); animation: xpfly 1s cubic-bezier(0.18, 0.89, 0.32, 1.28) forwards; }
+#toast-container { position: fixed; top: 75px; right: 16px; z-index: 9995; display: flex; flex-direction: column; gap: 8px; max-width: 310px; }
+.toast { background: var(--bg2); border-left: 5px solid var(--a); padding: 14px 18px; border-radius: var(--r2); box-shadow: var(--shadow-lg); font-size: 0.85rem; font-weight: 600; display: flex; align-items: center; gap: 10px; color: var(--text); border: 1px solid var(--bd); }
 #auth-screen { position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px; }
-.auth-card { background:var(--bg2);border:1px solid var(--bd);padding:25px;border-radius:var(--r);width:100%;max-width:360px;box-shadow:var(--shadow-lg); }
-
-/* FEED INTERFACES */
-.stories-row { display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px; }
-.story-item { flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:5px; }
-.story-ring { width:60px;height:60px;border-radius:50%;padding:2.5px;background:linear-gradient(45deg,var(--a),var(--pu)); }
-.story-avatar { width:100%;height:100%;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:700;border:2.5px solid var(--bg); }
-.story-name { font-size:.6rem;color:var(--text3); }
-.create-post { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:14px; }
-.cp-top { display:flex;align-items:center;gap:10px;margin-bottom:11px; }
-.cp-input { flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:24px;padding:9px 16px;font-size:.88rem;color:var(--text3);outline:none; }
-.post-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:12px;overflow:hidden; padding:14px; }
-.post-header { display:flex;align-items:center;gap:10px; margin-bottom: 10px;}
-.post-name { font-size:.9rem;font-weight:600; }
-.post-time { font-size:.7rem;color:var(--text3); }
-.post-text { font-size:.9rem;line-height:1.65;color:var(--text); }
-
-/* CHAT MESSAGES ELEMENTS */
-.chat-message { display:flex;gap:8px;align-items:flex-start; margin-bottom: 8px; }
-.chat-message.me { flex-direction:row-reverse; }
-.cm-avatar { width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff; background: var(--pu); }
-.cm-content { max-width:72%; }
-.cm-bubble { padding:9px 13px;border-radius:4px 16px 16px 16px;font-size:.84rem;line-height:1.55; }
-.chat-message.me .cm-bubble { border-radius:16px 4px 16px 16px;background:var(--a);color:#fff; }
-.chat-message:not(.me) .cm-bubble { background:var(--bg3);color:var(--text); }
-.chat-input-area { border-top:1px solid var(--bd);padding:10px 14px;background:var(--bg);display:flex;gap:8px; align-items: center; }
-
-/* LEADERBOARD & PODIUM */
-.podium { display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:16px 0; height: 130px; }
-.pod { display:flex;flex-direction:column;align-items:center;gap:5px; }
-.pod-av { width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;background: var(--gd); }
-.pod-block { display:flex;align-items:center;justify-content:center;border-radius:6px 6px 0 0;width:64px;font-size:.78rem;font-weight:700;color: #fff; }
-.lb-item { display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px; }
-.lb-rank { font-size:.82rem;font-weight:700;min-width:22px; }
-.lb-info { flex:1; }
-.lb-name { font-size:.86rem;font-weight:600; }
-.lb-score { text-align:right; font-family:'Fira Code',monospace; font-weight: 700; color: var(--a);}
-
-/* DOPAMINE / QUESTS / SHOP DESIGN PARTS HELD */
-.xp-card { background:var(--a);border-radius:var(--r);padding:16px;margin-bottom:12px;color:#fff; }
-.stat-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px; }
-.stat-box { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center; }
-.stat-num { font-size:1.4rem;font-weight:700;color:var(--a);display:block; }
-.quest-card { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:10px; }
-.shop-grid { display:grid;grid-template-columns:1fr 1fr;gap:9px; }
-.shop-item { background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center; }
-
-#levelUpModal { position:fixed;inset:0;z-index:9996;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center; }
+.auth-card { background:var(--bg2);border:2px solid var(--bd);padding:35px 25px;border-radius:var(--r);width:100%;max-width:390px;text-align:center; }
+#levelUpModal { position:fixed;inset:0;z-index:9996;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center; backdrop-filter: blur(6px); }
 #levelUpModal.show { display:flex; }
-.lu-card { background:var(--bg);border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;box-shadow:var(--shadow-lg);border:1px solid var(--bd); }
+.lu-card { background:var(--bg);border-radius:28px;padding:40px 25px;text-align:center;max-width:330px;width:90%;border:2px solid var(--pu); }
 </style>
 </head>
 <body>
 
+<div id="toast-container"></div>
+
+<!-- LOGIN -->
 <div id="auth-screen">
   <div class="auth-card">
-    <h2 style="margin-bottom:10px; font-weight:800; text-align:center;">BrightMesh Auth</h2>
-    <p style="font-size:0.8rem; color:var(--text3); margin-bottom:15px; text-align:center;">রিয়েল-টাইম ডাটা কানেক্ট করার জন্য নিজের নাম দিয়ে প্রবেশ কর।</p>
-    <input type="text" id="auth-name" class="inp" placeholder="তোমার নাম লেখ (যেমন: Ashu)" style="margin-bottom:12px;">
-    <button class="btn btn-primary" style="width:100%; padding:11px;" onclick="handleLogin()">প্রবেশ করুন 🚀</button>
+    <div style="font-size: 3.5rem; margin-bottom: 12px; animation: float 3s infinite ease-in-out;">⚡</div>
+    <h2 style="margin-bottom:10px; font-weight:900; font-size:1.6rem;">BrightMesh: Ultra DB Engine</h2>
+    <p style="font-size:0.85rem; color:var(--text3); margin-bottom:24px;">HSC অল সাবজেক্ট ডাটাবেজ, শর্টকাট ট্রিকস এবং আল্ট্রা সার্চ অপশন আনলক করার জন্য তোর নাম লেখ।</p>
+    <input type="text" id="auth-name" class="inp" placeholder="তোর নাম বা নিকনেম (যেমন: Ashu)" style="margin-bottom:18px; text-align: center; font-weight: 700;">
+    <button class="btn btn-primary" style="width:100%; padding:14px;" onclick="handleLogin()">ডাটাবেজে প্রবেশ করো ⚔️</button>
   </div>
 </div>
 
+<!-- TOPBAR -->
 <div class="topbar">
   <div class="logo">
-    <div class="logo-icon">B</div>
+    <div class="logo-icon">M</div>
     <div class="logo-text">Bright<span>Mesh</span></div>
   </div>
   <div class="tb-actions">
+    <div class="streak-badge">🔥 <span id="top-streak-val">1</span> Day</div>
     <button class="tb-icon-btn" onclick="toggleTheme()">🌓</button>
-    <div class="tb-avatar" id="top-user-avatar">?</div>
+    <div class="tb-avatar" id="top-user-avatar" style="font-weight:900; background:var(--a); color:#fff; width:35px; height:35px; border-radius:50%; display:flex; align-items:center; justify-content:center;">?</div>
   </div>
 </div>
 
 <div class="wrap main">
   
+  <!-- HOME PANEL -->
   <div id="p-feed" class="panel active">
-    <div class="stories-row">
-      <div class="story-item"><div class="story-ring"><div class="story-avatar">🔥</div></div><div class="story-name">Live Hub</div></div>
+    <!-- SEARCH SYSTEM IMPLEMENTATION -->
+    <div class="search-box-wrapper">
+      <span class="search-icon-inside">🔍</span>
+      <input type="text" id="global-search" class="inp search-inp" placeholder="যেকোনো চ্যাপ্টার, শর্টকাট বা টপিক সার্চ কর (যেমন: Trigonometry, ডাইপোল)..." oninput="executeSearch()">
+    </div>
+
+    <!-- SEARCH RESULTS LIVE BOX -->
+    <div id="search-results-section" style="display:none; margin-bottom: 20px;">
+      <div class="section-title" style="color:var(--a)">🎯 সার্চ রেজাল্ট (ফলাফল)</div>
+      <div id="search-results-container"></div>
+      <hr style="border:0; border-top:1px dashed var(--bd); margin: 20px 0;">
     </div>
     
     <div class="create-post">
       <div class="cp-top">
-        <input type="text" id="post-input" class="cp-input" placeholder="আজকে কী পড়া শেষ করলা? শেয়ার করো...">
-        <button class="btn btn-primary btn-sm" onclick="submitPost()">পোস্ট</button>
+        <input type="text" id="post-input" class="cp-input" placeholder="আজকে কোন চ্যাপ্টারের কোপ দিলি? বাস্ট কর এখানে...">
+        <button class="btn btn-primary btn-sm" onclick="submitPost()">পোস্ট 🚀</button>
       </div>
     </div>
 
-    <div class="section-title">সাম্প্রতিক ফিড ও আপডেট</div>
-    <div id="feed-container">
-      </div>
+    <div class="section-title">📢 লাইভ ব্যাটেল ফিড (Real-Time Actions)</div>
+    <div id="feed-container"></div>
   </div>
 
-  <div id="p-leaderboard" class="panel">
-    <div class="section-title" style="text-align:center;">🏆 গ্লোবাল র‍্যাঙ্কিং (Live)</div>
+  <!-- STUDY DATABASE PANEL (NEW SUBJECT ALL DATA) -->
+  <div id="p-database" class="panel">
+    <div class="section-title">📚 HSC অল সাবজেক্ট আল্ট্রা ডাটাবেজ</div>
+    <p style="font-size:0.8rem; color:var(--text3); margin-bottom:14px;">HSC ও BUET এডমিশন লেভেলের শর্টকাট হ্যাকস এবং ইম্পর্টেন্ট টপিক লিস্ট।</p>
     
-    <div class="podium">
-      <div class="pod" style="order:2;">
-        <div class="pod-av" id="pod-1-av">1st</div>
-        <div style="font-size:.75rem;font-weight:600;" id="pod-1-name">-</div>
-        <div class="pod-block" style="height:70px;background:var(--gd);">1st</div>
-      </div>
-      <div class="pod" style="order:1;">
-        <div class="pod-av" id="pod-2-av" style="background:var(--text4);">2nd</div>
-        <div style="font-size:.75rem;font-weight:600;" id="pod-2-name">-</div>
-        <div class="pod-block" style="height:50px;background:var(--text4);">2nd</div>
-      </div>
-      <div class="pod" style="order:3;">
-        <div class="pod-av" id="pod-3-av" style="background:#cd7f32;">3rd</div>
-        <div style="font-size:.75rem;font-weight:600;" id="pod-3-name">-</div>
-        <div class="pod-block" style="height:35px;background:#cd7f32;">3rd</div>
-      </div>
-    </div>
-
-    <div id="leaderboard-list">
-      </div>
+    <div id="subject-db-container"></div>
   </div>
 
+  <!-- CHAT PANEL -->
   <div id="p-chat" class="panel">
-    <div class="section-title">💬 গ্লোবাল চ্যাট রুম</div>
-    <div class="card" style="height:calc(100vh - 200px); display:flex; flex-direction:column; overflow:hidden;">
+    <div class="section-title">💬 গ্লোবাল স্কোয়াড চ্যাট রুম (Live)</div>
+    <div class="card" style="height:calc(100vh - 215px); display:flex; flex-direction:column; overflow:hidden;">
       <div class="chat-area" id="chat-messages-container"></div>
       <div class="chat-input-area">
-        <input type="text" id="chat-input-field" class="cia-input" placeholder="মেসেজ টাইপ কর...">
-        <button class="cia-send" onclick="submitChatMessage()">➔</button>
+        <input type="text" id="chat-input-field" class="inp" placeholder="মেসেজ ব্লাস্ট কর এখানে..." style="border-radius: 24px;">
+        <button class="btn btn-primary" style="border-radius: 50%; width:42px; height:42px; padding:0;" onclick="submitChatMessage()">➔</button>
       </div>
     </div>
   </div>
 
+  <!-- MISSIONS PANEL & SPIN WHEEL -->
   <div id="p-quests" class="panel">
-    <div class="xp-card">
-      <div style="font-size:1.1rem; font-weight:800; margin-bottom:5px;">ডেইলি প্রোগ্রেস হাব</div>
-      <p style="font-size:0.8rem; opacity:0.9;">কয়েন এবং এক্সপি আর্ন করে নিজেকে লিডারবোর্ডের শীর্ষে নিয়ে যাও!</p>
+    <div class="card" style="padding:16px; background:linear-gradient(135deg, var(--a-light), var(--bg2)); margin-bottom:16px;">
+      <div style="font-size:1.25rem; font-weight:900; margin-bottom:4px;">Lv.<span id="progress-lvl">1</span> <span id="rank-title-badge">Noob</span></div>
+      <div class="progress-container"><div class="progress-bar" id="live-progress-bar"></div></div>
+      <div style="font-size:0.7rem; text-align:right; margin-top:5px; font-family:'Fira Code';" id="progress-text-pct">0/100 XP</div>
     </div>
     
-    <div class="stat-grid">
-      <div class="stat-box"><span class="stat-num" id="stat-xp">120</span><span class="stat-lbl">XP অর্জিত</span></div>
-      <div class="stat-box"><span class="stat-num" id="stat-coins">450</span><span class="stat-lbl">🪙 কয়েন ব্যালেন্স</span></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+      <div class="card" style="padding:12px; text-align:center;"><span style="font-size:1.3rem; font-weight:900;" id="stat-xp">0</span><br><span style="font-size:0.7rem; color:var(--text3);">📊 মোট XP</span></div>
+      <div class="card" style="padding:12px; text-align:center;"><span style="font-size:1.3rem; font-weight:900;" id="stat-coins">0</span><br><span style="font-size:0.7rem; color:var(--text3);">🪙 কয়েন ব্যালেন্স</span></div>
     </div>
 
-    <div class="section-title">আজকের চ্যালেঞ্জসমূহ</div>
-    <div class="quest-card">
-      <div style="font-size:0.85rem; font-weight:600; margin-bottom:8px;">🔥 মিশন কমপ্লিট করো</div>
-      <p style="font-size:0.75rem; color:var(--text3);">প্রতিটি পোস্ট এবং চ্যাট মেসেজে এক্সপি বুস্ট হবে।</p>
+    <div class="spin-section">
+      <div style="font-size: 0.95rem; font-weight: 800;">🎡 ডেইলি লাকি স্পিন হুইল</div>
+      <div style="position: relative; width: 140px; margin: 0 auto;">
+        <div class="wheel-pointer"></div>
+        <div class="wheel-container" id="spin-wheel"><div class="wheel-center">🎯</div></div>
+      </div>
+      <button class="btn btn-primary btn-sm" id="spin-btn" onclick="spinTheWheel(event)">স্পিন করো 🚀</button>
+      <div style="font-size: 0.72rem; margin-top: 8px; font-weight:700; color:var(--gr);" id="spin-cooldown-msg">স্পিন করার জন্য রেডি!</div>
     </div>
   </div>
 
+  <!-- PROFILE PANEL -->
   <div id="p-profile" class="panel">
-    <div class="card" style="padding:20px; text-align:center; margin-bottom:15px;">
-      <div class="avatar" id="pro-big-av" style="width:70px; height:70px; background:var(--a); color:#fff; font-size:1.8rem; margin:0 auto 12px;">?</div>
-      <h3 id="pro-name">User Name</h3>
-      <p style="font-size:0.75rem; color:var(--text3); margin-top:4px;">Rank: Active Learner</p>
-    </div>
-
-    <div class="section-title">স্টোর / রিওয়ার্ড আইটেম</div>
-    <div class="shop-grid">
-      <div class="shop-item">
-        <span class="shop-ic">⚡</span>
-        <div class="shop-nm">XP Booster</div>
-        <div class="shop-price">200 🪙</div>
-      </div>
-      <div class="shop-item">
-        <span class="shop-ic">👑</span>
-        <div class="shop-nm">Viper Title</div>
-        <div class="shop-price">500 🪙</div>
-      </div>
+    <div class="card" style="padding:26px; text-align:center; margin-bottom:16px; background: linear-gradient(to bottom, var(--bg2), var(--bg3));">
+      <div class="avatar" id="pro-big-av" style="width:80px; height:80px; font-size:2.2rem; margin:0 auto 12px;">?</div>
+      <h3 id="pro-name" style="font-weight:900; font-size:1.4rem;">User Name</h3>
+      <div id="pro-status-badge" style="margin-top:6px;"><span class="badge" style="background:var(--text4);">Level 1 Learner</span></div>
     </div>
   </div>
 
 </div>
 
+<!-- BOTTOM NAV -->
 <div class="bnav">
   <button class="bni active" onclick="switchTab('feed', this)"><span class="ni">🏠</span>হোম</button>
-  <button class="bni" onclick="switchTab('leaderboard', this)"><span class="ni">📊</span>র‍্যাঙ্ক</button>
+  <button class="bni" onclick="switchTab('database', this)"><span class="ni">📚</span>ডাটাবেজ</button>
   <button class="bni" onclick="switchTab('chat', this)"><span class="ni">💬</span>চ্যাট</button>
   <button class="bni" onclick="switchTab('quests', this)"><span class="ni">🎯</span>মিশন</button>
   <button class="bni" onclick="switchTab('profile', this)"><span class="ni">👤</span>প্রোফাইল</button>
 </div>
 
+<!-- LEVEL UP MODAL -->
 <div id="levelUpModal">
   <div class="lu-card">
-    <div style="font-size:3rem;margin-bottom:10px;">🎊</div>
-    <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;">Level Up!</div>
-    <div style="font-weight:700;margin-bottom:6px; color:var(--gr)">অভিনন্দন! 🎉</div>
-    <p style="font-size:.82rem;color:var(--text3);margin-bottom:14px;">তুমি নতুন এক্সপি টার্গেট ছুঁয়ে ফেলেছ!</p>
-    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="document.getElementById('levelUpModal').classList.remove('show')">🚀 চালিয়ে যাও</button>
+    <div style="font-size:4rem; margin-bottom:12px;">🎉</div>
+    <div style="font-size:1.8rem; font-weight:900; color:var(--pu); margin-bottom:4px;">LEVEL UP!</div>
+    <p style="font-size:.85rem; color:var(--text3);" id="lu-title-msg">সাব্বাস ব্রো! লেভেল আপ হয়েছে!</p>
+    <button class="btn btn-primary" style="width:100%; padding:14px; margin-top:15px;" onclick="document.getElementById('levelUpModal').classList.remove('show')">🚀 যুদ্ধ চালিয়ে যাও</button>
   </div>
 </div>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+  import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, doc, setDoc, getDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-  // তোর দেওয়া ফায়ারবেস কনফিগারেশন
   const firebaseConfig = {
     apiKey: "AIzaSyBahvYk6mX9OXsNUI7Hj2a06lcJZtFFy2c",
     authDomain: "brightmesh-f93b3.firebaseapp.com",
@@ -302,115 +268,169 @@ input,textarea { font-family:inherit; }
   const db = getFirestore(app);
 
   let currentUserName = "";
-  let userCoins = 100;
-  let userXP = 50;
+  let userCoins = 0;
+  let userXP = 0;
+  let userStreak = 1;
+
+  // 🧠 HSC অল সাবজেক্টের রিয়েল মেগা ডাটাবেজ (সার্চ ফ্রেন্ডলি)
+  const hscDatabase = [
+    { subject: "Higher Math", topic: "Trigonometry (Chapter 7)", shortcut: "Shortcut: sinθ + cosθ = max value is √2. If tanA + tanB + tanC = tanA.tanB.tanC then A+B+C = π.", tags: "Trigonometry, math, chapter 7, trikonmiti", deepInfo: "HSC MCQ এর জন্য ওয়ান-শট টেকনিক। এডমিশনে সরাসরি অপশন টেস্ট মেথড দিয়ে করা যায়।" },
+    { subject: "Higher Math", topic: "Matrices & Determinants", shortcut: "Shortcut Inverse Matrix [2x2]: Swap corners, change signs of other two, divide by determinant value.", tags: "Matrix, determinants, math, inversion, matris", deepInfo: "BUET ও অন্যান্য ইঞ্জিনিয়ারিং এডমিশন টেস্টে MCQ ক্র্যাক করার সবচেয়ে ফাস্ট টেকনিক।" },
+    { subject: "Physics", topic: "Vector (Chapter 2)", shortcut: "Shortcut Dot Product = 0 means perpendicular. Cross Product = 0 means parallel vectors. Max resultant R = P+Q.", tags: "Vector, physics, chapter 2, dot product, cross product", deepInfo: "নদী-নৌকার ম্যাথ শর্টকাট: t = d / (v * sinθ). সর্বনিম্ন সময়ে নদী পার হওয়ার জন্য θ = 90°." },
+    { subject: "Physics", topic: "Ideal Gas & Kinetic Theory", shortcut: "Shortcut: RMS Velocity C = √(3RT/M). Standard density relation P = 1/3 * ρ * C^2.", tags: "Physics, ideal gas, rms velocity, gas, chapter 10", deepInfo: "বুদবুদ হ্রদের তলদেশ থেকে ওপরে আসলে ব্যাসার্ধ n গুণ হলে গভীরতা h = (n^3 - 1) * 10.33 meter." },
+    { subject: "Chemistry", topic: "Organic Chemistry (Nomenclature & Reactions)", shortcut: "Shortcut Trick: Markovnikov's rule -> 'তেলো মাথায় তেল দেওয়া' (যার হাইড্রোজেন বেশি সেখানে H যাবে)।", tags: "Organic chemistry, chemistry, jaibo jogo, markovnikov, ozonolysis", deepInfo: "Ozonolysis Shortcut: ডাবল বন্ড ভেঙে দুই পাশে দুইটা অক্সিজেন (O) গুঁজে দিলেই প্রোডাক্ট রেডি!" },
+    { subject: "Chemistry", topic: "Quantitative Chemistry", shortcut: "Shortcut: W = (S * M * V(mL)) / 1000. Titration formula: V1*S1*e1 = V2*S2*e2.", tags: "Chemistry, quantitative, molarity, titration, s m v", deepInfo: "পিপিএম (ppm) কনভার্সন হ্যাক: ppm = Molarity * Molecular Weight * 1000." },
+    { subject: "Biology", topic: "Cell & Its Structure (Chapter 1)", shortcut: "Core Tip: Transcription -> DNA to mRNA. Translation -> mRNA to Protein. Start Codon always AUG.", tags: "Biology, cell, dna, rna, translation, transcription", deepInfo: "উদ্ভিদবিজ্ঞান ১ম অধ্যায়: প্লাজমামেমব্রেন এর ফ্লুইড মোজাইক মডেল আবিষ্কার করেন সিঙ্গার ও নিকলসন (১৯৭২)।" },
+    { subject: "Biology", topic: "Genetics & Evolution", shortcut: "Mendel's 1st Law Ratio = 3:1. Lethal Gene Ratio = 2:1 (not 3:1 because dominant homozygote dies).", tags: "Biology, genetics, mendel, lethal gene, ratio", deepInfo: "জিন তত্ত্ব ও বিবর্তন: ২য় সূত্রের ব্যতিক্রম পরিপূরক জিন অনুপাত ৯:৭।" }
+  ];
+
+  // ডাটাবেজ প্যানেলে সব ডেটা রেন্ডার করা
+  window.renderDatabaseView = function() {
+    const container = document.getElementById('subject-db-container');
+    container.innerHTML = '';
+    hscDatabase.forEach(item => {
+      let color = item.subject === "Higher Math" ? "var(--pu)" : item.subject === "Physics" ? "var(--a)" : item.subject === "Chemistry" ? "var(--gr)" : "var(--rd)";
+      container.innerHTML += `
+        <div class="db-card">
+          <span class="db-subject-tag" style="background:${color}">${item.subject}</span>
+          <div class="db-title">${item.topic}</div>
+          <p style="font-size:0.85rem; color:var(--text2); margin-bottom:8px;">${item.deepInfo}</p>
+          <div class="db-shortcut">${item.shortcut}</div>
+        </div>
+      `;
+    });
+  }
+
+  // 🔍 রিয়েল-টাইম সার্চ ইঞ্জিন লজিক
+  window.executeSearch = function() {
+    const queryStr = document.getElementById('global-search').value.toLowerCase().trim();
+    const resultSection = document.getElementById('search-results-section');
+    const resultContainer = document.getElementById('search-results-container');
+
+    if(!queryStr) {
+      resultSection.style.display = 'none';
+      return;
+    }
+
+    // ফিল্টারিং ইঞ্জিন
+    const matched = hscDatabase.filter(item => 
+      item.topic.toLowerCase().includes(queryStr) || 
+      item.shortcut.toLowerCase().includes(queryStr) || 
+      item.tags.toLowerCase().includes(queryStr) || 
+      item.subject.toLowerCase().includes(queryStr)
+    );
+
+    resultContainer.innerHTML = '';
+    resultSection.style.display = 'block';
+
+    if(matched.length === 0) {
+      resultContainer.innerHTML = `<p style="font-size:0.85rem; color:var(--text3); padding:10px;">ডাটাবেজে এই টপিকের কোনো শর্টকাট বা তথ্য পাওয়া যায়নি! ⚠️</p>`;
+      return;
+    }
+
+    matched.forEach(item => {
+      let color = item.subject === "Higher Math" ? "var(--pu)" : item.subject === "Physics" ? "var(--a)" : item.subject === "Chemistry" ? "var(--gr)" : "var(--rd)";
+      resultContainer.innerHTML += `
+        <div class="db-card" style="border-color: var(--a); background: var(--bg3)">
+          <span class="db-subject-tag" style="background:${color}">${item.subject}</span>
+          <div class="db-title">${item.topic}</div>
+          <p style="font-size:0.82rem; color:var(--text2); margin-bottom:6px;">${item.deepInfo}</p>
+          <div class="db-shortcut" style="background:var(--bg); border-left-color:var(--a);">${item.shortcut}</div>
+        </div>
+      `;
+    });
+  }
 
   // লগইন হ্যান্ডলার
   window.handleLogin = async function() {
     const nameInput = document.getElementById('auth-name').value.trim();
     if(!nameInput) {
-      alert("দয়া করে একটি নাম টাইপ করো!");
+      alert("তোর নাম টাইপ কর ওয়ারিয়র!");
       return;
     }
     currentUserName = nameInput;
     document.getElementById('auth-screen').style.display = 'none';
     
-    // লোকাল ইউআই আপডেট
     document.getElementById('top-user-avatar').innerText = currentUserName.substring(0,2).toUpperCase();
     document.getElementById('pro-big-av').innerText = currentUserName.substring(0,2).toUpperCase();
     document.getElementById('pro-name').innerText = currentUserName;
 
-    // ডাটাবেসে মেম্বার সিঙ্ক বা রেজিস্টার করা (নাম ছাড়া কোনো হার্ডকোড ভ্যালু নেই)
-    await setDoc(doc(db, "brightMeshUsers", currentUserName), {
+    const userRef = doc(db, "brightMeshUsers", currentUserName);
+    const userSnap = await getDoc(userRef);
+
+    if (userSnap.exists()) {
+      const data = userSnap.data();
+      userXP = data.xp || 0;
+      userCoins = data.coins || 0;
+      userStreak = data.streak || 1;
+    } else {
+      userXP = 100;
+      userCoins = 150;
+      userStreak = 1;
+    }
+
+    await setDoc(userRef, {
       username: currentUserName,
       xp: userXP,
       coins: userCoins,
+      streak: userStreak,
       lastActive: serverTimestamp()
     }, { merge: true });
 
+    updateLocalUI();
+    renderDatabaseView();
     initDatabaseListeners();
   }
 
-  // পোস্ট সাবমিট করা
-  window.submitPost = async function() {
-    const postTxt = document.getElementById('post-input').value.trim();
-    if(!postTxt) return;
-
-    await addDoc(collection(db, "brightMeshPosts"), {
-      author: currentUserName,
-      text: postTxt,
-      createdAt: serverTimestamp()
-    });
-
-    document.getElementById('post-input').value = '';
-    boostReward(20, 50); // পোস্ট করলে এক্সপি ও কয়েন রিওয়ার্ড
-  }
-
-  // চ্যাট মেসেজ সাবমিট করা
-  window.submitChatMessage = async function() {
-    const msgInput = document.getElementById('chat-input-field');
-    const msgText = msgInput.value.trim();
-    if(!msgText) return;
-
-    await addDoc(collection(db, "brightMeshChats"), {
-      sender: currentUserName,
-      text: msgText,
-      createdAt: serverTimestamp()
-    });
-
-    msgInput.value = '';
-    boostReward(5, 10); // চ্যাট মেসেজ দিলে ছোট এক্সপি বোনাস
-  }
-
-  // রিওয়ার্ড বুস্টার মেকানিজম
-  async function boostReward(xpGain, coinGain) {
-    userXP += xpGain;
-    userCoins += coinGain;
-    
+  function updateLocalUI() {
     document.getElementById('stat-xp').innerText = userXP;
     document.getElementById('stat-coins').innerText = userCoins;
+    document.getElementById('top-streak-val').innerText = userStreak;
 
-    await setDoc(doc(db, "brightMeshUsers", currentUserName), {
-      xp: userXP,
-      coins: userCoins
-    }, { merge: true });
+    let currentLevel = Math.floor(userXP / 100) + 1;
+    let xpInCurrentLevel = userXP % 100;
+    
+    let rankTitle = "Noob";
+    if(currentLevel >= 3) rankTitle = "Alpha";
+    if(currentLevel >= 6) rankTitle = "Immortal ⚔️";
 
-    if(userXP % 100 === 0) {
-      document.getElementById('levelUpModal').classList.add('show');
-    }
+    document.getElementById('progress-lvl').innerText = currentLevel;
+    document.getElementById('rank-title-badge').innerText = rankTitle;
+    document.getElementById('live-progress-bar').style.width = `${xpInCurrentLevel}%`;
+    document.getElementById('progress-text-pct').innerText = `${xpInCurrentLevel}/100 XP`;
+    document.getElementById('pro-status-badge').innerHTML = `<span class="badge" style="background:var(--a);">${rankTitle} (Level ${currentLevel})</span>`;
   }
 
-  // রিয়েল-টাইম ডাটা লিসেনার
+  function spawnXpFlyer(text, color, event) {
+    const flyer = document.createElement('div');
+    flyer.className = 'xp-flyer';
+    flyer.innerText = text;
+    flyer.style.color = color || 'var(--gd)';
+    flyer.style.left = event ? `${event.clientX || event.pageX}px` : '50%';
+    flyer.style.top = event ? `${event.clientY || event.pageY}px` : '50%';
+    document.body.appendChild(flyer);
+    setTimeout(() => flyer.remove(), 950);
+  }
+
   function initDatabaseListeners() {
-    // ১. ফিড বা পোস্ট ট্র্যাকিং রিয়েল-টাইম রেন্ডার
-    const qPosts = query(collection(db, "brightMeshPosts"), orderBy("createdAt", "desc"));
-    onSnapshot(qPosts, (snapshot) => {
+    onSnapshot(query(collection(db, "brightMeshPosts"), orderBy("createdAt", "desc")), (snapshot) => {
       const container = document.getElementById('feed-container');
       container.innerHTML = '';
-      if(snapshot.empty) {
-        container.innerHTML = `<p style="font-size:0.8rem; color:var(--text3); text-align:center; padding:20px;">এখনো কোনো পোস্ট নেই!</p>`;
-        return;
-      }
       snapshot.forEach(doc => {
         const p = doc.data();
         container.innerHTML += `
           <div class="post-card">
             <div class="post-header">
-              <div class="avatar" style="width:32px; height:32px; background:var(--a); color:#fff; font-size:0.75rem;">${p.author ? p.author.substring(0,2).toUpperCase() : '??'}</div>
-              <div class="post-meta">
-                <div class="post-name">${p.author}</div>
-                <div class="post-time">সদ্য পোস্ট করা হয়েছে</div>
-              </div>
+              <div class="avatar" style="width:34px; height:34px; font-size:0.75rem;">${p.author ? p.author.substring(0,2).toUpperCase() : '??'}</div>
+              <div style="font-size:0.9rem; font-weight:750;">${p.author}</div>
             </div>
-            <div class="post-text">${p.text}</div>
+            <div style="font-size:.9rem; line-height:1.5;">${p.text}</div>
           </div>
         `;
       });
     });
 
-    // ২. চ্যাট মেসেজ রিয়েল-টাইম রেন্ডার
-    const qChats = query(collection(db, "brightMeshChats"), orderBy("createdAt", "asc"));
-    onSnapshot(qChats, (snapshot) => {
+    onSnapshot(query(collection(db, "brightMeshChats"), orderBy("createdAt", "asc")), (snapshot) => {
       const container = document.getElementById('chat-messages-container');
       container.innerHTML = '';
       snapshot.forEach(doc => {
@@ -418,60 +438,61 @@ input,textarea { font-family:inherit; }
         const isMe = c.sender === currentUserName;
         container.innerHTML += `
           <div class="chat-message ${isMe ? 'me' : ''}">
-            <div class="cm-avatar">${c.sender ? c.sender.substring(0,2).toUpperCase() : '??'}</div>
-            <div class="cm-content">
-              <div class="cm-name">${c.sender}</div>
-              <div class="cm-bubble">${c.text}</div>
-            </div>
+            <div class="cm-bubble">${c.text}</div>
           </div>
         `;
       });
       container.scrollTop = container.scrollHeight;
     });
+  }
 
-    // ৩. লিডারবোর্ড ও পোডিয়াম রিয়েল-টাইম ডাইনামিক রেন্ডার
-    const qUsers = query(collection(db, "brightMeshUsers"), orderBy("xp", "desc"));
-    onSnapshot(qUsers, (snapshot) => {
-      const listContainer = document.getElementById('leaderboard-list');
-      listContainer.innerHTML = '';
-      
-      let index = 1;
-      let topThree = [];
+  window.submitPost = async function() {
+    const postTxt = document.getElementById('post-input').value.trim();
+    if(!postTxt) return;
+    await addDoc(collection(db, "brightMeshPosts"), { author: currentUserName, text: postTxt, createdAt: serverTimestamp() });
+    document.getElementById('post-input').value = '';
+    boostReward(30, 50, null);
+  }
 
-      snapshot.forEach(doc => {
-        const u = doc.data();
-        if(index <= 3) {
-          topThree.push({ name: u.username, xp: u.xp });
-        }
+  window.submitChatMessage = async function() {
+    const msgInput = document.getElementById('chat-input-field');
+    if(!msgInput.value.trim()) return;
+    await addDoc(collection(db, "brightMeshChats"), { sender: currentUserName, text: msgInput.value.trim(), createdAt: serverTimestamp() });
+    msgInput.value = '';
+    boostReward(5, 10, null);
+  }
 
-        const isMe = u.username === currentUserName;
-        listContainer.innerHTML += `
-          <div class="lb-item" style="${isMe ? 'border-color:var(--a); background:var(--a-light);' : ''}">
-            <div class="lb-rank">${index}</div>
-            <div class="lb-info">
-              <div class="lb-name">${u.username} ${isMe ? '(তুমি)' : ''}</div>
-              <div class="lb-detail">🪙 ${u.coins || 0} Coins</div>
-            </div>
-            <div class="lb-score">${u.xp || 0} XP</div>
-          </div>
-        `;
-        index++;
-      });
+  window.spinTheWheel = function(event) {
+    const randomDegree = Math.floor(Math.random() * 360) + 1440;
+    document.getElementById('spin-wheel').style.transform = `rotate(${randomDegree}deg)`;
+    setTimeout(() => {
+      boostReward(40, 60, event);
+      showToast("🎡 স্পিন বোনাস!", "৪০ XP ও ৬০ কয়েন যোগ করা হয়েছে!");
+    }, 4000);
+  }
 
-      // পোডিয়াম ১ম, ২য়, ৩য় প্লেস লাইভ আপডেট লজিক
-      if(topThree[0]) {
-        document.getElementById('pod-1-name').innerText = topThree[0].name;
-        document.getElementById('pod-1-av').innerText = topThree[0].name.substring(0,2).toUpperCase();
-      }
-      if(topThree[1]) {
-        document.getElementById('pod-2-name').innerText = topThree[1].name;
-        document.getElementById('pod-2-av').innerText = topThree[1].name.substring(0,2).toUpperCase();
-      }
-      if(topThree[2]) {
-        document.getElementById('pod-3-name').innerText = topThree[2].name;
-        document.getElementById('pod-3-av').innerText = topThree[2].name.substring(0,2).toUpperCase();
-      }
-    });
+  async function boostReward(xpGain, coinGain, event) {
+    let oldLevel = Math.floor(userXP / 100);
+    userXP += xpGain; userCoins += coinGain;
+    let newLevel = Math.floor(userXP / 100);
+
+    if(xpGain > 0) spawnXpFlyer(`+${xpGain} XP`, 'var(--a)', event);
+    updateLocalUI();
+
+    await setDoc(doc(db, "brightMeshUsers", currentUserName), { xp: userXP, coins: userCoins, lastActive: serverTimestamp() }, { merge: true });
+    if(newLevel > oldLevel) {
+      document.getElementById('lu-title-msg').innerText = `তুই এখন লেভেল ${newLevel + 1}-এ উঠলি!`;
+      document.getElementById('levelUpModal').classList.add('show');
+    }
+  }
+
+  function showToast(title, bodyText) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.innerHTML = `<div><strong>${title}</strong><div style='font-size:0.75rem; opacity:0.8;'>${bodyText}</div></div>`;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
   }
 </script>
 
@@ -479,15 +500,12 @@ input,textarea { font-family:inherit; }
   function switchTab(panelId, element) {
     document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.bni').forEach(b => b.classList.remove('active'));
-    
     document.getElementById(`p-${panelId}`).classList.add('active');
     element.classList.add('active');
   }
-
   function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', newTheme);
+    document.documentElement.setAttribute('data-theme', currentTheme === 'dark' ? 'light' : 'dark');
   }
 </script>
 </body>
