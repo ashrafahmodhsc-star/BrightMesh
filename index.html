@@ -1,1250 +1,1420 @@
-bash
 
-cat > /tmp/bm_part1.html << 'EOF'
-<!DOCTYPE html>
-<html lang="bn" data-theme="light">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="theme-color" content="#0066ff">
-<meta name="description" content="BrightMesh — Learn Together | Bangladesh HSC Study App">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="BrightMesh">
-<title>BrightMesh — Learn Together 📚</title>
-<link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230066ff'/><text x='96' y='130' font-size='100' text-anchor='middle' fill='white'>B</text></svg>">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg:#ffffff;--bg2:#f8f9fa;--bg3:#f1f3f5;--bg4:#e9ecef;
-  --text:#0a0a0a;--text2:#343a40;--text3:#6c757d;--text4:#adb5bd;
-  --a:#0066ff;--a2:#3385ff;--al:#e8f0ff;
-  --gr:#00a651;--rd:#dc3545;--gd:#f5a623;--pu:#7c3aed;--cy:#00bcd4;
-  --bd:#dee2e6;--bd2:#ced4da;
-  --sh:0 2px 12px rgba(0,0,0,.08);--shl:0 8px 32px rgba(0,0,0,.12);
-  --r:12px;--r2:8px;
+// StudyConnect - Complete Frontend React App
+// ============================================
+// Run: npx create-react-app studyconnect
+// Replace src/App.js with this file
+// Install: npm install react-router-dom axios
+
+import { useState, useEffect, createContext, useContext } from "react";
+
+// ══════════════════════════════
+// CONTEXT (Global State)
+// ══════════════════════════════
+const AppContext = createContext();
+const useApp = () => useContext(AppContext);
+
+// ══════════════════════════════
+// STYLES
+// ══════════════════════════════
+const styles = `
+  @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&family=Sora:wght@600;700;800&family=Fira+Code:wght@400;600&display=swap');
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  :root {
+    --bg: #060d1a; --bg2: #0d1829; --bg3: #142038;
+    --a: #4f9eff; --gr: #2dba60; --rd: #ff4d6d;
+    --gd: #f5c542; --pu: #b57bee; --cy: #1de9c4; --or: #ff8a3d;
+    --bd: rgba(79,158,255,.12); --mt: #6b7fa8; --text: #e2ecff;
+    --r: 14px; --r2: 10px;
+  }
+  
+  body {
+    background: var(--bg);
+    font-family: 'Hind Siliguri', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+  
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg2); }
+  ::-webkit-scrollbar-thumb { background: var(--a); border-radius: 2px; }
+
+  /* ANIMATIONS */
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+  @keyframes spin { from { transform: rotate(0); } to { transform: rotate(360deg); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes shimmer { from { background-position: 0%; } to { background-position: 300%; } }
+  
+  .fade-in { animation: fadeIn .5s ease both; }
+  .pulse { animation: pulse 2s infinite; }
+  .float { animation: float 3s ease-in-out infinite; }
+  
+  /* SHARED COMPONENTS */
+  .btn-primary {
+    background: linear-gradient(135deg, var(--a), #1a5fc4);
+    border: none; border-radius: var(--r2);
+    color: #fff; font-family: 'Sora', sans-serif;
+    font-weight: 700; cursor: pointer;
+    transition: all .25s;
+    box-shadow: 0 4px 14px rgba(79,158,255,.3);
+  }
+  .btn-primary:hover { filter: brightness(1.1); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(79,158,255,.4); }
+  
+  .btn-secondary {
+    background: var(--bg3); border: 1px solid var(--bd);
+    border-radius: var(--r2); color: var(--text);
+    font-family: inherit; cursor: pointer; transition: all .25s;
+  }
+  .btn-secondary:hover { border-color: var(--a); color: var(--a); }
+  
+  .card {
+    background: var(--bg2); border: 1px solid var(--bd);
+    border-radius: var(--r); position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--a), transparent);
+    opacity: .5;
+  }
+  
+  .input-field {
+    width: 100%; background: var(--bg3); border: 1.5px solid var(--bd);
+    border-radius: var(--r2); padding: 12px 16px;
+    font-size: .9rem; color: var(--text); outline: none;
+    font-family: inherit; transition: border-color .2s;
+  }
+  .input-field:focus { border-color: var(--a); box-shadow: 0 0 0 3px rgba(79,158,255,.1); }
+  .input-field::placeholder { color: var(--mt); }
+  
+  .badge {
+    display: inline-block; padding: 2px 8px;
+    border-radius: 20px; font-size: .65rem; font-weight: 600;
+  }
+  
+  /* NAVBAR */
+  .navbar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+    background: rgba(6,13,26,.95); backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--bd); height: 60px;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px;
+  }
+  .nav-logo {
+    font-family: 'Sora', sans-serif; font-size: 1.1rem; font-weight: 800;
+    background: linear-gradient(90deg, var(--a), var(--pu), var(--cy));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; cursor: pointer;
+  }
+  .nav-links { display: flex; align-items: center; gap: 6px; }
+  .nav-link {
+    padding: 7px 14px; border-radius: var(--r2); font-size: .82rem;
+    color: var(--mt); cursor: pointer; transition: all .2s;
+    background: none; border: none; font-family: inherit;
+  }
+  .nav-link:hover, .nav-link.active { color: var(--a); background: rgba(79,158,255,.08); }
+  .nav-link.btn { background: linear-gradient(135deg, var(--a), #1a5fc4); color: #fff !important; }
+  
+  /* PAGE WRAPPER */
+  .page { padding: 80px 24px 40px; max-width: 1100px; margin: 0 auto; }
+  .page-sm { padding: 80px 24px 40px; max-width: 480px; margin: 0 auto; }
+  
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  
+  @media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .page, .page-sm { padding: 70px 14px 40px; }
+    .navbar { padding: 0 14px; }
+    .hide-mobile { display: none !important; }
+  }
+  
+  /* STAT BOX */
+  .stat-box {
+    background: var(--bg2); border: 1px solid var(--bd);
+    border-radius: var(--r); padding: 18px; text-align: center;
+    transition: all .25s;
+  }
+  .stat-box:hover { border-color: var(--a); transform: translateY(-3px); }
+  .stat-num { font-family: 'Fira Code', monospace; font-size: 1.6rem; font-weight: 700; color: var(--a); display: block; }
+  .stat-lbl { font-size: .7rem; color: var(--mt); margin-top: 4px; }
+  
+  /* PROGRESS BAR */
+  .prog-bar { height: 8px; background: var(--bg3); border-radius: 4px; overflow: hidden; }
+  .prog-fill { height: 100%; border-radius: 4px; transition: width .8s; }
+  
+  /* LOADING SPINNER */
+  .spinner {
+    width: 32px; height: 32px; border-radius: 50%;
+    border: 3px solid var(--bg3); border-top-color: var(--a);
+    animation: spin 1s linear infinite; margin: 0 auto;
+  }
+`;
+
+// ══════════════════════════════
+// MOCK DATA
+// ══════════════════════════════
+const MOCK_COURSES = [
+  { id: 1, title: "HSC Physics Complete 2025", teacher: "Ashraf Ahmed", price: 599, origPrice: 1499, discount: 60, rating: 4.9, students: 3421, thumb: "⚛️", color: "rgba(79,158,255,.15)", badge: "Bestseller", badgeColor: "#ff4d6d", duration: "50 videos", category: "Physics" },
+  { id: 2, title: "Math Master Full Course", teacher: "Khadiza Juha", price: 499, origPrice: 1299, discount: 62, rating: 4.8, students: 2876, thumb: "🧮", color: "rgba(45,186,96,.15)", badge: "New", badgeColor: "#4f9eff", duration: "45 videos", category: "Math" },
+  { id: 3, title: "Python Programming Hero", teacher: "Jisan Khan", price: 699, origPrice: 1999, discount: 65, rating: 4.9, students: 5234, thumb: "💻", color: "rgba(255,138,61,.15)", badge: "Hot 🔥", badgeColor: "#2dba60", duration: "60 videos", category: "Coding" },
+  { id: 4, title: "BCS Complete Prep 2025", teacher: "Amjad Hossain", price: 899, origPrice: 2499, discount: 64, rating: 4.7, students: 4123, thumb: "📖", color: "rgba(245,197,66,.15)", badge: "Popular", badgeColor: "#f5c542", duration: "80 videos", category: "BCS" },
+  { id: 5, title: "Chemistry HSC Full Course", teacher: "Akbor Hossen", price: 549, origPrice: 1299, discount: 58, rating: 4.6, students: 1987, thumb: "🧪", color: "rgba(181,123,238,.15)", badge: "Trending", badgeColor: "#b57bee", duration: "42 videos", category: "Chemistry" },
+  { id: 6, title: "IELTS Complete Guide", teacher: "Ahmod Hossain", price: 999, origPrice: 2999, discount: 67, rating: 4.8, students: 3456, thumb: "🌐", color: "rgba(29,233,196,.15)", badge: "Top Rated", badgeColor: "#1de9c4", duration: "55 videos", category: "English" },
+];
+
+const MOCK_LEADERBOARD = [
+  { rank: 1, name: "Ashraf Ahmed", avatar: "As", score: 58, streak: 25, color: "linear-gradient(135deg,#ffd700,#ff8c00)", badge: "👑" },
+  { rank: 2, name: "Khadiza Juha", avatar: "Kh", score: 42, streak: 18, color: "#42b883", badge: "🥈" },
+  { rank: 3, name: "Ahmod Hossain", avatar: "Ah", score: 38, streak: 12, color: "#e91e63", badge: "🥉" },
+  { rank: 4, name: "Akbor Hossen", avatar: "Ak", score: 35, streak: 8, color: "#9c27b0", badge: "" },
+  { rank: 5, name: "Jisan Khan", avatar: "Ji", score: 33, streak: 30, color: "#ff5722", badge: "" },
+  { rank: 6, name: "Amjad Hossain", avatar: "Am", score: 30, streak: 15, color: "#00bcd4", badge: "" },
+];
+
+// ══════════════════════════════
+// COMPONENTS
+// ══════════════════════════════
+
+// Navbar
+function Navbar({ page, setPage, user, setUser }) {
+  return (
+    <nav className="navbar">
+      <div className="nav-logo" onClick={() => setPage("home")}>📚 StudyConnect</div>
+      <div className="nav-links">
+        <button className={`nav-link ${page === "home" ? "active" : ""}`} onClick={() => setPage("home")}>🏠 Home</button>
+        <button className={`nav-link ${page === "courses" ? "active" : ""}`} onClick={() => setPage("courses")}>🎓 Courses</button>
+        <button className={`nav-link ${page === "leaderboard" ? "active" : ""}`} onClick={() => setPage("leaderboard")}>🏆 Rank</button>
+        {user ? (
+          <>
+            <button className={`nav-link ${page === "dashboard" ? "active" : ""}`} onClick={() => setPage("dashboard")}>📊 Dashboard</button>
+            <button className={`nav-link ${page === "ai" ? "active" : ""}`} onClick={() => setPage("ai")}>🤖 AI Tutor</button>
+            <button className={`nav-link ${page === "reels" ? "active" : ""}`} onClick={() => setPage("reels")}>🎬 Reels</button>
+            <button className={`nav-link ${page === "status" ? "active" : ""}`} onClick={() => setPage("status")}>📸 Status</button>
+            <button className={`nav-link ${page === "post" ? "active" : ""}`} onClick={() => setPage("post")}>📝 Feed</button>
+            <div onClick={() => setPage("profile")} style={{ width: 36, height: 36, borderRadius: "50%", background: "linear-gradient(135deg,#4f9eff,#b57bee)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: ".82rem", cursor: "pointer", border: "2px solid rgba(79,158,255,.3)" }}>
+              {user.name?.slice(0, 2).toUpperCase()}
+            </div>
+          </>
+        ) : (
+          <>
+            <button className="nav-link" onClick={() => setPage("login")}>Login</button>
+            <button className="nav-link btn btn-primary" style={{ padding: "8px 16px" }} onClick={() => setPage("register")}>Get Started →</button>
+          </>
+        )}
+      </div>
+    </nav>
+  );
 }
-[data-theme="dark"]{
-  --bg:#0a0a0f;--bg2:#111118;--bg3:#1a1a24;--bg4:#22222f;
-  --text:#f0f0f5;--text2:#c8c8d8;--text3:#8888a8;--text4:#555570;
-  --a:#4d9fff;--a2:#77b8ff;--al:#0f1f3f;
-  --bd:#2a2a3a;--bd2:#333348;
-  --sh:0 2px 12px rgba(0,0,0,.4);--shl:0 8px 32px rgba(0,0,0,.5);
-}
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
-html{scroll-behavior:smooth;height:100%;}
-body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;transition:background .3s,color .3s;overflow-x:hidden;}
-button{cursor:pointer;font-family:inherit;}
-input,textarea,select{font-family:inherit;}
-::-webkit-scrollbar{width:3px;height:3px;}
-::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
-img{max-width:100%;display:block;}
 
-/* ANIMATIONS */
-@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
-@keyframes slideLeft{from{transform:translateX(100%)}to{transform:translateX(0)}}
-@keyframes pop{0%{transform:scale(.85)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
-@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
-@keyframes xpFly{0%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(-55px)}}
-@keyframes confetti{0%{transform:translateY(-15px) rotate(0);opacity:1}100%{transform:translateY(110vh) rotate(540deg);opacity:0}}
-@keyframes notifIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
-@keyframes spin360{from{transform:rotate(0)}to{transform:rotate(360deg)}}
-@keyframes fire{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.08) rotate(2deg)}}
-@keyframes shimmer{0%{background-position:200%}100%{background-position:-200%}}
-@keyframes countDown{0%{transform:scale(1.3);color:var(--rd)}100%{transform:scale(1)}}
-@keyframes timerPulse{0%,100%{box-shadow:0 0 0 rgba(0,102,255,0)}50%{box-shadow:0 0 20px rgba(0,102,255,.4)}}
-
-/* BASE */
-.card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);transition:all .2s;}
-.btn{padding:9px 18px;border-radius:var(--r2);border:none;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;}
-.btn-p{background:var(--a);color:#fff;}
-.btn-p:hover{background:var(--a2);transform:translateY(-1px);}
-.btn-s{background:var(--bg3);border:1.5px solid var(--bd);color:var(--text2);}
-.btn-s:hover{border-color:var(--a);color:var(--a);}
-.btn-gr{background:var(--gr);color:#fff;}
-.btn-sm{padding:6px 14px;font-size:.78rem;}
-.btn-rd{background:var(--rd);color:#fff;}
-.inp{width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r2);padding:11px 14px;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s;}
-.inp:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(0,102,255,.1);}
-.inp::placeholder{color:var(--text4);}
-.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;}
-.tag{display:inline-block;padding:3px 9px;border-radius:20px;font-size:.66rem;background:var(--al);color:var(--a);}
-.wrap{max-width:680px;margin:0 auto;padding:10px 12px;}
-.sec-title{font-size:.7rem;font-weight:600;color:var(--text3);letter-spacing:.8px;text-transform:uppercase;margin-bottom:9px;}
-.empty{text-align:center;padding:32px 18px;color:var(--text3);}
-.empty .ei{font-size:2.8rem;margin-bottom:10px;}
-.empty .et{font-size:.94rem;font-weight:600;color:var(--text2);margin-bottom:5px;}
-.empty .ed{font-size:.8rem;line-height:1.6;}
-.divider{height:1px;background:var(--bd);margin:8px 0;}
-
-/* LOADER */
-#loader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
-.ld-logo{font-size:3rem;animation:float 2s ease-in-out infinite;}
-.ld-name{font-size:1.3rem;font-weight:800;color:var(--a);}
-.ld-spin{width:34px;height:34px;border:3px solid var(--bd);border-top-color:var(--a);border-radius:50%;animation:spin360 .8s linear infinite;}
-.ld-sub{font-size:.76rem;color:var(--text3);}
-
-/* AUTH */
-#authWrap{position:fixed;inset:0;z-index:9000;background:var(--bg);display:none;align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
-#authWrap.show{display:flex;}
-.auth-box{background:var(--bg2);border:1px solid var(--bd);border-radius:20px;padding:26px 22px;width:100%;max-width:400px;box-shadow:var(--shl);animation:pop .4s ease;}
-.auth-logo-wrap{text-align:center;margin-bottom:20px;}
-.auth-logo-ic{width:56px;height:56px;border-radius:15px;background:var(--a);display:flex;align-items:center;justify-content:center;font-size:1.5rem;color:#fff;font-weight:900;margin:0 auto 8px;}
-.auth-tabs{display:flex;gap:4px;background:var(--bg3);border-radius:10px;padding:3px;margin-bottom:16px;}
-.atab{flex:1;padding:8px;border-radius:8px;border:none;background:transparent;font-size:.84rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;}
-.atab.on{background:var(--bg);color:var(--a);font-weight:600;box-shadow:var(--sh);}
-.auth-field{margin-bottom:11px;}
-.auth-field label{display:block;font-size:.79rem;font-weight:500;color:var(--text2);margin-bottom:5px;}
-.auth-err{background:#fff5f5;border:1px solid #ffd0d0;border-radius:var(--r2);padding:9px 12px;font-size:.8rem;color:var(--rd);margin-bottom:11px;display:none;}
-[data-theme="dark"] .auth-err{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.3);}
-.or-div{display:flex;align-items:center;gap:10px;margin:12px 0;font-size:.74rem;color:var(--text3);}
-.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--bd);}
-.g-btn{width:100%;padding:11px;border:1.5px solid var(--bd);border-radius:var(--r2);background:var(--bg3);color:var(--text2);font-size:.88rem;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .2s;}
-.g-btn:hover{border-color:var(--a);}
-
-/* PWA BANNER */
-#pwaBanner{position:fixed;bottom:66px;left:10px;right:10px;z-index:8000;background:var(--a);color:#fff;border-radius:var(--r);padding:12px 14px;display:none;align-items:center;gap:10px;box-shadow:var(--shl);animation:slideUp .4s ease;}
-#pwaBanner.show{display:flex;}
-.pb-text{flex:1;}
-.pb-title{font-size:.88rem;font-weight:700;}
-.pb-sub{font-size:.7rem;opacity:.85;}
-.pb-install{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);border-radius:8px;padding:6px 14px;color:#fff;font-size:.78rem;font-weight:700;cursor:pointer;}
-.pb-x{background:none;border:none;color:rgba(255,255,255,.75);font-size:1.2rem;cursor:pointer;}
-
-/* TOPBAR */
-.topbar{position:fixed;top:0;left:0;right:0;z-index:300;background:var(--bg);border-bottom:1px solid var(--bd);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:var(--sh);}
-.logo{display:flex;align-items:center;gap:8px;}
-.logo-ic{width:30px;height:30px;border-radius:8px;background:var(--a);display:flex;align-items:center;justify-content:center;font-size:.85rem;color:#fff;font-weight:900;}
-.logo-tx{font-size:1rem;font-weight:800;}
-.logo-tx span{color:var(--a);}
-.tb-r{display:flex;align-items:center;gap:5px;}
-.tb-btn{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.85rem;cursor:pointer;position:relative;transition:all .2s;}
-.tb-btn:hover{border-color:var(--a);}
-.tb-badge{position:absolute;top:0;right:0;width:14px;height:14px;background:var(--rd);border-radius:50%;font-size:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);}
-.tb-av{width:32px;height:32px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;color:#fff;cursor:pointer;border:2px solid var(--bd);}
-
-/* SEARCH */
-.search-wrap{position:relative;margin-bottom:12px;}
-.s-ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text4);font-size:.9rem;}
-.s-inp{padding-left:36px;padding-right:34px;}
-.s-clr{position:absolute;right:11px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);cursor:pointer;display:none;}
-.s-drop{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-top:5px;overflow:hidden;display:none;box-shadow:var(--sh);max-height:300px;overflow-y:auto;}
-.sd-item{padding:11px 14px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .15s;}
-.sd-item:last-child{border-bottom:none;}
-.sd-item:hover{background:var(--bg3);}
-.sd-title{font-size:.86rem;font-weight:500;margin-bottom:2px;}
-.sd-meta{font-size:.72rem;color:var(--text3);}
-
-/* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--bg);border-top:1px solid var(--bd);display:flex;height:58px;box-shadow:0 -2px 10px rgba(0,0,0,.06);overflow-x:auto;}
-.bnav::-webkit-scrollbar{display:none;}
-.bni{flex:1;min-width:48px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.5rem;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;transition:color .2s;position:relative;}
-.bni.active{color:var(--a);}
-.bni .ni{font-size:1.1rem;line-height:1;}
-.bni .ndot{position:absolute;top:6px;right:calc(50% - 16px);width:7px;height:7px;background:var(--rd);border-radius:50%;border:1.5px solid var(--bg);}
-
-/* MAIN */
-.main{padding:56px 0 60px;min-height:100vh;}
-.panel{display:none;}
-.panel.active{display:block;animation:fadeIn .3s ease;}
-
-/* STORIES */
-.stories{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;}
-.stories::-webkit-scrollbar{display:none;}
-.st-item{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:4px;cursor:pointer;}
-.st-ring{width:58px;height:58px;border-radius:50%;padding:2.5px;background:linear-gradient(45deg,var(--a),var(--pu));}
-.st-ring.add{background:var(--bg3);border:2px dashed var(--bd2);}
-.st-ring.seen{background:var(--bd2);}
-.st-av{width:100%;height:100%;border-radius:50%;background:var(--bg4);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;border:2.5px solid var(--bg);color:#fff;}
-.st-name{font-size:.57rem;color:var(--text3);max-width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
-/* CREATE POST */
-.create-post{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:12px;margin-bottom:12px;}
-.cp-row{display:flex;align-items:center;gap:10px;margin-bottom:9px;}
-.cp-inp{flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:24px;padding:9px 15px;font-size:.86rem;color:var(--text);outline:none;cursor:pointer;}
-.cp-inp::placeholder{color:var(--text4);}
-.cp-acts{display:flex;gap:3px;border-top:1px solid var(--bd);padding-top:9px;}
-.cp-act{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border-radius:var(--r2);font-size:.73rem;font-weight:500;border:none;background:none;color:var(--text3);cursor:pointer;transition:background .2s;}
-.cp-act:hover{background:var(--bg3);}
-
-/* POST CARD */
-.pc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:10px;overflow:hidden;animation:fadeIn .4s ease;}
-.pc-hd{display:flex;align-items:center;gap:9px;padding:11px 12px 6px;}
-.pc-meta{flex:1;}
-.pc-name{font-size:.9rem;font-weight:600;display:flex;align-items:center;gap:5px;flex-wrap:wrap;}
-.pc-time{font-size:.67rem;color:var(--text3);margin-top:2px;}
-.pc-more{width:26px;height:26px;border-radius:50%;border:none;background:none;font-size:1rem;color:var(--text3);cursor:pointer;}
-.pc-txt{padding:2px 12px 9px;font-size:.88rem;line-height:1.65;}
-.pc-tags{display:flex;flex-wrap:wrap;gap:5px;padding:0 12px 9px;}
-.pc-stats{padding:6px 12px;display:flex;justify-content:space-between;border-bottom:1px solid var(--bd);font-size:.69rem;color:var(--text3);}
-.pc-acts{display:flex;}
-.pa{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:8px;font-size:.75rem;font-weight:500;border:none;background:none;color:var(--text3);cursor:pointer;transition:background .2s;}
-.pa:hover{background:var(--bg3);}
-.pa.liked{color:var(--rd);}
-
-/* POST MODAL */
-#postModal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;}
-#postModal.show{display:flex;}
-.pm-box{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:680px;padding:16px 14px 28px;animation:slideUp .35s ease;max-height:92vh;overflow-y:auto;}
-.pm-handle{width:40px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 14px;}
-.pm-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
-.pm-title{font-size:.95rem;font-weight:700;}
-.pm-close{background:none;border:none;font-size:1.2rem;color:var(--text3);cursor:pointer;}
-.pm-ta{width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r2);padding:11px 13px;font-size:.9rem;color:var(--text);outline:none;resize:none;min-height:100px;line-height:1.65;}
-.pm-ta:focus{border-color:var(--a);}
-.pm-cats{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0;}
-.pcat{padding:5px 13px;border-radius:20px;border:1.5px solid var(--bd);background:var(--bg3);font-size:.75rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;}
-.pcat.on{border-color:var(--a);color:var(--a);background:var(--al);}
-.pm-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;}
-.pm-char{font-size:.72rem;color:var(--text3);}
-
-/* XP HERO */
-.xp-hero{background:linear-gradient(135deg,var(--a),var(--pu));color:#fff;border-radius:var(--r);padding:16px;margin-bottom:11px;position:relative;overflow:hidden;}
-.xp-hero::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);}
-.xp-hero::after{content:'';position:absolute;bottom:-25px;left:-10px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.07);}
-.xp-row{display:flex;align-items:center;gap:11px;margin-bottom:10px;position:relative;z-index:1;}
-.xp-badge{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800;cursor:pointer;flex-shrink:0;}
-.xp-bar-bg{height:10px;background:rgba(255,255,255,.25);border-radius:5px;overflow:hidden;position:relative;z-index:1;}
-.xp-bar-fill{height:100%;background:rgba(255,255,255,.9);border-radius:5px;transition:width .8s;}
-.xp-labels{display:flex;justify-content:space-between;font-size:.6rem;opacity:.8;margin-top:4px;position:relative;z-index:1;}
-
-/* STATS */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:11px;}
-.stat-box{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:13px;text-align:center;}
-.stat-val{font-size:1.4rem;font-weight:700;color:var(--a);display:block;font-family:'Fira Code',monospace;}
-.stat-lbl{font-size:.67rem;color:var(--text3);margin-top:3px;}
-.stat-chg{font-size:.6rem;color:var(--gr);margin-top:2px;}
-
-/* STREAK */
-.streak-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:11px;border-left:4px solid var(--gd);}
-.s-days{display:flex;justify-content:center;gap:5px;margin:9px 0;}
-.sday{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:600;color:var(--text3);}
-.sday.done{background:var(--gd);border-color:var(--gd);color:#fff;}
-.sday.today{border-color:var(--gd);color:var(--gd);}
-
-/* ══ YPT-STYLE TIMER ══ */
-.ypt-timer{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:11px;}
-.ypt-header{background:linear-gradient(135deg,#0a0a0f,#1a1a2e);padding:18px 16px;text-align:center;position:relative;}
-[data-theme="light"] .ypt-header{background:linear-gradient(135deg,#1e3a5f,#0d2137);}
-.ypt-label{font-size:.65rem;font-weight:700;letter-spacing:2px;color:rgba(255,255,255,.6);text-transform:uppercase;margin-bottom:12px;}
-.ypt-clock{font-family:'Fira Code',monospace;font-size:4rem;font-weight:700;color:#fff;letter-spacing:6px;text-shadow:0 0 30px rgba(0,102,255,.5);animation:timerPulse 2s ease-in-out infinite;margin-bottom:8px;line-height:1;}
-.ypt-clock.running{color:#4ade80;text-shadow:0 0 30px rgba(74,222,128,.5);}
-.ypt-session-info{font-size:.72rem;color:rgba(255,255,255,.55);font-family:'Fira Code',monospace;}
-.ypt-body{padding:14px;}
-.ypt-task{width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:10px;padding:10px 13px;font-size:.87rem;color:var(--text);outline:none;margin-bottom:12px;}
-.ypt-task:focus{border-color:var(--a);}
-.ypt-task::placeholder{color:var(--text4);}
-.ypt-modes{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:13px;}
-.ypt-mode{padding:6px 14px;border-radius:22px;border:1.5px solid var(--bd);background:var(--bg3);font-size:.73rem;font-weight:600;color:var(--text3);cursor:pointer;transition:all .2s;}
-.ypt-mode.on{border-color:var(--a);color:var(--a);background:var(--al);}
-.ypt-btns{display:flex;gap:8px;justify-content:center;margin-bottom:10px;}
-.ypt-start{padding:11px 28px;border-radius:12px;border:none;font-size:.9rem;font-weight:700;cursor:pointer;transition:all .25s;font-family:inherit;}
-.ypt-start.idle{background:var(--a);color:#fff;box-shadow:0 4px 14px rgba(0,102,255,.35);}
-.ypt-start.idle:hover{background:var(--a2);transform:translateY(-2px);}
-.ypt-start.running{background:var(--rd);color:#fff;box-shadow:0 4px 14px rgba(220,53,69,.3);}
-.ypt-start.paused{background:var(--gr);color:#fff;box-shadow:0 4px 14px rgba(0,166,81,.3);}
-.ypt-reset{padding:11px 18px;border-radius:12px;border:1.5px solid var(--bd);background:var(--bg3);color:var(--text3);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;}
-.ypt-reset:hover{border-color:var(--rd);color:var(--rd);}
-.ypt-stats-row{display:flex;gap:8px;}
-.ypt-stat{flex:1;background:var(--bg3);border-radius:10px;padding:10px;text-align:center;}
-.yst-val{font-family:'Fira Code',monospace;font-size:1rem;font-weight:700;color:var(--a);}
-.yst-lbl{font-size:.6rem;color:var(--text3);margin-top:2px;}
-/* Today's log */
-.study-log{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:13px;margin-bottom:11px;}
-.sl-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd);}
-.sl-item:last-child{border-bottom:none;}
-.sl-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-.sl-task{flex:1;font-size:.82rem;}
-.sl-dur{font-family:'Fira Code',monospace;font-size:.78rem;color:var(--a);font-weight:600;}
-/* Weekly chart */
-.week-chart{display:flex;align-items:flex-end;gap:6px;height:80px;margin:12px 0;}
-.wc-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
-.wc-fill{width:100%;border-radius:4px 4px 0 0;transition:height .6s;min-height:3px;}
-.wc-day{font-size:.58rem;color:var(--text3);font-family:'Fira Code',monospace;}
-.wc-val{font-size:.58rem;color:var(--a);font-family:'Fira Code',monospace;}
-
-/* MYSTERY BOX */
-.mystery-box{background:linear-gradient(135deg,var(--pu),#4f46e5);border-radius:var(--r);padding:18px;text-align:center;color:#fff;cursor:pointer;transition:all .3s;margin-bottom:11px;}
-.mystery-box:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.3);}
-.mb-e{font-size:2.8rem;display:block;margin-bottom:9px;animation:float 3s ease-in-out infinite;}
-
-/* QUEST */
-.quest-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:13px;margin-bottom:10px;}
-.quest-item{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd);}
-.quest-item:last-child{border-bottom:none;}
-.qi-ic{font-size:1.2rem;flex-shrink:0;}
-.qi-info{flex:1;}
-.qi-name{font-size:.83rem;font-weight:500;margin-bottom:4px;}
-.qi-bar{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden;}
-.qi-fill{height:100%;border-radius:3px;transition:width .5s;}
-.qi-pct{font-size:.62rem;color:var(--text3);margin-top:3px;}
-.qi-r{text-align:right;flex-shrink:0;font-size:.72rem;font-weight:600;color:var(--a);}
-.qi-btn{background:var(--gr);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:.7rem;font-weight:600;cursor:pointer;}
-
-/* PROG */
-.prog-item{margin-bottom:10px;}
-.prog-label{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:5px;}
-.prog-bar{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
-.prog-fill{height:100%;border-radius:4px;transition:width .6s;}
-
-/* SPIN */
-#spinCanvas{display:block;margin:0 auto;}
-
-/* LB */
-.lb-tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:11px;}
-.lb-tab{flex:1;padding:7px;border-radius:8px;border:none;background:transparent;font-size:.72rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;}
-.lb-tab.on{background:var(--al);color:var(--a);font-weight:600;}
-.lb-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;transition:all .2s;}
-.lb-item:hover{border-color:var(--a);}
-.lb-item.me{border-color:var(--a);background:var(--al);}
-.lb-rank{font-size:.8rem;font-weight:700;color:var(--text3);min-width:22px;text-align:center;font-family:'Fira Code',monospace;}
-.lb-rank.g{color:#f5a623;}
-.lb-rank.s{color:#adb5bd;}
-.lb-rank.b{color:#cd7f32;}
-.lb-info{flex:1;}
-.lb-name{font-size:.87rem;font-weight:600;}
-.lb-sub{font-size:.69rem;color:var(--text3);margin-top:2px;}
-.lb-score{text-align:right;}
-.lb-hrs{font-size:.9rem;font-weight:700;color:var(--a);font-family:'Fira Code',monospace;}
-.lb-pts{font-size:.62rem;color:var(--text3);}
-.live-badge{display:inline-flex;align-items:center;gap:4px;background:var(--rd);color:#fff;border-radius:5px;padding:2px 7px;font-size:.6rem;font-weight:700;}
-.live-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:blink 1s infinite;}
-
-/* GROUPS */
-.g-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;margin-bottom:12px;}
-.g-tabs::-webkit-scrollbar{display:none;}
-.g-tab{flex-shrink:0;padding:7px 16px;border-radius:24px;border:1.5px solid var(--bd);background:var(--bg2);font-size:.79rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;}
-.g-tab.on{background:var(--a);border-color:var(--a);color:#fff;}
-.gc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:12px;margin-bottom:9px;cursor:pointer;transition:all .2s;}
-.gc:hover{border-color:var(--a);box-shadow:var(--sh);}
-.gc-hd{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
-.gc-ic{width:48px;height:48px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
-.gc-name{font-size:.9rem;font-weight:700;}
-.gc-meta{font-size:.7rem;color:var(--text3);margin-top:2px;}
-.gc-desc{font-size:.79rem;color:var(--text3);line-height:1.5;margin-bottom:8px;}
-.gc-mavs{display:flex;margin-bottom:8px;}
-.gc-mav{width:23px;height:23px;border-radius:50%;border:2px solid var(--bg2);margin-left:-5px;display:flex;align-items:center;justify-content:center;font-size:.55rem;font-weight:700;color:#fff;}
-.gc-mav:first-child{margin-left:0;}
-.joined-tag{background:var(--al);color:var(--a);border-radius:20px;padding:3px 11px;font-size:.7rem;font-weight:600;}
-.cgb{display:flex;align-items:center;gap:10px;background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:12px;cursor:pointer;transition:all .2s;margin-bottom:12px;}
-.cgb:hover{border-color:var(--a);background:var(--al);}
-.cgb-ic{width:44px;height:44px;border-radius:12px;background:var(--al);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-
-/* FULLSCREEN PANELS */
-.fs{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column;}
-.fs.show{display:flex;}
-.fs-hd{display:flex;align-items:center;gap:11px;padding:12px 13px;border-bottom:1px solid var(--bd);background:var(--bg);}
-.fs-back{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;}
-.fs-title{font-size:1rem;font-weight:700;flex:1;}
-.fs-acts{display:flex;gap:6px;}
-
-/* CHAT */
-.chat-area{flex:1;overflow-y:auto;padding:11px 13px;display:flex;flex-direction:column;gap:9px;}
-.chat-msg{display:flex;gap:8px;align-items:flex-start;}
-.chat-msg.me{flex-direction:row-reverse;}
-.cm-av{width:30px;height:30px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:700;color:#fff;}
-.cm-content{max-width:73%;}
-.cm-name{font-size:.62rem;font-weight:600;margin-bottom:3px;color:var(--text3);}
-.chat-msg.me .cm-name{text-align:right;}
-.cm-bubble{padding:9px 12px;border-radius:4px 16px 16px 16px;font-size:.83rem;line-height:1.55;}
-.chat-msg.me .cm-bubble{border-radius:16px 4px 16px 16px;background:var(--a);color:#fff;}
-.chat-msg:not(.me) .cm-bubble{background:var(--bg3);color:var(--text);}
-.cm-time{font-size:.57rem;color:var(--text4);margin-top:3px;}
-.chat-msg.me .cm-time{text-align:right;}
-.date-sep{text-align:center;font-size:.67rem;color:var(--text3);font-weight:500;margin:5px 0;display:flex;align-items:center;gap:8px;}
-.date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:var(--bd);}
-.typing{display:flex;gap:3px;background:var(--bg3);padding:8px 12px;border-radius:16px;align-self:flex-start;}
-.td{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:pulse .8s ease-in-out infinite;}
-.td:nth-child(2){animation-delay:.15s;}
-.td:nth-child(3){animation-delay:.3s;}
-.chat-inp{border-top:1px solid var(--bd);padding:9px 13px;background:var(--bg);}
-.cia-tools{display:flex;gap:5px;margin-bottom:7px;}
-.cia-tool{width:33px;height:33px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.8rem;cursor:pointer;transition:all .2s;}
-.cia-tool:hover{border-color:var(--a);}
-.cia-row{display:flex;align-items:flex-end;gap:8px;}
-.cia-inp{flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:22px;padding:9px 14px;font-size:.84rem;color:var(--text);outline:none;resize:none;max-height:110px;min-height:38px;line-height:1.5;transition:border-color .2s;}
-.cia-inp:focus{border-color:var(--a);}
-.cia-inp::placeholder{color:var(--text4);}
-.cia-send{width:38px;height:38px;border-radius:50%;background:var(--a);border:none;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;cursor:pointer;transition:all .2s;}
-.cia-send:hover{background:var(--a2);transform:scale(1.05);}
-
-/* DM LIST */
-.dm-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:all .2s;}
-.dm-item:hover{border-color:var(--a);}
-.dm-item.unread{background:var(--al);border-color:rgba(0,102,255,.2);}
-.dmi-av{position:relative;}
-.dmi-sts{position:absolute;bottom:1px;right:1px;width:10px;height:10px;border-radius:50%;border:2px solid var(--bg2);}
-.dmi-sts.on{background:var(--gr);}
-.dmi-sts.off{background:var(--text4);}
-.dmi-info{flex:1;min-width:0;}
-.dmi-name{font-size:.87rem;font-weight:600;margin-bottom:2px;display:flex;align-items:center;gap:5px;}
-.dmi-prev{font-size:.75rem;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.dmi-r{text-align:right;flex-shrink:0;}
-.dmi-time{font-size:.64rem;color:var(--text4);}
-.dmi-unread{width:18px;height:18px;border-radius:50%;background:var(--a);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:3px 0 0 auto;}
-
-/* HSC INFO */
-.hsc-tabs{display:flex;gap:5px;overflow-x:auto;padding-bottom:3px;margin-bottom:12px;}
-.hsc-tabs::-webkit-scrollbar{display:none;}
-.hsc-tab{flex-shrink:0;padding:6px 15px;border-radius:22px;border:1.5px solid var(--bd);background:var(--bg2);font-size:.76rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;}
-.hsc-tab.on{background:var(--a);border-color:var(--a);color:#fff;}
-.sub-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:10px;overflow:hidden;}
-.sub-card-hd{display:flex;align-items:center;gap:11px;padding:13px;cursor:pointer;transition:background .2s;}
-.sub-card-hd:hover{background:var(--bg3);}
-.sub-ic{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-.sub-name{font-size:.9rem;font-weight:700;}
-.sub-meta{font-size:.7rem;color:var(--text3);margin-top:2px;}
-.sub-body{padding:0 13px 13px;display:none;}
-.sub-body.open{display:block;}
-.ch-item{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--bd);}
-.ch-item:last-child{border-bottom:none;}
-.ch-num{width:26px;height:26px;border-radius:50%;background:var(--al);color:var(--a);display:flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:700;flex-shrink:0;}
-.ch-info{flex:1;}
-.ch-name{font-size:.83rem;font-weight:600;}
-.ch-marks{font-size:.7rem;color:var(--text3);margin-top:2px;}
-.ch-imp{font-size:.65rem;color:var(--rd);font-weight:600;}
-.tip-box{background:linear-gradient(135deg,rgba(0,102,255,.06),rgba(124,58,237,.04));border:1px solid rgba(0,102,255,.15);border-radius:10px;padding:11px 13px;margin-top:10px;}
-.tip-title{font-size:.78rem;font-weight:700;color:var(--a);margin-bottom:5px;}
-.tip-text{font-size:.78rem;line-height:1.65;color:var(--text2);}
-.syllabus-btn{background:var(--a);color:#fff;border:none;border-radius:8px;padding:7px 14px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px;}
-
-/* PROFILE */
-.p-cover{height:120px;background:linear-gradient(135deg,var(--a),var(--pu));display:flex;align-items:center;justify-content:center;font-size:3rem;}
-.p-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px;}
-.ps-item{background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;}
-.ps-n{font-size:.9rem;font-weight:700;color:var(--a);}
-.ps-l{font-size:.57rem;color:var(--text3);margin-top:2px;}
-.set-item{display:flex;align-items:center;gap:11px;padding:12px 13px;border-bottom:1px solid var(--bd);cursor:pointer;transition:background .2s;}
-.set-item:hover{background:var(--bg3);}
-.set-item:last-child{border-bottom:none;}
-.si-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;}
-.si-tx h4{font-size:.85rem;font-weight:500;}
-.si-tx p{font-size:.69rem;color:var(--text3);margin-top:1px;}
-.si-arr{margin-left:auto;color:var(--text3);}
-
-/* ID CARD */
-.id-card{background:linear-gradient(135deg,var(--a),var(--pu));border-radius:16px;padding:20px;color:#fff;position:relative;overflow:hidden;margin-bottom:14px;}
-.id-card::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);}
-.id-card::after{content:'';position:absolute;bottom:-30px;left:-15px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.07);}
-.id-header{display:flex;align-items:center;gap:12px;margin-bottom:14px;position:relative;z-index:1;}
-.id-av-wrap{position:relative;}
-.id-av{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:1.6rem;font-weight:800;border:3px solid rgba(255,255,255,.4);}
-.id-name{font-size:1.1rem;font-weight:800;}
-.id-class{font-size:.75rem;opacity:.85;margin-top:2px;}
-.id-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;position:relative;z-index:1;}
-.id-field{background:rgba(255,255,255,.12);border-radius:9px;padding:9px 12px;}
-.id-field-label{font-size:.6rem;opacity:.7;text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px;}
-.id-field-val{font-size:.85rem;font-weight:700;}
-.id-field-val.mono{font-family:'Fira Code',monospace;}
-.id-btns{display:flex;gap:8px;margin-top:12px;position:relative;z-index:1;}
-.id-btn{flex:1;padding:9px;border-radius:10px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.15);color:#fff;font-family:inherit;font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;}
-.id-btn:hover{background:rgba(255,255,255,.25);}
-/* Edit name modal */
-#editNameModal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.55);display:none;align-items:center;justify-content:center;padding:20px;}
-#editNameModal.show{display:flex;}
-.en-box{background:var(--bg);border-radius:16px;padding:24px;width:100%;max-width:360px;animation:pop .35s ease;box-shadow:var(--shl);}
-.en-title{font-size:.95rem;font-weight:700;margin-bottom:14px;}
-.en-field{margin-bottom:11px;}
-.en-field label{display:block;font-size:.79rem;font-weight:500;color:var(--text2);margin-bottom:5px;}
-
-/* BADGES */
-.badges-grid{display:flex;gap:8px;flex-wrap:wrap;}
-.badge-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
-.badge-ic{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;border:2px solid var(--bd);}
-.badge-ic.earned{border-color:var(--gd);box-shadow:0 0 10px rgba(245,166,35,.2);}
-.badge-ic.locked{opacity:.35;filter:grayscale(1);}
-.badge-nm{font-size:.56rem;color:var(--text3);text-align:center;}
-
-/* VIDEO */
-.v-cats{display:flex;gap:7px;overflow-x:auto;padding-bottom:5px;margin-bottom:11px;}
-.v-cats::-webkit-scrollbar{display:none;}
-.vcat{flex-shrink:0;padding:5px 14px;border-radius:24px;border:1.5px solid var(--bd);background:var(--bg2);font-size:.75rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;}
-.vcat.on{background:var(--text);color:var(--bg);border-color:var(--text);}
-.vc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.vc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;}
-.vc:hover{border-color:var(--a);transform:translateY(-2px);box-shadow:var(--sh);}
-.vc-thumb{width:100%;aspect-ratio:16/9;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2rem;position:relative;}
-.vc-dur{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.75);color:#fff;font-size:.6rem;padding:2px 6px;border-radius:4px;font-family:'Fira Code',monospace;}
-.vc-info{padding:8px;}
-.vc-title{font-size:.77rem;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3px;}
-.vc-meta{font-size:.64rem;color:var(--text3);}
-
-/* FOMO */
-.fomo{border-radius:var(--r);padding:10px 13px;margin-bottom:9px;display:flex;align-items:center;gap:9px;font-size:.81rem;}
-.fomo.urgent{background:#fff5f5;border:1px solid #ffd0d0;color:var(--rd);}
-.fomo.info{background:var(--al);border:1px solid rgba(0,102,255,.2);color:var(--a);}
-[data-theme="dark"] .fomo.urgent{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.3);}
-[data-theme="dark"] .fomo.info{background:rgba(0,102,255,.1);border-color:rgba(0,102,255,.25);}
-.fomo-timer{font-family:'Fira Code',monospace;font-size:.87rem;font-weight:700;color:var(--rd);}
-
-/* SHOP */
-.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-.shop-item{background:var(--bg2);border:1.5px solid var(--bd);border-radius:var(--r);padding:12px;text-align:center;cursor:pointer;position:relative;transition:all .22s;}
-.shop-item:hover{border-color:var(--a);transform:translateY(-2px);box-shadow:var(--sh);}
-.shop-item.feat{border-color:var(--gd);}
-.shop-hot{position:absolute;top:-7px;right:8px;background:var(--rd);color:#fff;font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:20px;}
-.shop-ic{font-size:1.7rem;margin-bottom:6px;display:block;}
-.shop-nm{font-size:.79rem;font-weight:600;margin-bottom:3px;}
-.shop-desc{font-size:.65rem;color:var(--text3);margin-bottom:6px;line-height:1.4;}
-.shop-price{font-size:.82rem;font-weight:700;color:var(--gd);font-family:'Fira Code',monospace;}
-
-/* NOTIF */
-#notifC{position:fixed;top:64px;right:11px;z-index:9990;display:flex;flex-direction:column;gap:7px;pointer-events:none;max-width:270px;}
-.notif-t{background:var(--bg);border:1px solid var(--bd);border-radius:13px;padding:10px 12px;display:flex;align-items:center;gap:8px;box-shadow:var(--shl);animation:notifIn .35s ease;pointer-events:auto;}
-.nt-ic{font-size:1.1rem;flex-shrink:0;}
-.nt-title{font-size:.77rem;font-weight:700;margin-bottom:1px;}
-.nt-text{font-size:.71rem;color:var(--text3);}
-.xp-pop{position:fixed;pointer-events:none;z-index:9995;font-size:1rem;font-weight:700;font-family:'Fira Code',monospace;color:var(--gr);animation:xpFly 1.2s ease forwards;}
-#confettiC{position:fixed;inset:0;pointer-events:none;z-index:9994;overflow:hidden;}
-
-/* LEVEL UP */
-#luModal{position:fixed;inset:0;z-index:9991;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;}
-#luModal.show{display:flex;}
-.lu-card{background:var(--bg);border-radius:20px;padding:28px 22px;text-align:center;max-width:300px;width:90%;animation:pop .5s ease;box-shadow:var(--shl);border:1px solid var(--bd);}
-
-/* MISC */
-.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gr);animation:blink 2s infinite;vertical-align:middle;}
-.section-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
-.section-hd h3{font-size:.92rem;font-weight:700;}
-.section-hd a{font-size:.76rem;color:var(--a);cursor:pointer;}
-.notice-box{background:linear-gradient(135deg,rgba(245,166,35,.1),rgba(220,53,69,.06));border:1px solid rgba(245,166,35,.25);border-radius:var(--r);padding:13px;margin-bottom:11px;}
-.nb-title{font-size:.85rem;font-weight:700;color:var(--gd);margin-bottom:4px;}
-.nb-text{font-size:.79rem;line-height:1.6;color:var(--text2);}
-</style>
-EOF
-echo "Part 1 size: $(wc -c < /tmp/bm_part1.html)"
-Output
-
-Part 1 size: 39714
-Done
-    bash
-
-cat > /tmp/bm_body.html << 'BODYEOF'
-</head>
-<body>
-<div id="confettiC"></div>
-<div id="notifC"></div>
-
-<!-- LOADER -->
-<div id="loader">
-  <div class="ld-logo">📚</div>
-  <div class="ld-name">BrightMesh</div>
-  <div class="ld-spin"></div>
-  <div class="ld-sub">Firebase connecting...</div>
-</div>
-
-<!-- LEVEL UP MODAL -->
-<div id="luModal">
-  <div class="lu-card">
-    <div style="font-size:3rem;margin-bottom:10px;animation:float 2s ease-in-out infinite;">🎊</div>
-    <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;" id="luNum">Level 2!</div>
-    <div style="font-weight:700;margin-bottom:6px;">Congratulations! 🎓</div>
-    <div style="font-size:.82rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">নতুন level-এ পৌঁছেছ! চালিয়ে যাও!</div>
-    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--gd);">+500🪙</div><div style="font-size:.6rem;color:var(--text3);">Coins</div></div>
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--a);">+100⭐</div><div style="font-size:.6rem;color:var(--text3);">XP</div></div>
-    </div>
-    <button class="btn btn-p" style="width:100%;padding:12px;" onclick="document.getElementById('luModal').classList.remove('show')">🚀 চালিয়ে যাও!</button>
-  </div>
-</div>
-
-<!-- EDIT NAME MODAL -->
-<div id="editNameModal">
-  <div class="en-box">
-    <div class="en-title">✏️ Profile Update</div>
-    <div class="en-field"><label>Display Name</label><input class="inp" type="text" id="enName" placeholder="তোমার নাম"/></div>
-    <div class="en-field"><label>Class / Level</label>
-      <select class="inp" id="enClass">
-        <option>SSC 2025</option><option>HSC 2025</option><option>University</option>
-        <option>BCS Prep</option><option>Bank Job</option><option>IELTS</option><option>Other</option>
-      </select>
-    </div>
-    <div class="en-field"><label>Bio (optional)</label><input class="inp" type="text" id="enBio" placeholder="নিজেকে describe করো..."/></div>
-    <div style="display:flex;gap:8px;margin-top:4px;">
-      <button class="btn btn-s" style="flex:1;" onclick="document.getElementById('editNameModal').classList.remove('show')">Cancel</button>
-      <button class="btn btn-p" style="flex:1;" onclick="saveProfile()">💾 Save</button>
-    </div>
-  </div>
-</div>
-
-<!-- AUTH SCREEN -->
-<div id="authWrap">
-  <div class="auth-box">
-    <div class="auth-logo-wrap">
-      <div class="auth-logo-ic">B</div>
-      <div style="font-size:1.4rem;font-weight:800;margin-top:6px;">BrightMesh</div>
-      <div style="font-size:.8rem;color:var(--text3);">Bangladesh-এর #1 Study App 📚</div>
-    </div>
-    <div class="auth-tabs">
-      <button class="atab on" id="loginTab" onclick="switchAuth('login')">🔑 Login</button>
-      <button class="atab" id="signupTab" onclick="switchAuth('signup')">✨ Sign Up</button>
-    </div>
-    <div class="auth-err" id="authErr"></div>
-    <div id="loginForm">
-      <div class="auth-field"><label>Email</label><input class="inp" type="email" id="liEmail" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input class="inp" type="password" id="liPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-      <button class="btn btn-p" style="width:100%;padding:12px;margin-bottom:10px;font-size:.9rem;" onclick="doLogin()" id="liBtn">🚀 Login করো</button>
-      <div class="or-div">অথবা</div>
-      <button class="g-btn" onclick="doGoogle()">🔵 Continue with Google</button>
-    </div>
-    <div id="signupForm" style="display:none;">
-      <div class="auth-field"><label>Full Name / নাম</label><input class="inp" type="text" id="suName" placeholder="তোমার পুরো নাম"/></div>
-      <div class="auth-field"><label>Email</label><input class="inp" type="email" id="suEmail" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input class="inp" type="password" id="suPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
-      <div class="auth-field"><label>Class / Level</label>
-        <select class="inp" id="suClass">
-          <option value="">Select class</option>
-          <option>SSC 2025</option><option>HSC 2025</option><option>University</option>
-          <option>BCS Prep</option><option>Bank Job</option><option>IELTS</option><option>Other</option>
-        </select>
+// Course Card
+function CourseCard({ course, onClick }) {
+  const [wished, setWished] = useState(false);
+  return (
+    <div className="card fade-in" style={{ cursor: "pointer", transition: "all .25s" }}
+      onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
+      onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
+      onClick={() => onClick && onClick(course)}>
+      <div style={{ height: 140, background: course.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "3.5rem", position: "relative" }}>
+        {course.thumb}
+        <div style={{ position: "absolute", top: 10, left: 10, background: course.badgeColor, color: "#fff", padding: "2px 8px", borderRadius: 5, fontSize: ".62rem", fontWeight: 700 }}>{course.badge}</div>
+        <button onClick={e => { e.stopPropagation(); setWished(!wished); }} style={{ position: "absolute", top: 10, right: 10, width: 30, height: 30, borderRadius: "50%", background: "rgba(0,0,0,.4)", border: "none", fontSize: ".9rem", cursor: "pointer" }}>
+          {wished ? "❤️" : "🤍"}
+        </button>
       </div>
-      <button class="btn btn-gr" style="width:100%;padding:12px;font-size:.9rem;" onclick="doSignup()" id="suBtn">✅ Create Account</button>
-    </div>
-  </div>
-</div>
-
-<!-- PWA BANNER -->
-<div id="pwaBanner">
-  <div style="font-size:1.4rem;">📱</div>
-  <div class="pb-text"><div class="pb-title">BrightMesh Install করো!</div><div class="pb-sub">Home screen-এ add করো</div></div>
-  <button class="pb-install" onclick="installPWA()">Install</button>
-  <button class="pb-x" onclick="document.getElementById('pwaBanner').classList.remove('show')">✕</button>
-</div>
-
-<!-- TOPBAR -->
-<div class="topbar" id="topbar" style="display:none;">
-  <div class="logo"><div class="logo-ic">B</div><div class="logo-tx">Bright<span>Mesh</span></div></div>
-  <div class="tb-r">
-    <div class="tb-btn" id="themeBtn" onclick="toggleTheme()">☀️</div>
-    <div class="tb-btn">🔔<span class="tb-badge">3</span></div>
-    <div class="tb-av" id="tbAv" onclick="showP('profile',document.querySelector('.bni:last-child'))">U</div>
-  </div>
-</div>
-
-<!-- MAIN APP -->
-<div class="main" id="mainApp" style="display:none;">
-
-<!-- ════ FEED ════ -->
-<div class="panel active" id="panel-feed">
-<div class="wrap">
-  <div class="fomo urgent">
-    <span>⏰</span>
-    <div style="flex:1;"><strong>Streak শেষ হচ্ছে!</strong> আজ রাত ১২টায়!</div>
-    <span class="fomo-timer" id="fomoT">03:24:15</span>
-  </div>
-  <div class="fomo info" id="challengeFomo">
-    <span>⚔️</span>
-    <div style="flex:1;">৩ জন তোমাকে <strong>challenge</strong> করেছে!</div>
-    <button class="btn btn-p btn-sm" onclick="showP('lb',document.querySelectorAll('.bni')[2])">দেখো</button>
-  </div>
-  <!-- Stories -->
-  <div class="stories">
-    <div class="st-item"><div class="st-ring add"><div class="st-av" style="background:var(--bg4);color:var(--a);font-size:1.3rem;">+</div></div><div class="st-name">Add</div></div>
-    <div class="st-item"><div class="st-ring"><div class="st-av" style="background:#1877f2;">As</div></div><div class="st-name">Ashraf</div></div>
-    <div class="st-item"><div class="st-ring"><div class="st-av" style="background:#42b883;">Kh</div></div><div class="st-name">Khadiza</div></div>
-    <div class="st-item"><div class="st-ring seen"><div class="st-av" style="background:#ff5722;">Ji</div></div><div class="st-name">Jisan</div></div>
-    <div class="st-item"><div class="st-ring seen"><div class="st-av" style="background:#9c27b0;">Ak</div></div><div class="st-name">Akbor</div></div>
-    <div class="st-item"><div class="st-ring seen"><div class="st-av" style="background:#00bcd4;">Am</div></div><div class="st-name">Amjad</div></div>
-  </div>
-  <!-- Search (Firestore live) -->
-  <div class="search-wrap">
-    <span class="s-ic">🔍</span>
-    <input class="inp s-inp" id="searchInp" placeholder="Search posts, topics, notes..." oninput="doSearch(this.value)"/>
-    <button class="s-clr" id="sClear" onclick="clearSearch()">✕</button>
-    <div class="s-drop" id="sDrop"></div>
-  </div>
-  <!-- Create Post -->
-  <div class="create-post">
-    <div class="cp-row">
-      <div class="av" id="cpAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
-      <input class="cp-inp" placeholder="কি মনে আছে? শেয়ার করো! 📚" onclick="openPost()"/>
-    </div>
-    <div class="cp-acts">
-      <button class="cp-act" style="color:var(--rd);" onclick="openPost()">📹 Live</button>
-      <button class="cp-act" style="color:var(--gr);" onclick="openPost()">🖼️ Photo</button>
-      <button class="cp-act" style="color:var(--a);" onclick="openPost()">📝 Note</button>
-      <button class="cp-act" style="color:var(--gd);" onclick="openPost()">📊 Progress</button>
-    </div>
-  </div>
-  <!-- Posts (real-time Firebase) -->
-  <div id="postsFeed"><div class="empty"><div class="ei">📭</div><div class="et">Loading...</div><div class="ed">Firebase থেকে real-time posts আসছে</div></div></div>
-</div>
-</div>
-
-<!-- ════ STUDY + YPT TIMER ════ -->
-<div class="panel" id="panel-study">
-<div class="wrap">
-  <!-- XP Hero -->
-  <div class="xp-hero">
-    <div class="xp-row">
-      <div class="xp-badge" onclick="triggerLU()">Lv.<span id="userLv">1</span></div>
-      <div style="flex:1;position:relative;z-index:1;">
-        <div style="font-size:.9rem;font-weight:700;" id="rankTitle">Beginner Scholar</div>
-        <div style="font-size:.72rem;opacity:.85;">Level up হতে <strong id="xpNeed">100</strong> XP বাকি!</div>
-      </div>
-      <div style="font-family:'Fira Code',monospace;font-size:.88rem;font-weight:700;position:relative;z-index:1;" id="xpDisp">0</div>
-    </div>
-    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:5%;"></div></div>
-    <div class="xp-labels"><span id="xpL">0</span><span id="xpC">0/100</span><span id="xpR">100</span></div>
-  </div>
-  <!-- Stat Grid -->
-  <div class="stat-grid">
-    <div class="stat-box"><span class="stat-val" id="todayH">0.0h</span><div class="stat-lbl">আজকের পড়া</div><div class="stat-chg" id="todayChange">↑ 0m today</div></div>
-    <div class="stat-box"><span class="stat-val">🔥<span id="streakD">0</span></span><div class="stat-lbl">Day Streak</div></div>
-    <div class="stat-box"><span class="stat-val" id="totalH">0h</span><div class="stat-lbl">মোট study</div></div>
-    <div class="stat-box"><span class="stat-val">🪙<span id="coinsD">0</span></span><div class="stat-lbl">Coins</div></div>
-  </div>
-  <!-- Streak -->
-  <div class="streak-card">
-    <div style="font-size:2rem;animation:fire 2s ease-in-out infinite;margin-bottom:6px;">🔥</div>
-    <div style="font-size:1.8rem;font-weight:800;color:var(--gd);" id="streakNum">0</div>
-    <div style="font-size:.79rem;color:var(--text3);margin-bottom:9px;">দিনের Study Streak!</div>
-    <div class="s-days">
-      <div class="sday" id="sd0">S</div><div class="sday" id="sd1">M</div><div class="sday" id="sd2">T</div>
-      <div class="sday" id="sd3">W</div><div class="sday today" id="sd4">T</div><div class="sday" id="sd5">F</div><div class="sday" id="sd6">S</div>
-    </div>
-    <div style="font-size:.75rem;color:var(--rd);margin-bottom:10px;">⚠️ শেষ হবে: <span id="streakCd" style="font-family:'Fira Code',monospace;font-weight:700;">03:24:15</span></div>
-    <button class="btn btn-p" onclick="studyNow()">📚 এখনই পড়ো!</button>
-  </div>
-
-  <!-- ══ YPT-STYLE FOCUS TIMER ══ -->
-  <div class="ypt-timer">
-    <div class="ypt-header">
-      <div class="ypt-label">⏱️ FOCUS TIMER — Firebase Sync</div>
-      <div class="ypt-clock" id="yptClock">25:00</div>
-      <div class="ypt-session-info" id="yptInfo">Sessions: 0 · Total: 0h 0m</div>
-    </div>
-    <div class="ypt-body">
-      <input class="ypt-task" id="yptTask" placeholder="📝 এখন কি পড়ছ? (e.g. Physics Ch.5)"/>
-      <div class="ypt-modes">
-        <button class="ypt-mode on" onclick="setYPT(25,this)">🍅 Pomodoro 25m</button>
-        <button class="ypt-mode" onclick="setYPT(5,this)">☕ Break 5m</button>
-        <button class="ypt-mode" onclick="setYPT(50,this)">💪 Deep 50m</button>
-        <button class="ypt-mode" onclick="setYPT(90,this)">🎯 Flow 90m</button>
-        <button class="ypt-mode" onclick="setYPT(0,this)">⏱️ Stopwatch</button>
-      </div>
-      <div class="ypt-btns">
-        <button class="ypt-start idle" id="yptBtn" onclick="toggleYPT()">▶ Study শুরু</button>
-        <button class="ypt-reset" onclick="resetYPT()">↺ Reset</button>
-      </div>
-      <div class="ypt-stats-row">
-        <div class="ypt-stat"><div class="yst-val" id="ystToday">0m</div><div class="yst-lbl">Today</div></div>
-        <div class="ypt-stat"><div class="yst-val" id="ystWeek">0h</div><div class="yst-lbl">This Week</div></div>
-        <div class="ypt-stat"><div class="yst-val" id="ystSes">0</div><div class="yst-lbl">Sessions</div></div>
-        <div class="ypt-stat"><div class="yst-val" id="ystRank">#—</div><div class="yst-lbl">LB Rank</div></div>
-      </div>
-    </div>
-  </div>
-  <!-- Today's Study Log -->
-  <div class="study-log" id="studyLogCard">
-    <div class="sec-title">📋 Today's Sessions</div>
-    <div id="studyLogList"><div style="font-size:.8rem;color:var(--text3);text-align:center;padding:8px;">এখনো কোনো session নেই — study শুরু করো!</div></div>
-  </div>
-  <!-- Weekly Chart -->
-  <div class="card" style="padding:14px;margin-bottom:11px;">
-    <div class="sec-title">📈 Weekly Study Chart</div>
-    <div class="week-chart" id="weekChart"></div>
-    <div style="display:flex;justify-content:space-between;font-family:'Fira Code',monospace;font-size:.62rem;color:var(--text3);">
-      <span>Total: <span id="weekTotal" style="color:var(--a);">0h</span></span>
-      <span>Best: <span id="weekBest" style="color:var(--gd);">—</span></span>
-    </div>
-  </div>
-  <!-- Mystery Box -->
-  <div class="mystery-box" onclick="openBox()">
-    <span class="mb-e" id="boxEmoji">🎁</span>
-    <div style="font-size:.95rem;font-weight:700;margin-bottom:5px;">Mystery Reward Box!</div>
-    <div style="font-size:.78rem;opacity:.85;margin-bottom:10px;">Study করলে random reward পাও!</div>
-    <button style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:22px;padding:8px 22px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;">🎲 Open Now!</button>
-    <div style="font-size:.65rem;opacity:.7;margin-top:8px;" id="boxCd">Available now!</div>
-  </div>
-  <!-- Spin Wheel -->
-  <div class="card" style="padding:14px;margin-bottom:11px;">
-    <div class="sec-title">🎯 Daily Spin</div>
-    <canvas id="spinCanvas" width="240" height="240"></canvas>
-    <div style="text-align:center;margin-top:10px;">
-      <button class="btn btn-p" id="spinBtn" onclick="doSpin()">🎯 Spin!</button>
-      <div id="spinRes" style="font-size:.84rem;font-weight:700;margin-top:8px;min-height:18px;"></div>
-    </div>
-  </div>
-  <!-- Random Bonus -->
-  <div style="background:var(--bg2);border:2px dashed var(--bd2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;margin-bottom:11px;" onclick="claimBonus()">
-    <div style="font-size:.65rem;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">🎰 Variable Reward</div>
-    <div style="font-size:2rem;font-weight:800;color:var(--a);font-family:'Fira Code',monospace;" id="bonusAmt">???</div>
-    <div style="font-size:.75rem;color:var(--text3);margin-top:4px;">Click → কখনো 10, কখনো 1000 XP 😈</div>
-  </div>
-  <!-- Daily Quests -->
-  <div class="quest-card">
-    <div class="sec-title">🎯 Daily Quests</div>
-    <div class="quest-item">
-      <div class="qi-ic">⏱️</div>
-      <div class="qi-info"><div class="qi-name">২ ঘন্টা focus করো</div><div class="qi-bar"><div class="qi-fill" id="q1f" style="width:0%;background:var(--gr)"></div></div><div class="qi-pct" id="q1p">0/2h</div></div>
-      <div class="qi-r">+100⭐<br>+50🪙</div>
-    </div>
-    <div class="quest-item">
-      <div class="qi-ic">📝</div>
-      <div class="qi-info"><div class="qi-name">১টি post শেয়ার করো</div><div class="qi-bar"><div class="qi-fill" id="q2f" style="width:0%;background:var(--a)"></div></div><div class="qi-pct" id="q2p">0/1</div></div>
-      <div class="qi-r">+50⭐<br>+30🪙</div>
-    </div>
-    <div class="quest-item">
-      <div class="qi-ic">👥</div>
-      <div class="qi-info"><div class="qi-name">Group-এ message দাও</div><div class="qi-bar"><div class="qi-fill" id="q3f" style="width:0%;background:var(--gd)"></div></div><div class="qi-pct" id="q3p">0/1</div></div>
-      <div><button class="qi-btn" onclick="claimQ(3,75,40)">Claim</button></div>
-    </div>
-  </div>
-  <!-- Progress -->
-  <div class="card" style="padding:14px;margin-bottom:11px;">
-    <div class="sec-title">📚 Subject Progress</div>
-    <div class="prog-item"><div class="prog-label"><span>⚛️ Physics</span><span style="color:var(--a);" id="phpct">0%</span></div><div class="prog-bar"><div class="prog-fill" id="phfill" style="width:0%;background:linear-gradient(90deg,var(--a),var(--pu))"></div></div></div>
-    <div class="prog-item"><div class="prog-label"><span>🧮 Math</span><span style="color:var(--a);" id="mapct">0%</span></div><div class="prog-bar"><div class="prog-fill" id="mafill" style="width:0%;background:linear-gradient(90deg,var(--gr),#00796b)"></div></div></div>
-    <div class="prog-item"><div class="prog-label"><span>🧪 Chemistry</span><span style="color:var(--a);" id="chpct">0%</span></div><div class="prog-bar"><div class="prog-fill" id="chfill" style="width:0%;background:linear-gradient(90deg,var(--gd),#e65100)"></div></div></div>
-    <div class="prog-item"><div class="prog-label"><span>🌿 Biology</span><span style="color:var(--a);" id="bipct">0%</span></div><div class="prog-bar"><div class="prog-fill" id="bifill" style="width:0%;background:linear-gradient(90deg,#56ab2f,#a8e063)"></div></div></div>
-    <div class="prog-item"><div class="prog-label"><span>🌐 English</span><span style="color:var(--a);" id="enpct">0%</span></div><div class="prog-bar"><div class="prog-fill" id="enfill" style="width:0%;background:linear-gradient(90deg,var(--rd),var(--pu))"></div></div></div>
-  </div>
-  <!-- AI Tutor -->
-  <div class="card" style="padding:14px;margin-bottom:11px;">
-    <div class="sec-title">🤖 AI Study Tutor (Claude)</div>
-    <div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r);height:190px;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px;margin-bottom:9px;" id="aiMsgs">
-      <div style="padding:9px 12px;background:var(--bg2);border:1px solid var(--bd);border-radius:4px 14px 14px 14px;font-size:.83rem;line-height:1.6;align-self:flex-start;max-width:85%;">👋 আমি BrightMesh AI Tutor! HSC Physics, Math, Chemistry, Biology, English — যেকোনো বিষয়ে প্রশ্ন করো!</div>
-    </div>
-    <div style="display:flex;gap:7px;flex-wrap:wrap;margin-bottom:9px;">
-      <button onclick="aiQuick('Newton\'s 2nd Law বাংলায় বুঝাও')" style="padding:5px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--bg3);font-size:.68rem;color:var(--text3);cursor:pointer;">⚛️ Physics</button>
-      <button onclick="aiQuick('Integration কিভাবে করে সহজে?')" style="padding:5px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--bg3);font-size:.68rem;color:var(--text3);cursor:pointer;">🧮 Math</button>
-      <button onclick="aiQuick('Organic Chemistry reaction list দাও')" style="padding:5px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--bg3);font-size:.68rem;color:var(--text3);cursor:pointer;">🧪 Chemistry</button>
-      <button onclick="aiQuick('HSC Biology important topics কোনগুলো?')" style="padding:5px 11px;border-radius:20px;border:1px solid var(--bd);background:var(--bg3);font-size:.68rem;color:var(--text3);cursor:pointer;">🌿 Biology</button>
-    </div>
-    <div style="display:flex;gap:7px;">
-      <input class="inp" id="aiInp" placeholder="প্রশ্ন করো..." onkeydown="if(event.key==='Enter')sendAI()" style="border-radius:22px;flex:1;"/>
-      <button class="cia-send" onclick="sendAI()">➤</button>
-    </div>
-  </div>
-  <!-- Shop -->
-  <div class="sec-title">🛒 Coins Shop</div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:9px;font-family:'Fira Code',monospace;font-size:.8rem;"><span style="color:var(--text3);">Balance:</span><span style="color:var(--gd);font-weight:700;">🪙 <span id="shopBal">0</span></span></div>
-  <div class="shop-grid">
-    <div class="shop-item feat" onclick="buyItem(this,'Streak Freeze',500)"><div class="shop-hot">HOT</div><span class="shop-ic">🧊</span><div class="shop-nm">Streak Freeze</div><div class="shop-desc">Streak বাঁচাও!</div><div class="shop-price">🪙 500</div></div>
-    <div class="shop-item" onclick="buyItem(this,'XP Booster',800)"><span class="shop-ic">⚡</span><div class="shop-nm">XP Booster 2x</div><div class="shop-desc">24h double XP!</div><div class="shop-price">🪙 800</div></div>
-    <div class="shop-item" onclick="buyItem(this,'Gold Frame',300)"><span class="shop-ic">🎭</span><div class="shop-nm">Gold Frame</div><div class="shop-desc">Special avatar!</div><div class="shop-price">🪙 300</div></div>
-    <div class="shop-item feat" onclick="buyItem(this,'Mystery Box',600)"><div class="shop-hot">NEW</div><span class="shop-ic">🎁</span><div class="shop-nm">Extra Box</div><div class="shop-desc">Random reward!</div><div class="shop-price">🪙 600</div></div>
-  </div>
-</div>
-</div>
-
-<!-- ════ LEADERBOARD ════ -->
-<div class="panel" id="panel-lb">
-<div class="wrap">
-  <div class="section-hd"><h3>🏆 Leaderboard</h3><span class="live-badge"><span class="live-dot"></span>LIVE</span></div>
-  <div style="font-size:.77rem;color:var(--text3);margin-bottom:11px;">Study করলে rank change হয় — Firebase real-time!</div>
-  <div class="lb-tabs">
-    <button class="lb-tab on" onclick="selLb(this,'today')">📅 Today</button>
-    <button class="lb-tab" onclick="selLb(this,'week')">📆 Week</button>
-    <button class="lb-tab" onclick="selLb(this,'all')">🏅 All Time</button>
-  </div>
-  <div id="lbList"><div class="empty"><div class="ei">⏳</div><div class="et">Loading...</div></div></div>
-</div>
-</div>
-
-<!-- ════ HSC INFO ════ -->
-<div class="panel" id="panel-hsc">
-<div class="wrap">
-  <div style="margin-bottom:14px;">
-    <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">📘 HSC Bangla 1st Paper</div>
-    <div style="font-size:.8rem;color:var(--text3);margin-bottom:12px;">সম্পূর্ণ Syllabus, Important Topics ও Tips</div>
-    <div class="notice-box">
-      <div class="nb-title">🎯 পরীক্ষার প্রস্তুতি Tips</div>
-      <div class="nb-text">Bangla 1st Paper-এ MCQ তে ৩০ এবং Written-এ ৭০ নম্বর থাকে। গল্প ও কবিতার মূলভাব, লেখক পরিচিতি, ও সৃজনশীল প্রশ্নের format ভালো করে practice করো।</div>
-    </div>
-  </div>
-  <div class="hsc-tabs">
-    <button class="hsc-tab on" onclick="selHsc(this,'prosa')">📖 গদ্য</button>
-    <button class="hsc-tab" onclick="selHsc(this,'poem')">🌸 পদ্য</button>
-    <button class="hsc-tab" onclick="selHsc(this,'tips')">💡 Tips</button>
-    <button class="hsc-tab" onclick="selHsc(this,'mcq')">📝 MCQ Focus</button>
-  </div>
-  <!-- গদ্য Section -->
-  <div id="hsc-prosa">
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#e8f5e9;">📖</div>
-        <div><div class="sub-name">১. সোনার তরী — রবীন্দ্রনাথ ঠাকুর</div><div class="sub-meta">গদ্য · অধ্যায় ১ · Very Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">সৃষ্টিকর্তার কাছে মানুষের কৃতিত্বের স্বীকৃতি পাওয়ার আকাঙ্ক্ষা</div></div></div>
-        <div class="ch-item"><div class="ch-num">👤</div><div class="ch-info"><div class="ch-name">লেখক পরিচিতি</div><div class="ch-marks">রবীন্দ্রনাথ ঠাকুর (১৮৬১-১৯৪১) · নোবেলজয়ী বাংলা সাহিত্যিক</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">Important Lines</div><div class="ch-marks">"ঠাই নাই ঠাই নাই ছোট সে তরী" — ৯৯% পরীক্ষায় আসে</div><div class="ch-imp">🔥 Board Exam Favourite</div></div></div>
-        <div class="ch-item"><div class="ch-num">📝</div><div class="ch-info"><div class="ch-name">সৃজনশীল প্রশ্ন Pattern</div><div class="ch-marks">জ্ঞান (২), অনুধাবন (৪), প্রয়োগ (৩), উচ্চতর দক্ষতা (৩) = ১২ নম্বর</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• কবির জীবনী ১০০ শব্দে মুখস্থ রাখো<br>• "সোনার তরী" মানে — জীবনের ভার বহনকারী নৌকা<br>• MCQ তে রচনাকাল ও উৎস জানতে হবে</div></div>
-      </div>
-    </div>
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#e8f0ff;">📚</div>
-        <div><div class="sub-name">২. বিড়াল — মাইকেল মধুসূদন দত্ত</div><div class="sub-meta">গদ্য · অধ্যায় ২ · Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">সমাজের ধনী-গরিব বৈষম্য ও মানবিক মূল্যবোধের প্রতিফলন</div></div></div>
-        <div class="ch-item"><div class="ch-num">👤</div><div class="ch-info"><div class="ch-name">লেখক পরিচিতি</div><div class="ch-marks">মাইকেল মধুসূদন দত্ত (১৮২৪-১৮৭৩) · মেঘনাদবধ কাব্যের রচয়িতা</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">রচনার ধরন</div><div class="ch-marks">বিদ্রূপাত্মক গদ্য — বিড়ালের মুখ দিয়ে সমাজের সমালোচনা</div><div class="ch-imp">🔥 MCQ তে রচনার ধরন জিজ্ঞেস করে</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• "বিড়াল" রচনাটি কোন গ্রন্থ থেকে নেওয়া হয়েছে জানো<br>• সমালোচনার target কাদের — ধনী শ্রেণি<br>• ব্যঙ্গাত্মক ভাষার উদাহরণ মুখস্থ রাখো</div></div>
-      </div>
-    </div>
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#fff8e1;">🌊</div>
-        <div><div class="sub-name">৩. আমার পথ — কাজী নজরুল ইসলাম</div><div class="sub-meta">গদ্য · অধ্যায় ৩ · Very Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">আত্মবিশ্বাস ও সত্যের পথে চলার শক্তি সম্পর্কে নজরুলের দৃঢ় বিশ্বাস</div></div></div>
-        <div class="ch-item"><div class="ch-num">👤</div><div class="ch-info"><div class="ch-name">লেখক পরিচিতি</div><div class="ch-marks">কাজী নজরুল ইসলাম (১৮৯৯-১৯৭৬) · জাতীয় কবি, বিদ্রোহী কবি</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">Famous Quote</div><div class="ch-marks">"আমি চিনেছি আমারে, আমার পথ দেখাবে আমার সত্য"</div><div class="ch-imp">🔥 Exam-এ ৯০% সময় আসে!</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• "রাজবন্দীর জবানবন্দী" গ্রন্থ থেকে নেওয়া<br>• "আমি" = নজরুল নিজে + সমগ্র বাঙালি<br>• মিথ্যার বিরুদ্ধে সত্যের সংগ্রামের প্রতীক</div></div>
-      </div>
-    </div>
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#fce4ec;">🌹</div>
-        <div><div class="sub-name">৪. মাসি-পিসি — মানিক বন্দ্যোপাধ্যায়</div><div class="sub-meta">গদ্য · অধ্যায় ৪ · Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">নারীর সংগ্রাম, সমাজের নিষ্ঠুরতা ও মানবিক মর্যাদার প্রশ্ন</div></div></div>
-        <div class="ch-item"><div class="ch-num">👤</div><div class="ch-info"><div class="ch-name">লেখক পরিচিতি</div><div class="ch-marks">মানিক বন্দ্যোপাধ্যায় (১৯০৮-১৯৫৬) · মনোবিশ্লেষণমূলক সাহিত্যিক</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">চরিত্র</div><div class="ch-marks">আহ্লাদি (নির্যাতিত নারী), মাসি ও পিসি (রক্ষাকারী)</div><div class="ch-imp">🔥 চরিত্র বিশ্লেষণ প্রায়ই আসে</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• রচনাটি সমাজ-সচেতনতামূলক<br>• নারী স্বাধীনতার বার্তা আছে<br>• "পুতুলনাচের ইতিকথা" লেখকের বিখ্যাত উপন্যাস</div></div>
-      </div>
-    </div>
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#e0f7fa;">🎭</div>
-        <div><div class="sub-name">৫. জাদুঘরে কেন যাই — আনিসুজ্জামান</div><div class="sub-meta">গদ্য · অধ্যায় ৫</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">জাদুঘর মানুষকে ইতিহাস ও সংস্কৃতির সাথে সংযুক্ত রাখে</div></div></div>
-        <div class="ch-item"><div class="ch-num">👤</div><div class="ch-info"><div class="ch-name">লেখক</div><div class="ch-marks">আনিসুজ্জামান (১৯৩৭-২০২০) · বাংলাদেশের প্রখ্যাত শিক্ষাবিদ</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• প্রবন্ধ জাতীয় রচনা<br>• জাতীয় জাদুঘর ও ইতিহাসের গুরুত্ব নিয়ে লেখা<br>• MCQ তে লেখকের অন্যান্য কাজ জানো</div></div>
-      </div>
-    </div>
-  </div>
-  <!-- পদ্য Section -->
-  <div id="hsc-poem" style="display:none;">
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#f3e5f5;">🌸</div>
-        <div><div class="sub-name">১. বিভীষণের প্রতি মেঘনাদ — মাইকেল মধুসূদন দত্ত</div><div class="sub-meta">পদ্য · Very Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">দেশপ্রেম, বিশ্বাসঘাতকতার নিন্দা ও বীরত্বের মহিমা</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">উৎস</div><div class="ch-marks">মেঘনাদবধ কাব্য (১৮৬১) — বাংলা সাহিত্যের প্রথম সার্থক মহাকাব্য</div><div class="ch-imp">🔥 উৎস প্রায়ই জিজ্ঞেস করে!</div></div></div>
-        <div class="ch-item"><div class="ch-num">📝</div><div class="ch-info"><div class="ch-name">Important Lines</div><div class="ch-marks">"স্বদেশের উপকারে মরে যে জন, সে জন চিরজীবী"</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• মেঘনাদ = রাবণপুত্র, বিভীষণ = রাবণের ভাই (ঘরের শত্রু)<br>• অমিত্রাক্ষর ছন্দে রচিত<br>• মূল রামায়ণের বিপরীত দৃষ্টিভঙ্গি</div></div>
-      </div>
-    </div>
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#e8f0ff;">🌙</div>
-        <div><div class="sub-name">২. তাহারেই পড়ে মনে — সুফিয়া কামাল</div><div class="sub-meta">পদ্য · Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">প্রিয়জন হারানোর বেদনা ও বসন্তের প্রকৃতির সাথে কবির শোকের তুলনা</div></div></div>
-        <div class="ch-item"><div class="ch-num">👤</div><div class="ch-info"><div class="ch-name">লেখক</div><div class="ch-marks">সুফিয়া কামাল (১৯১১-১৯৯৯) · জননী সাহসিকা, বাংলাদেশের প্রথম মহিলা কবি</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">বিশেষত্ব</div><div class="ch-marks">কবিতাটি কবির স্বামীর মৃত্যুর শোকে রচিত</div><div class="ch-imp">🔥 Background জানা জরুরি!</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• "শীত" ও "বসন্ত" প্রতীকী — শোক ও আনন্দের প্রতীক<br>• "তাহারেই" = প্রয়াত স্বামীকে<br>• কবিতার মূল থিম: শোক ও প্রকৃতি</div></div>
-      </div>
-    </div>
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#e8f5e9;">🦋</div>
-        <div><div class="sub-name">৩. ফেব্রুয়ারি ১৯৬৯ — শামসুর রাহমান</div><div class="sub-meta">পদ্য · Very Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">ভাষা আন্দোলনের শহীদদের স্মরণ ও বাংলা ভাষার মহিমা</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">Historical Context</div><div class="ch-marks">১৯৬৯ সালের গণ-অভ্যুত্থানের পটভূমিতে রচিত</div><div class="ch-imp">🔥 Historical context Board Exam-এ আসে!</div></div></div>
-        <div class="ch-item"><div class="ch-num">🌸</div><div class="ch-info"><div class="ch-name">Symbol</div><div class="ch-marks">"কৃষ্ণচূড়া" = শহীদদের রক্তের প্রতীক</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• ১৯৫২ + ১৯৬৯ উভয় আন্দোলনের connection জানো<br>• শামসুর রাহমান = নগরকবি<br>• "আবার ফুটেছে দেখো কৃষ্ণচূড়া" — important line</div></div>
-      </div>
-    </div>
-    <div class="sub-card">
-      <div class="sub-card-hd" onclick="toggleSub(this)">
-        <div class="sub-ic" style="background:#fff3e0;">🏔️</div>
-        <div><div class="sub-name">৪. আঠারো বছর বয়স — সুকান্ত ভট্টাচার্য</div><div class="sub-meta">পদ্য · Important</div></div>
-        <div style="margin-left:auto;color:var(--text3);">▼</div>
-      </div>
-      <div class="sub-body">
-        <div class="ch-item"><div class="ch-num">📌</div><div class="ch-info"><div class="ch-name">মূলভাব</div><div class="ch-marks">যৌবনের শক্তি, বিদ্রোহী চেতনা ও পরিবর্তনের আকাঙ্ক্ষা</div></div></div>
-        <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">Famous Line</div><div class="ch-marks">"আঠারো বছর বয়স কী দুঃসহ, স্পর্ধায় নেয় মাথা তোলবার ঝুঁকি"</div><div class="ch-imp">🔥 MCQ + Written দুটোতেই আসে!</div></div></div>
-        <div class="tip-box"><div class="tip-title">💡 Quick Tips</div><div class="tip-text">• সুকান্ত ভট্টাচার্য = কিশোর কবি (মাত্র ২১ বছরে মৃত্যু)<br>• কবিতাটি তরুণদের জীবনশক্তির প্রতীক<br>• ঝুঁকি + সাহস = ১৮ বছরের মূল বৈশিষ্ট্য</div></div>
-      </div>
-    </div>
-  </div>
-  <!-- Tips Section -->
-  <div id="hsc-tips" style="display:none;">
-    <div class="notice-box" style="margin-bottom:11px;">
-      <div class="nb-title">📋 সৃজনশীল প্রশ্নের Format</div>
-      <div class="nb-text">
-        <strong>ক) জ্ঞান (২ নম্বর):</strong> সরাসরি তথ্য জিজ্ঞেস করে<br>
-        <strong>খ) অনুধাবন (৪ নম্বর):</strong> নিজের ভাষায় ব্যাখ্যা করো<br>
-        <strong>গ) প্রয়োগ (৩ নম্বর):</strong> উদ্দীপকের সাথে relate করো<br>
-        <strong>ঘ) উচ্চতর দক্ষতা (৩ নম্বর):</strong> বিশ্লেষণ করো
-      </div>
-    </div>
-    <div class="sub-card" style="padding:14px;margin-bottom:10px;">
-      <div class="sec-title">✅ A+ পাওয়ার Strategy</div>
-      <div class="ch-item"><div class="ch-num">1</div><div class="ch-info"><div class="ch-name">লেখকের জীবনী</div><div class="ch-marks">প্রতিটি লেখকের জন্ম, মৃত্যু, বিখ্যাত রচনা মুখস্থ রাখো</div></div></div>
-      <div class="ch-item"><div class="ch-num">2</div><div class="ch-info"><div class="ch-name">উৎস জানো</div><div class="ch-marks">প্রতিটি গল্প/কবিতা কোন গ্রন্থ থেকে নেওয়া — MCQ-তে আসে</div></div></div>
-      <div class="ch-item"><div class="ch-num">3</div><div class="ch-info"><div class="ch-name">মূল থিম</div><div class="ch-marks">প্রতিটি রচনার মূলভাব ৩ লাইনে লিখতে পারো কিনা check করো</div></div></div>
-      <div class="ch-item"><div class="ch-num">4</div><div class="ch-info"><div class="ch-name">উদ্ধৃতি মুখস্থ</div><div class="ch-marks">প্রতিটি রচনা থেকে ২টি করে গুরুত্বপূর্ণ line মুখস্থ রাখো</div></div></div>
-      <div class="ch-item"><div class="ch-num">5</div><div class="ch-info"><div class="ch-name">MCQ Practice</div><div class="ch-marks">প্রতিদিন ৩০টি MCQ করো — Board Question Bank থেকে</div></div></div>
-    </div>
-    <div class="sub-card" style="padding:14px;">
-      <div class="sec-title">⏰ Time Management (Exam Hall)</div>
-      <div class="ch-item"><div class="ch-num">🕐</div><div class="ch-info"><div class="ch-name">MCQ (৩০ নম্বর)</div><div class="ch-marks">৩০ মিনিট — প্রতি MCQ সর্বোচ্চ ১ মিনিট</div></div></div>
-      <div class="ch-item"><div class="ch-num">🕑</div><div class="ch-info"><div class="ch-name">সৃজনশীল (৭০ নম্বর)</div><div class="ch-marks">১৪০ মিনিট — প্রতি প্রশ্নে ১৮-২০ মিনিট</div></div></div>
-      <div class="ch-item"><div class="ch-num">💡</div><div class="ch-info"><div class="ch-name">Revision</div><div class="ch-marks">শেষ ১০ মিনিট review করো</div></div></div>
-    </div>
-  </div>
-  <!-- MCQ Focus -->
-  <div id="hsc-mcq" style="display:none;">
-    <div class="sub-card" style="padding:14px;margin-bottom:10px;">
-      <div class="sec-title">🎯 MCQ Most Expected Topics</div>
-      <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">লেখকের জন্ম-মৃত্যু সাল</div><div class="ch-marks">রবীন্দ্রনাথ: ১৮৬১-১৯৪১ | নজরুল: ১৮৯৯-১৯৭৬ | মধুসূদন: ১৮২৪-১৮৭৩</div><div class="ch-imp">🔥 ৯০% পরীক্ষায় আসে</div></div></div>
-      <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">রচনার উৎস</div><div class="ch-marks">সোনার তরী → সোনার তরী কাব্যগ্রন্থ | বিড়াল → কমেডি অফ এরর্স</div></div></div>
-      <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">ছন্দ ও অলঙ্কার</div><div class="ch-marks">অমিত্রাক্ষর ছন্দ = মধুসূদনের বিশেষত্ব | পয়ার = রবীন্দ্রনাথ</div><div class="ch-imp">🔥 প্রায়ই জিজ্ঞেস করে</div></div></div>
-      <div class="ch-item"><div class="ch-num">⭐</div><div class="ch-info"><div class="ch-name">চরিত্রের নাম ও পরিচয়</div><div class="ch-marks">মাসি-পিসিতে — আহ্লাদি, জগু | সোনার তরীতে — কৃষক ও নৌকার মাঝি</div></div></div>
-    </div>
-    <div class="sub-card" style="padding:14px;">
-      <div class="sec-title">📊 Mark Distribution</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-        <div style="background:var(--al);border-radius:10px;padding:11px;text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:var(--a);">৩০</div><div style="font-size:.75rem;color:var(--text3);">MCQ (৩০×১)</div></div>
-        <div style="background:#e8f5e9;border-radius:10px;padding:11px;text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:var(--gr);">৪৮</div><div style="font-size:.75rem;color:var(--text3);">সৃজনশীল (৪×১২)</div></div>
-        <div style="background:#fff8e1;border-radius:10px;padding:11px;text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:var(--gd);">২২</div><div style="font-size:.75rem;color:var(--text3);">রচনা/চিঠি/ভাষণ</div></div>
-        <div style="background:#fce4ec;border-radius:10px;padding:11px;text-align:center;"><div style="font-size:1.4rem;font-weight:800;color:var(--rd);">১০০</div><div style="font-size:.75rem;color:var(--text3);">মোট নম্বর</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ════ GROUPS ════ -->
-<div class="panel" id="panel-groups">
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <div><div style="font-size:1.1rem;font-weight:800;">Groups</div><div style="font-size:.77rem;color:var(--text3);">Study together, grow together</div></div>
-    <button class="btn btn-p btn-sm" onclick="showNotif('✨','Create!','Group creation feature!','var(--a)')">+ Create</button>
-  </div>
-  <div class="cgb" onclick="showNotif('✨','Group','নতুন group বানাও!','var(--a)')">
-    <div class="cgb-ic">➕</div>
-    <div><div style="font-size:.88rem;font-weight:600;color:var(--a);">নতুন Group তৈরি করো</div><div style="font-size:.72rem;color:var(--text3);">Subject-based study group</div></div>
-  </div>
-  <div class="g-tabs">
-    <button class="g-tab on" onclick="selGTab(this,'my')">My Groups</button>
-    <button class="g-tab" onclick="selGTab(this,'discover')">Discover</button>
-    <button class="g-tab" onclick="selGTab(this,'popular')">Popular</button>
-  </div>
-  <div id="groupsC"></div>
-</div>
-</div>
-
-<!-- ════ MESSAGES ════ -->
-<div class="panel" id="panel-msg">
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;">
-    <div style="font-size:1.1rem;font-weight:800;">Messages</div>
-    <button class="btn btn-p btn-sm">✏️ New</button>
-  </div>
-  <div class="search-wrap" style="margin-bottom:11px;">
-    <span class="s-ic">🔍</span><input class="inp s-inp" placeholder="Search conversations..."/>
-  </div>
-  <div class="sec-title">Online Now</div>
-  <div style="display:flex;gap:11px;overflow-x:auto;padding-bottom:8px;margin-bottom:11px;">
-    <div class="st-item" onclick="openDM('Khadiza Juha','Kh','#42b883',true)"><div class="st-ring"><div class="st-av" style="background:#42b883;">Kh</div></div><div class="st-name">Khadiza</div></div>
-    <div class="st-item" onclick="openDM('Ahmod Hossain','Ah','#e91e63',true)"><div class="st-ring"><div class="st-av" style="background:#e91e63;">Ah</div></div><div class="st-name">Ahmod</div></div>
-    <div class="st-item" onclick="openDM('Jisan Khan','Ji','#ff5722',false)"><div class="st-ring seen"><div class="st-av" style="background:#ff5722;">Ji</div></div><div class="st-name">Jisan</div></div>
-    <div class="st-item" onclick="openDM('Akbor Hossen','Ak','#9c27b0',false)"><div class="st-ring seen"><div class="st-av" style="background:#9c27b0;">Ak</div></div><div class="st-name">Akbor</div></div>
-  </div>
-  <div class="sec-title">Recent</div>
-  <div id="dmListC"></div>
-</div>
-</div>
-
-<!-- ════ VIDEOS ════ -->
-<div class="panel" id="panel-video">
-<div class="wrap">
-  <div style="font-size:1.1rem;font-weight:800;margin-bottom:11px;">📹 Videos</div>
-  <div class="v-cats">
-    <div class="vcat on" onclick="selVC(this)">🎯 All</div>
-    <div class="vcat" onclick="selVC(this)">⚛️ Physics</div>
-    <div class="vcat" onclick="selVC(this)">🧮 Math</div>
-    <div class="vcat" onclick="selVC(this)">🧪 Chemistry</div>
-    <div class="vcat" onclick="selVC(this)">💻 Coding</div>
-    <div class="vcat" onclick="selVC(this)">📖 BCS</div>
-  </div>
-  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:11px;cursor:pointer;">
-    <div style="width:100%;aspect-ratio:16/9;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative;">⚛️<div style="position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">▶️</div><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;font-size:.62rem;padding:2px 8px;border-radius:5px;font-family:'Fira Code',monospace;">15:32</div></div>
-    <div style="padding:11px;"><div style="font-size:.92rem;font-weight:700;margin-bottom:5px;">HSC Physics: Electrostatics সম্পূর্ণ গাইড</div><div style="font-size:.72rem;color:var(--text3);">Ashraf Ahmed · 1.2M views · 2 days ago</div></div>
-  </div>
-  <div class="vc-grid">
-    <div class="vc"><div class="vc-thumb">🧮<div class="vc-dur">12:45</div></div><div class="vc-info"><div class="vc-title">Integration Tricks HSC</div><div class="vc-meta">892K · 1w</div></div></div>
-    <div class="vc"><div class="vc-thumb">💻<div class="vc-dur">35:00</div></div><div class="vc-info"><div class="vc-title">Python Zero to Hero</div><div class="vc-meta">3.2M · 1mo</div></div></div>
-    <div class="vc"><div class="vc-thumb">🧪<div class="vc-dur">18:20</div></div><div class="vc-info"><div class="vc-title">Organic Chemistry Full</div><div class="vc-meta">456K · 3d</div></div></div>
-    <div class="vc"><div class="vc-thumb">📖<div class="vc-dur">45:20</div></div><div class="vc-info"><div class="vc-title">BCS Complete Guide</div><div class="vc-meta">567K · 4d</div></div></div>
-  </div>
-</div>
-</div>
-
-<!-- ════ PROFILE ════ -->
-<div class="panel" id="panel-profile">
-  <div class="p-cover">🌆</div>
-  <div class="wrap">
-    <!-- ID CARD -->
-    <div class="id-card">
-      <div class="id-header">
-        <div class="id-av-wrap">
-          <div class="id-av" id="idAv">U</div>
+      <div style={{ padding: 14 }}>
+        <div style={{ fontSize: ".84rem", fontWeight: 600, marginBottom: 6, lineHeight: 1.4 }}>{course.title}</div>
+        <div style={{ fontSize: ".7rem", color: "var(--a)", marginBottom: 6 }}>👨‍🏫 {course.teacher}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8, fontSize: ".7rem", color: "var(--mt)" }}>
+          <span style={{ color: "#f5c542" }}>⭐ {course.rating}</span>
+          <span>({course.students.toLocaleString()} students)</span>
+          <span>•</span>
+          <span>{course.duration}</span>
         </div>
-        <div style="position:relative;z-index:1;">
-          <div class="id-name" id="idName">Loading...</div>
-          <div class="id-class" id="idClass">BrightMesh Student</div>
-          <div style="font-size:.7rem;opacity:.8;margin-top:3px;" id="idBio">— no bio yet —</div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 12 }}>
+          <span style={{ fontFamily: "'Fira Code',monospace", fontSize: "1rem", fontWeight: 700, color: "var(--rd)" }}>৳{course.price}</span>
+          <span style={{ fontFamily: "'Fira Code',monospace", fontSize: ".72rem", color: "var(--mt)", textDecoration: "line-through" }}>৳{course.origPrice}</span>
+          <span style={{ fontSize: ".65rem", color: "var(--gr)", fontWeight: 600 }}>{course.discount}% off</span>
+        </div>
+        <button className="btn-primary" style={{ width: "100%", padding: "9px" }} onClick={e => { e.stopPropagation(); alert(`✅ "${course.title}" cart-এ যোগ হয়েছে!`); }}>
+          🛒 Enroll Now
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// PAGES
+// ══════════════════════════════
+
+// HOME PAGE
+function HomePage({ setPage }) {
+  const stats = [
+    { num: "50K+", lbl: "Students" },
+    { num: "200+", lbl: "Courses" },
+    { num: "50+", lbl: "Teachers" },
+    { num: "4.8⭐", lbl: "Rating" },
+  ];
+  const features = [
+    { icon: "🤖", title: "AI Tutor", desc: "যেকোনো প্রশ্নের উত্তর পাও AI থেকে" },
+    { icon: "🏆", title: "Leaderboard", desc: "বন্ধুদের সাথে compete করো" },
+    { icon: "🎬", title: "Video Lectures", desc: "Expert teachers-এর class করো" },
+    { icon: "📊", title: "Progress Track", desc: "তোমার পড়ার progress দেখো" },
+    { icon: "🎯", title: "Live Classes", desc: "Real-time class করো" },
+    { icon: "🛒", title: "Marketplace", desc: "Notes ও books কিনো" },
+  ];
+
+  return (
+    <div className="page">
+      {/* HERO */}
+      <div style={{ textAlign: "center", padding: "40px 0 60px", position: "relative" }}>
+        <div style={{ display: "inline-block", background: "rgba(79,158,255,.1)", border: "1px solid rgba(79,158,255,.25)", borderRadius: 30, padding: "6px 18px", fontSize: ".7rem", color: "var(--a)", marginBottom: 20, fontFamily: "'Fira Code',monospace", letterSpacing: 2 }}>
+          🇧🇩 BANGLADESH'S #1 EDTECH PLATFORM
+        </div>
+        <h1 className="float" style={{ fontFamily: "'Sora',sans-serif", fontSize: "clamp(2rem,5vw,3.5rem)", fontWeight: 900, lineHeight: 1.2, marginBottom: 20 }}>
+          পড়াশোনাকে{" "}
+          <span style={{ background: "linear-gradient(90deg,var(--a),var(--pu),var(--cy))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text" }}>
+            মজাদার
+          </span>
+          {" "}করো
+        </h1>
+        <p style={{ fontSize: "1.05rem", color: "var(--mt)", maxWidth: 560, margin: "0 auto 32px", lineHeight: 1.8 }}>
+          AI-powered study tools, live classes, leaderboard, এবং expert tutors — সব এক জায়গায়! আজই শুরু করো।
+        </p>
+        <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
+          <button className="btn-primary" style={{ padding: "14px 32px", fontSize: ".95rem" }} onClick={() => setPage("register")}>
+            🚀 শুরু করো — Free!
+          </button>
+          <button className="btn-secondary" style={{ padding: "14px 32px", fontSize: ".95rem" }} onClick={() => setPage("courses")}>
+            📚 Courses দেখো
+          </button>
         </div>
       </div>
-      <div class="id-grid">
-        <div class="id-field"><div class="id-field-label">Student ID</div><div class="id-field-val mono" id="idUID">—</div></div>
-        <div class="id-field"><div class="id-field-label">Level</div><div class="id-field-val">Lv.<span id="idLv">1</span> 🎓</div></div>
-        <div class="id-field"><div class="id-field-label">Study Time</div><div class="id-field-val mono" id="idHours">0h</div></div>
-        <div class="id-field"><div class="id-field-label">Streak</div><div class="id-field-val">🔥 <span id="idStreak">0</span> days</div></div>
+
+      {/* STATS */}
+      <div className="grid-4" style={{ marginBottom: 60 }}>
+        {stats.map((s, i) => (
+          <div key={i} className="stat-box fade-in">
+            <span className="stat-num">{s.num}</span>
+            <div className="stat-lbl">{s.lbl}</div>
+          </div>
+        ))}
       </div>
-      <div class="id-btns">
-        <button class="id-btn" onclick="document.getElementById('editNameModal').classList.add('show')">✏️ Edit Profile</button>
-        <button class="id-btn" onclick="shareStats()">📤 Share Stats</button>
+
+      {/* FEATURES */}
+      <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.8rem", fontWeight: 700, marginBottom: 8 }}>কেন StudyConnect?</h2>
+        <p style={{ color: "var(--mt)", fontSize: ".9rem" }}>সব features এক platform-এ</p>
       </div>
-    </div>
-    <!-- Stats -->
-    <div class="p-stats">
-      <div class="ps-item"><div class="ps-n" id="pPosts">0</div><div class="ps-l">Posts</div></div>
-      <div class="ps-item"><div class="ps-n">🔥<span id="pStreak">0</span></div><div class="ps-l">Streak</div></div>
-      <div class="ps-item"><div class="ps-n" id="pHours">0h</div><div class="ps-l">Study</div></div>
-      <div class="ps-item"><div class="ps-n">🪙<span id="pCoins">0</span></div><div class="ps-l">Coins</div></div>
-    </div>
-    <!-- Badges -->
-    <div class="card" style="padding:13px;margin-bottom:11px;">
-      <div class="sec-title">🏅 Badges</div>
-      <div class="badges-grid">
-        <div class="badge-item"><div class="badge-ic earned">🔥</div><div class="badge-nm">Streak</div></div>
-        <div class="badge-item"><div class="badge-ic earned">⚛️</div><div class="badge-nm">Physics</div></div>
-        <div class="badge-item"><div class="badge-ic earned">📚</div><div class="badge-nm">100h</div></div>
-        <div class="badge-item"><div class="badge-ic earned">🏆</div><div class="badge-nm">Top 50</div></div>
-        <div class="badge-item"><div class="badge-ic locked">💎</div><div class="badge-nm">500h</div></div>
-        <div class="badge-item"><div class="badge-ic locked">👑</div><div class="badge-nm">Champ</div></div>
-        <div class="badge-item"><div class="badge-ic locked">🌟</div><div class="badge-nm">Top 10</div></div>
-        <div class="badge-item"><div class="badge-ic locked">🎓</div><div class="badge-nm">Mentor</div></div>
+      <div className="grid-3" style={{ marginBottom: 60 }}>
+        {features.map((f, i) => (
+          <div key={i} className="card fade-in" style={{ padding: 24, textAlign: "center", cursor: "pointer", transition: "all .25s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--a)"; e.currentTarget.style.transform = "translateY(-4px)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--bd)"; e.currentTarget.style.transform = "translateY(0)"; }}>
+            <div style={{ fontSize: "2.4rem", marginBottom: 14 }}>{f.icon}</div>
+            <div style={{ fontFamily: "'Sora',sans-serif", fontWeight: 700, marginBottom: 8 }}>{f.title}</div>
+            <div style={{ fontSize: ".8rem", color: "var(--mt)", lineHeight: 1.6 }}>{f.desc}</div>
+          </div>
+        ))}
       </div>
-    </div>
-    <!-- Settings -->
-    <div class="card" style="overflow:hidden;margin-bottom:11px;">
-      <div class="set-item" onclick="document.getElementById('editNameModal').classList.add('show')"><div class="si-ic" style="background:var(--al);">✏️</div><div class="si-tx"><h4>Edit Profile & Name</h4><p>নাম, class, bio পরিবর্তন করো</p></div><span class="si-arr">›</span></div>
-      <div class="set-item" onclick="toggleTheme()"><div class="si-ic" style="background:#e8f5e9;">🌓</div><div class="si-tx"><h4>Theme</h4><p>Light / Dark mode toggle</p></div><button class="btn btn-s btn-sm si-arr" id="themeLabel">Dark</button></div>
-      <div class="set-item" onclick="installPWA()"><div class="si-ic" style="background:#fff3e0;">📱</div><div class="si-tx"><h4>Install App (PWA)</h4><p>Phone-এ add করো</p></div><button class="btn btn-p btn-sm si-arr">Install</button></div>
-      <div class="set-item" onclick="showNotif('🔔','Notif','Notification settings!','var(--a)')"><div class="si-ic" style="background:#f3e5f5;">🔔</div><div class="si-tx"><h4>Notifications</h4><p>Manage alerts</p></div><span class="si-arr">›</span></div>
-      <div class="set-item" onclick="doLogout()"><div class="si-ic" style="background:#ffebee;">🚪</div><div class="si-tx"><h4 style="color:var(--rd);">Logout</h4><p>Sign out of account</p></div><span class="si-arr">›</span></div>
-    </div>
-    <!-- All-time stats -->
-    <div class="card" style="padding:13px;">
-      <div class="sec-title">📈 All-Time Stats</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:7px;">
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--a);font-family:'Fira Code',monospace;" id="atHours">0h</div><div style="font-size:.6rem;color:var(--text3);">Study</div></div>
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--gr);font-family:'Fira Code',monospace;" id="atXP">0</div><div style="font-size:.6rem;color:var(--text3);">XP</div></div>
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--gd);" id="atPosts">0</div><div style="font-size:.6rem;color:var(--text3);">Posts</div></div>
-        <div style="background:var(--bg3);border-radius:var(--r2);padding:10px 5px;text-align:center;"><div style="font-weight:700;color:var(--pu);" id="atCoins">0</div><div style="font-size:.6rem;color:var(--text3);">Coins</div></div>
+
+      {/* TOP COURSES */}
+      <div style={{ textAlign: "center", marginBottom: 32 }}>
+        <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.8rem", fontWeight: 700, marginBottom: 8 }}>🔥 Top Courses</h2>
+      </div>
+      <div className="grid-3" style={{ marginBottom: 60 }}>
+        {MOCK_COURSES.slice(0, 3).map(c => (
+          <CourseCard key={c.id} course={c} onClick={() => setPage("courses")} />
+        ))}
+      </div>
+
+      {/* CTA */}
+      <div style={{ background: "linear-gradient(135deg,rgba(79,158,255,.1),rgba(181,123,238,.08))", border: "1px solid var(--bd)", borderRadius: 20, padding: 48, textAlign: "center" }}>
+        <h2 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.8rem", fontWeight: 700, marginBottom: 12 }}>আজই শুরু করো — সম্পূর্ণ Free!</h2>
+        <p style={{ color: "var(--mt)", marginBottom: 24, fontSize: ".9rem" }}>50,000+ students ইতিমধ্যে পড়ছে</p>
+        <button className="btn-primary" style={{ padding: "14px 40px", fontSize: ".95rem" }} onClick={() => setPage("register")}>
+          ✅ Free Account খোলো
+        </button>
       </div>
     </div>
-  </div>
-</div>
+  );
+}
 
-</div><!-- /main -->
+// COURSES PAGE
+function CoursesPage() {
+  const [search, setSearch] = useState("");
+  const [cat, setCat] = useState("All");
+  const cats = ["All", "Physics", "Math", "Chemistry", "Coding", "English", "BCS"];
+  const filtered = MOCK_COURSES.filter(c =>
+    (cat === "All" || c.category === cat) &&
+    c.title.toLowerCase().includes(search.toLowerCase())
+  );
 
-<!-- POST MODAL -->
-<div id="postModal">
-  <div class="pm-box">
-    <div class="pm-handle"></div>
-    <div class="pm-top"><div class="pm-title">📝 Create Post</div><button class="pm-close" onclick="closePost()">✕</button></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:11px;">
-      <div class="av" id="pmAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
-      <div><div style="font-size:.88rem;font-weight:600;" id="pmName">User</div><div style="font-size:.72rem;color:var(--text3);">🌐 Public Post</div></div>
+  return (
+    <div className="page fade-in">
+      <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.8rem", fontWeight: 700, marginBottom: 6 }}>🎓 সব Courses</h1>
+      <p style={{ color: "var(--mt)", marginBottom: 24 }}>Expert teachers-এর সেরা courses</p>
+
+      {/* Search */}
+      <div style={{ position: "relative", marginBottom: 20 }}>
+        <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "var(--mt)" }}>🔍</span>
+        <input className="input-field" style={{ paddingLeft: 40 }} placeholder="Search courses..." value={search} onChange={e => setSearch(e.target.value)} />
+      </div>
+
+      {/* Category Filter */}
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 24 }}>
+        {cats.map(c => (
+          <button key={c} onClick={() => setCat(c)} style={{ padding: "6px 16px", borderRadius: 20, border: "1px solid", borderColor: cat === c ? "var(--a)" : "var(--bd)", background: cat === c ? "rgba(79,158,255,.1)" : "var(--bg3)", color: cat === c ? "var(--a)" : "var(--mt)", fontSize: ".78rem", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}>
+            {c}
+          </button>
+        ))}
+      </div>
+
+      {/* Results */}
+      <div style={{ fontSize: ".78rem", color: "var(--mt)", marginBottom: 16 }}>
+        {filtered.length} courses found
+      </div>
+
+      <div className="grid-3">
+        {filtered.map(c => <CourseCard key={c.id} course={c} />)}
+      </div>
+
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: 48, color: "var(--mt)" }}>
+          <div style={{ fontSize: "3rem", marginBottom: 12 }}>😕</div>
+          <div>কোনো course পাওয়া যায়নি</div>
+        </div>
+      )}
     </div>
-    <textarea class="pm-ta" id="pmText" placeholder="কি শিখলে? Notes, shortcuts, tips শেয়ার করো..." maxlength="500" oninput="document.getElementById('pmChar').textContent=this.value.length"></textarea>
-    <div class="pm-cats">
-      <button class="pcat on" onclick="selPCat(this)">📚 Study</button>
-      <button class="pcat" onclick="selPCat(this)">⚛️ Physics</button>
-      <button class="pcat" onclick="selPCat(this)">🧮 Math</button>
-      <button class="pcat" onclick="selPCat(this)">🧪 Chemistry</button>
-      <button class="pcat" onclick="selPCat(this)">🌿 Biology</button>
-      <button class="pcat" onclick="selPCat(this)">🌐 English</button>
-      <button class="pcat" onclick="selPCat(this)">📖 BCS</button>
-      <button class="pcat" onclick="selPCat(this)">💻 Coding</button>
+  );
+}
+
+// LOGIN PAGE
+function LoginPage({ setPage, setUser }) {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    // Simulate API call
+    await new Promise(r => setTimeout(r, 1200));
+    if (form.email && form.password) {
+      setUser({ name: "Ashraf Ahmed", email: form.email, level: 8, streak: 12, coins: 2840 });
+      setPage("dashboard");
+    } else {
+      setError("Email ও password দাও!");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="page-sm fade-in">
+      <div className="card" style={{ padding: 32, marginTop: 20 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.4rem", fontWeight: 800, background: "linear-gradient(90deg,var(--a),var(--pu))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 4 }}>📚 StudyConnect</div>
+          <div style={{ color: "var(--mt)", fontSize: ".85rem" }}>তোমার account-এ login করো</div>
+        </div>
+
+        {error && <div style={{ background: "rgba(255,77,109,.1)", border: "1px solid rgba(255,77,109,.3)", borderRadius: 8, padding: "10px 14px", marginBottom: 16, fontSize: ".8rem", color: "var(--rd)" }}>{error}</div>}
+
+        <form onSubmit={handleLogin}>
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: "block", fontSize: ".72rem", color: "var(--mt)", marginBottom: 5, fontFamily: "'Fira Code',monospace" }}>// email</label>
+            <input className="input-field" type="email" placeholder="তোমার email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} />
+          </div>
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: "block", fontSize: ".72rem", color: "var(--mt)", marginBottom: 5, fontFamily: "'Fira Code',monospace" }}>// password</label>
+            <input className="input-field" type="password" placeholder="Password" value={form.password} onChange={e => setForm({ ...form, password: e.target.value })} />
+          </div>
+          <button className="btn-primary" type="submit" style={{ width: "100%", padding: "13px", fontSize: ".92rem", marginBottom: 14 }} disabled={loading}>
+            {loading ? <span className="spinner" style={{ width: 20, height: 20, borderWidth: 2 }}></span> : "🚀 Login করো"}
+          </button>
+        </form>
+
+        <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "16px 0" }}>
+          <div style={{ flex: 1, height: 1, background: "var(--bd)" }}></div>
+          <span style={{ fontSize: ".72rem", color: "var(--mt)" }}>অথবা</span>
+          <div style={{ flex: 1, height: 1, background: "var(--bd)" }}></div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 20 }}>
+          <button className="btn-secondary" style={{ padding: "11px", fontSize: ".82rem" }} onClick={() => { setUser({ name: "Demo User", email: "demo@test.com", level: 8, streak: 12, coins: 2840 }); setPage("dashboard"); }}>🔵 Google</button>
+          <button className="btn-secondary" style={{ padding: "11px", fontSize: ".82rem" }} onClick={() => { setUser({ name: "Demo User", email: "demo@test.com", level: 8, streak: 12, coins: 2840 }); setPage("dashboard"); }}>📘 Facebook</button>
+        </div>
+
+        <div style={{ textAlign: "center", fontSize: ".82rem", color: "var(--mt)" }}>
+          Account নেই? <span style={{ color: "var(--a)", cursor: "pointer", fontWeight: 600 }} onClick={() => setPage("register")}>Register করো</span>
+        </div>
+      </div>
     </div>
-    <div class="pm-foot"><span class="pm-char"><span id="pmChar">0</span>/500</span><button class="btn btn-p" onclick="submitPost()" id="pmBtn" style="padding:9px 22px;">📤 Post</button></div>
-  </div>
-</div>
+  );
+}
 
-<!-- GROUP CHAT -->
-<div class="fs" id="gcScreen">
-  <div class="fs-hd">
-    <button class="fs-back" onclick="closeFS('gcScreen')">←</button>
-    <div style="font-size:1.3rem;" id="gcIc">📚</div>
-    <div style="margin-left:8px;flex:1;"><div class="fs-title" id="gcNm">Group</div><div style="font-size:.7rem;color:var(--text3);" id="gcMt"></div></div>
-    <div class="fs-acts"><div class="tb-btn">👥</div><div class="tb-btn">⚙️</div></div>
-  </div>
-  <div class="chat-area" id="gcArea"></div>
-  <div class="chat-inp">
-    <div class="cia-tools"><div class="cia-tool">🖼️</div><div class="cia-tool">📎</div><div class="cia-tool">📊</div><div class="cia-tool">😊</div></div>
-    <div class="cia-row">
-      <textarea class="cia-inp" id="gcInp" placeholder="Group-এ message করো..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendGC();}"></textarea>
-      <button class="cia-send" onclick="sendGC()">➤</button>
+// REGISTER PAGE
+function RegisterPage({ setPage, setUser }) {
+  const [form, setForm] = useState({ name: "", phone: "", classLevel: "", password: "" });
+  const [loading, setLoading] = useState(false);
+
+  const handleRegister = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    await new Promise(r => setTimeout(r, 1500));
+    setUser({ name: form.name || "নতুন Student", email: form.phone, level: 1, streak: 0, coins: 100 });
+    setPage("dashboard");
+    setLoading(false);
+  };
+
+  return (
+    <div className="page-sm fade-in">
+      <div className="card" style={{ padding: 32, marginTop: 20 }}>
+        <div style={{ textAlign: "center", marginBottom: 28 }}>
+          <div style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.4rem", fontWeight: 800, background: "linear-gradient(90deg,var(--gr),var(--cy))", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent", backgroundClip: "text", marginBottom: 4 }}>📚 StudyConnect</div>
+          <div style={{ color: "var(--mt)", fontSize: ".85rem" }}>নতুন account তৈরি করো</div>
+        </div>
+
+        <form onSubmit={handleRegister}>
+          {[
+            { key: "name", label: "// full name", placeholder: "তোমার পুরো নাম", type: "text" },
+            { key: "phone", label: "// phone number", placeholder: "01XXXXXXXXX", type: "tel" },
+            { key: "password", label: "// password", placeholder: "Strong password", type: "password" },
+          ].map(field => (
+            <div key={field.key} style={{ marginBottom: 14 }}>
+              <label style={{ display: "block", fontSize: ".72rem", color: "var(--mt)", marginBottom: 5, fontFamily: "'Fira Code',monospace" }}>{field.label}</label>
+              <input className="input-field" type={field.type} placeholder={field.placeholder} value={form[field.key]} onChange={e => setForm({ ...form, [field.key]: e.target.value })} />
+            </div>
+          ))}
+          <div style={{ marginBottom: 20 }}>
+            <label style={{ display: "block", fontSize: ".72rem", color: "var(--mt)", marginBottom: 5, fontFamily: "'Fira Code',monospace" }}>// class / level</label>
+            <select className="input-field" value={form.classLevel} onChange={e => setForm({ ...form, classLevel: e.target.value })} style={{ cursor: "pointer" }}>
+              <option value="">Select your class</option>
+              {["SSC 2025", "HSC 2025", "University", "BCS Prep", "Bank Job", "IELTS"].map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+          <button className="btn-primary" type="submit" style={{ width: "100%", padding: "13px", fontSize: ".92rem", marginBottom: 14, background: "linear-gradient(135deg,var(--gr),#1a8c40)" }} disabled={loading}>
+            {loading ? "Creating account..." : "✅ Register করো"}
+          </button>
+        </form>
+
+        <div style={{ textAlign: "center", fontSize: ".82rem", color: "var(--mt)" }}>
+          Already registered? <span style={{ color: "var(--a)", cursor: "pointer", fontWeight: 600 }} onClick={() => setPage("login")}>Login করো</span>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  );
+}
 
-<!-- DM CHAT -->
-<div class="fs" id="dmScreen">
-  <div class="fs-hd">
-    <button class="fs-back" onclick="closeFS('dmScreen')">←</button>
-    <div style="position:relative;"><div class="av" id="dmAv" style="width:36px;height:36px;font-size:.8rem;color:#fff;"></div><div class="dmi-sts" id="dmSts"></div></div>
-    <div style="margin-left:9px;flex:1;"><div class="fs-title" id="dmNm">Name</div><div style="font-size:.7rem;" id="dmOnl">Online</div></div>
-    <div class="fs-acts"><div class="tb-btn">📞</div><div class="tb-btn">📹</div></div>
-  </div>
-  <div class="chat-area" id="dmArea"></div>
-  <div class="chat-inp">
-    <div class="cia-tools"><div class="cia-tool">🖼️</div><div class="cia-tool">📎</div><div class="cia-tool">🎤</div><div class="cia-tool">😊</div></div>
-    <div class="cia-row">
-      <textarea class="cia-inp" id="dmInp" placeholder="Message..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDM();}"></textarea>
-      <button class="cia-send" onclick="sendDM()">➤</button>
+// DASHBOARD PAGE
+function DashboardPage({ user, setPage }) {
+  const [timerTime, setTimerTime] = useState(25 * 60);
+  const [timerRun, setTimerRun] = useState(false);
+  const [sessions, setSessions] = useState(0);
+
+  useEffect(() => {
+    if (!timerRun) return;
+    const int = setInterval(() => {
+      setTimerTime(t => {
+        if (t <= 1) { setTimerRun(false); setSessions(s => s + 1); return 25 * 60; }
+        return t - 1;
+      });
+    }, 1000);
+    return () => clearInterval(int);
+  }, [timerRun]);
+
+  const fmt = s => `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+
+  const goals = [
+    { text: "Physics Chapter 4 পড়া", done: true, xp: 50 },
+    { text: "Math ২০ সমস্যা সমাধান", done: true, xp: 50 },
+    { text: "Chemistry revision", done: false, xp: 50 },
+    { text: "English writing practice", done: false, xp: 50 },
+  ];
+
+  const [doneGoals, setDoneGoals] = useState([true, true, false, false]);
+
+  return (
+    <div className="page fade-in">
+      {/* Header */}
+      <div style={{ marginBottom: 28 }}>
+        <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700 }}>
+          👋 Welcome back, {user?.name?.split(" ")[0]}!
+        </h1>
+        <p style={{ color: "var(--mt)", fontSize: ".88rem", marginTop: 4 }}>আজকে কি পড়বে? চলো শুরু করি!</p>
+      </div>
+
+      <div className="grid-2" style={{ gap: 20 }}>
+        {/* LEFT COLUMN */}
+        <div>
+          {/* XP Level */}
+          <div className="card" style={{ padding: 18, marginBottom: 16 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
+              <div style={{ width: 48, height: 48, borderRadius: "50%", background: "linear-gradient(135deg,var(--gd),var(--or))", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: ".85rem", color: "#000", flexShrink: 0 }}>Lv.{user?.level || 8}</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: ".85rem", fontWeight: 600 }}>Advanced Learner</div>
+                <div style={{ fontSize: ".68rem", color: "var(--mt)" }}>160 XP to Level {(user?.level || 8) + 1}</div>
+              </div>
+              <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".82rem", color: "var(--a)", fontWeight: 700 }}>2,840 XP</div>
+            </div>
+            <div className="prog-bar">
+              <div className="prog-fill" style={{ width: "78%", background: "linear-gradient(90deg,var(--a),var(--pu))" }}></div>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid-2" style={{ gap: 10, marginBottom: 16 }}>
+            {[
+              { val: "4.5h", lbl: "আজকের পড়া", color: "var(--a)" },
+              { val: `🔥 ${user?.streak || 12}`, lbl: "Day Streak", color: "var(--gd)" },
+              { val: "128h", lbl: "এই মাসে", color: "var(--gr)" },
+              { val: `🪙 ${user?.coins || 2840}`, lbl: "Study Coins", color: "var(--gd)" },
+            ].map((s, i) => (
+              <div key={i} className="stat-box" style={{ padding: 14 }}>
+                <span className="stat-num" style={{ fontSize: "1.2rem", color: s.color }}>{s.val}</span>
+                <div className="stat-lbl">{s.lbl}</div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pomodoro Timer */}
+          <div className="card" style={{ padding: 20, marginBottom: 16, textAlign: "center" }}>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".6rem", letterSpacing: 2, color: "var(--a)", marginBottom: 12, textTransform: "uppercase" }}>⏱️ Focus Timer</div>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: "3rem", fontWeight: 700, color: "var(--a)", letterSpacing: 4, filter: "drop-shadow(0 0 20px rgba(79,158,255,.35))", marginBottom: 16 }}>
+              {fmt(timerTime)}
+            </div>
+            <input className="input-field" placeholder="এখন কি পড়ছ?" style={{ textAlign: "center", marginBottom: 14 }} />
+            <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
+              <button className="btn-primary" style={{ padding: "9px 20px" }} onClick={() => setTimerRun(true)}>▶ শুরু</button>
+              <button className="btn-secondary" style={{ padding: "9px 20px" }} onClick={() => setTimerRun(false)}>⏸ Pause</button>
+              <button className="btn-secondary" style={{ padding: "9px 20px" }} onClick={() => { setTimerRun(false); setTimerTime(25 * 60); }}>🔄</button>
+            </div>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".62rem", color: "var(--mt)", marginTop: 10 }}>
+              Sessions today: <span style={{ color: "var(--a)" }}>{sessions}</span>
+            </div>
+          </div>
+
+          {/* Subject Progress */}
+          <div className="card" style={{ padding: 18 }}>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".6rem", letterSpacing: 2, color: "var(--a)", marginBottom: 14, textTransform: "uppercase" }}>📚 Subject Progress</div>
+            {[
+              { subj: "⚛️ Physics", pct: 72, color: "linear-gradient(90deg,var(--a),var(--pu))" },
+              { subj: "🧮 Math", pct: 85, color: "linear-gradient(90deg,var(--gr),#2a9d8f)" },
+              { subj: "🧪 Chemistry", pct: 45, color: "linear-gradient(90deg,var(--gd),var(--or))" },
+              { subj: "🌿 Biology", pct: 60, color: "linear-gradient(90deg,#56ab2f,#a8e063)" },
+              { subj: "🌐 English", pct: 90, color: "linear-gradient(90deg,var(--rd),var(--pk))" },
+            ].map((s, i) => (
+              <div key={i} style={{ marginBottom: 12 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: ".8rem", marginBottom: 5 }}>
+                  <span>{s.subj}</span>
+                  <span style={{ fontFamily: "'Fira Code',monospace", color: "var(--a)", fontSize: ".72rem" }}>{s.pct}%</span>
+                </div>
+                <div className="prog-bar">
+                  <div className="prog-fill" style={{ width: `${s.pct}%`, background: s.color }}></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* RIGHT COLUMN */}
+        <div>
+          {/* Streak */}
+          <div style={{ background: "linear-gradient(135deg,rgba(245,197,66,.1),rgba(255,138,61,.06))", border: "1px solid rgba(245,197,66,.25)", borderRadius: 14, padding: 16, marginBottom: 16, display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ fontSize: "2.2rem" }}>🔥</div>
+            <div>
+              <div style={{ fontWeight: 700, color: "var(--gd)", fontSize: ".95rem" }}>১২ দিনের Streak!</div>
+              <div style={{ fontSize: ".72rem", color: "var(--mt)" }}>এই সপ্তাহ চালিয়ে যাও!</div>
+              <div style={{ display: "flex", gap: 5, marginTop: 8 }}>
+                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                  <div key={i} style={{ width: 26, height: 26, borderRadius: "50%", background: i < 5 ? "var(--gd)" : "var(--bg3)", border: `1px solid ${i < 5 ? "var(--gd)" : "var(--bd)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".6rem", fontFamily: "'Fira Code',monospace", color: i < 5 ? "#000" : "var(--mt)", fontWeight: i < 5 ? 700 : 400 }}>{d}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Daily Goals */}
+          <div className="card" style={{ padding: 18, marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".6rem", letterSpacing: 2, color: "var(--a)", marginBottom: 12, textTransform: "uppercase" }}>🎯 Daily Goals</div>
+            {goals.map((g, i) => (
+              <div key={i} onClick={() => setDoneGoals(d => { const n = [...d]; n[i] = !n[i]; return n; })}
+                style={{ display: "flex", alignItems: "center", gap: 10, padding: "9px 10px", background: doneGoals[i] ? "rgba(45,186,96,.06)" : "var(--bg3)", border: `1px solid ${doneGoals[i] ? "rgba(45,186,96,.2)" : "var(--bd)"}`, borderRadius: 10, marginBottom: 6, cursor: "pointer", transition: "all .2s" }}>
+                <div style={{ width: 20, height: 20, borderRadius: "50%", background: doneGoals[i] ? "var(--gr)" : "transparent", border: `2px solid ${doneGoals[i] ? "var(--gr)" : "var(--bd)"}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".65rem", flexShrink: 0 }}>{doneGoals[i] ? "✓" : ""}</div>
+                <span style={{ flex: 1, fontSize: ".84rem", textDecoration: doneGoals[i] ? "line-through" : "none", opacity: doneGoals[i] ? .5 : 1 }}>{g.text}</span>
+                <span style={{ fontSize: ".65rem", color: doneGoals[i] ? "var(--gr)" : "var(--mt)", fontWeight: 600 }}>+{g.xp}XP</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Weekly Chart */}
+          <div className="card" style={{ padding: 18, marginBottom: 16 }}>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".6rem", letterSpacing: 2, color: "var(--a)", marginBottom: 12, textTransform: "uppercase" }}>📊 Weekly Study</div>
+            <div style={{ display: "flex", alignItems: "flex-end", gap: 6, height: 80, marginBottom: 8 }}>
+              {[
+                { day: "S", h: 4, color: "var(--a)" },
+                { day: "M", h: 6, color: "var(--pu)" },
+                { day: "T", h: 5, color: "var(--gr)" },
+                { day: "W", h: 8, color: "var(--gd)" },
+                { day: "T", h: 7, color: "var(--cy)" },
+                { day: "F", h: 9, color: "var(--pk)" },
+                { day: "S", h: 4.5, color: "var(--or)" },
+              ].map((d, i) => (
+                <div key={i} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+                  <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".58rem", color: d.color }}>{d.h}h</div>
+                  <div style={{ width: "100%", height: `${(d.h / 9) * 70}px`, background: `${d.color}44`, borderRadius: "4px 4px 0 0", border: `1px solid ${d.color}44`, transition: "height .6s" }}></div>
+                  <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".58rem", color: "var(--mt)" }}>{d.day}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'Fira Code',monospace", fontSize: ".65rem", color: "var(--mt)" }}>
+              <span>Total: <span style={{ color: "var(--a)" }}>43.5h</span></span>
+              <span>Best: <span style={{ color: "var(--gd)" }}>Fri (9h)</span></span>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="card" style={{ padding: 18 }}>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".6rem", letterSpacing: 2, color: "var(--a)", marginBottom: 12, textTransform: "uppercase" }}>⚡ Quick Actions</div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              {[
+                { icon: "🤖", label: "AI Tutor", page: "ai", color: "rgba(79,158,255,.1)" },
+                { icon: "🏆", label: "Leaderboard", page: "leaderboard", color: "rgba(245,197,66,.1)" },
+                { icon: "🎓", label: "Courses", page: "courses", color: "rgba(45,186,96,.1)" },
+                { icon: "👤", label: "Profile", page: "profile", color: "rgba(181,123,238,.1)" },
+              ].map((a, i) => (
+                <button key={i} onClick={() => setPage(a.page)} style={{ padding: 14, borderRadius: 12, background: a.color, border: "1px solid var(--bd)", cursor: "pointer", display: "flex", alignItems: "center", gap: 8, fontSize: ".82rem", fontFamily: "inherit", color: "var(--text)", transition: "all .2s" }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "var(--a)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "var(--bd)"}>
+                  <span style={{ fontSize: "1.1rem" }}>{a.icon}</span>
+                  {a.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+  );
+}
 
-<!-- BOTTOM NAV -->
-<div class="bnav" id="bnav" style="display:none;">
-  <button class="bni active" onclick="showP('feed',this)"><span class="ni">🏠</span>Feed</button>
-  <button class="bni" onclick="showP('study',this)"><span class="ni">📚</span>Study</button>
-  <button class="bni" onclick="showP('lb',this)"><span class="ni">🏆</span>Rank</button>
-  <button class="bni" onclick="showP('hsc',this)"><span class="ni">📘</span>HSC</button>
-  <button class="bni" onclick="showP('groups',this);renderGroups('my')"><span class="ni">👥</span>Groups<span class="ndot"></span></button>
-  <button class="bni" onclick="showP('msg',this);renderDmList()"><span class="ni">💬</span>Chat<span class="ndot"></span></button>
-  <button class="bni" onclick="showP('video',this)"><span class="ni">🎬</span>Videos</button>
-  <button class="bni" onclick="showP('profile',this)"><span class="ni">👤</span>Profile</button>
-</div>
-BODYEOF
-echo "Body size: $(wc -c < /tmp/bm_body.html)"
-Output
+// AI TUTOR PAGE
+function AITutorPage() {
+  const [msgs, setMsgs] = useState([
+    { role: "ai", text: "👋 আস-সালামু আলাইকুম! আমি তোমার AI Study Tutor। যেকোনো subject নিয়ে প্রশ্ন করো — Physics, Math, Chemistry, Biology, English, BCS — সব বিষয়ে সাহায্য করতে পারবো! 📚" }
+  ]);
+  const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
 
-Body size: 62549
+  const quickPrompts = ["Newton's 2nd Law বাংলায় বুঝাও", "Integration কিভাবে করে?", "Photosynthesis explain করো", "BCS preparation tips দাও", "Python list vs tuple পার্থক্য?"];
+
+  const sendMsg = async (msg) => {
+    if (!msg.trim()) return;
+    const userMsg = msg.trim();
+    setInput("");
+    setMsgs(m => [...m, { role: "user", text: userMsg }]);
+    setLoading(true);
+    try {
+      const r = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-20250514",
+          max_tokens: 600,
+          system: "তুমি একজন expert Bangladeshi study tutor। সহজ বাংলায় বা English-এ উত্তর দাও। Emoji use করো। সংক্ষিপ্ত ও helpful।",
+          messages: [{ role: "user", content: userMsg }]
+        })
+      });
+      const data = await r.json();
+      const ans = data.content?.[0]?.text || "// Sorry, try again!";
+      setMsgs(m => [...m, { role: "ai", text: ans }]);
+    } catch {
+      setMsgs(m => [...m, { role: "ai", text: "// Connection error. আবার চেষ্টা করো।" }]);
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="page fade-in" style={{ maxWidth: 700 }}>
+      <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, marginBottom: 6 }}>🤖 AI Study Tutor</h1>
+      <p style={{ color: "var(--mt)", marginBottom: 20 }}>Powered by Claude AI — যেকোনো প্রশ্নের উত্তর পাও!</p>
+
+      {/* Quick Prompts */}
+      <div style={{ display: "flex", gap: 7, flexWrap: "wrap", marginBottom: 16 }}>
+        {quickPrompts.map((p, i) => (
+          <button key={i} onClick={() => sendMsg(p)} style={{ padding: "5px 12px", borderRadius: 20, border: "1px solid var(--bd)", background: "var(--bg3)", color: "var(--mt)", fontSize: ".7rem", cursor: "pointer", fontFamily: "inherit", transition: "all .2s" }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--a)"; e.currentTarget.style.color = "var(--a)"; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--bd)"; e.currentTarget.style.color = "var(--mt)"; }}>
+            {p}
+          </button>
+        ))}
+      </div>
+
+      {/* Chat */}
+      <div className="card" style={{ padding: 0, overflow: "hidden", marginBottom: 12 }}>
+        <div style={{ height: 420, overflowY: "auto", padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
+          {msgs.map((m, i) => (
+            <div key={i} style={{ display: "flex", gap: 10, flexDirection: m.role === "user" ? "row-reverse" : "row", alignItems: "flex-start" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: m.role === "ai" ? "linear-gradient(135deg,var(--a),var(--pu))" : "linear-gradient(135deg,var(--gr),var(--cy))", display: "flex", alignItems: "center", justifyContent: "center", fontSize: ".85rem", flexShrink: 0 }}>
+                {m.role === "ai" ? "🤖" : "As"}
+              </div>
+              <div style={{ maxWidth: "75%" }}>
+                <div style={{ background: m.role === "ai" ? "var(--bg3)" : "linear-gradient(135deg,var(--a),#1a5fc4)", border: m.role === "ai" ? "1px solid var(--bd)" : "none", borderRadius: m.role === "ai" ? "4px 14px 14px 14px" : "14px 4px 14px 14px", padding: "10px 14px", fontSize: ".84rem", lineHeight: 1.7, color: "#fff", whiteSpace: "pre-wrap" }}>
+                  {m.text}
+                </div>
+              </div>
+            </div>
+          ))}
+          {loading && (
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <div style={{ width: 34, height: 34, borderRadius: "50%", background: "linear-gradient(135deg,var(--a),var(--pu))", display: "flex", alignItems: "center", justifyContent: "center" }}>🤖</div>
+              <div style={{ background: "var(--bg3)", border: "1px solid var(--bd)", borderRadius: "4px 14px 14px 14px", padding: "12px 18px" }}>
+                <div style={{ display: "flex", gap: 4 }}>
+                  {[0, 1, 2].map(i => (
+                    <div key={i} style={{ width: 7, height: 7, borderRadius: "50%", background: "var(--a)", animation: "pulse 0.8s ease-in-out infinite", animationDelay: `${i * 0.15}s` }}></div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Input */}
+        <div style={{ padding: 14, borderTop: "1px solid var(--bd)", display: "flex", gap: 9 }}>
+          <input className="input-field" style={{ flex: 1, marginBottom: 0 }} placeholder="প্রশ্ন করো..." value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendMsg(input)} />
+          <button className="btn-primary" style={{ padding: "10px 18px", flexShrink: 0 }} onClick={() => sendMsg(input)} disabled={loading}>
+            ➤ Send
+          </button>
+        </div>
+      </div>
+
+      <div style={{ textAlign: "center", fontFamily: "'Fira Code',monospace", fontSize: ".62rem", color: "var(--mt)" }}>
+        Powered by Claude AI (Anthropic) 🤖
+      </div>
+    </div>
+  );
+}
+
+// LEADERBOARD PAGE
+function LeaderboardPage() {
+  const [tab, setTab] = useState("week");
+
+  return (
+    <div className="page fade-in" style={{ maxWidth: 700 }}>
+      <h1 style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.5rem", fontWeight: 700, marginBottom: 6 }}>🏆 Leaderboard</h1>
+      <p style={{ color: "var(--mt)", marginBottom: 20 }}>এই সপ্তাহের সেরা পড়ুয়ারা</p>
+
+      {/* Tabs */}
+      <div style={{ display: "flex", background: "var(--bg2)", border: "1px solid var(--bd)", borderRadius: 10, padding: 3, marginBottom: 24 }}>
+        {["week", "month", "alltime", "friends"].map(t => (
+          <button key={t} onClick={() => setTab(t)} style={{ flex: 1, padding: "8px", borderRadius: 8, border: "none", background: tab === t ? "rgba(79,158,255,.1)" : "transparent", color: tab === t ? "var(--a)" : "var(--mt)", fontSize: ".72rem", fontFamily: "'Fira Code',monospace", cursor: "pointer", transition: "all .2s", borderColor: tab === t ? "rgba(79,158,255,.2)" : "transparent" }}>
+            {t === "week" ? "📅 Week" : t === "month" ? "📆 Month" : t === "alltime" ? "🏅 All Time" : "👥 Friends"}
+          </button>
+        ))}
+      </div>
+
+      {/* Podium */}
+      <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "center", gap: 12, marginBottom: 28, padding: "0 20px" }}>
+        {[MOCK_LEADERBOARD[1], MOCK_LEADERBOARD[0], MOCK_LEADERBOARD[2]].map((u, i) => {
+          const isFirst = i === 1;
+          const height = [70, 90, 55][i];
+          const medal = ["🥈", "👑", "🥉"][i];
+          return (
+            <div key={u.rank} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
+              <div style={{ position: "relative" }}>
+                {isFirst && <div style={{ position: "absolute", top: -18, left: "50%", transform: "translateX(-50%)", fontSize: "1.2rem" }}>👑</div>}
+                <div style={{ width: isFirst ? 64 : 52, height: isFirst ? 64 : 52, borderRadius: "50%", background: u.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: isFirst ? "1.2rem" : ".95rem", color: "#fff", border: `3px solid ${isFirst ? "#ffd700" : "var(--bd)"}` }}>{u.avatar}</div>
+              </div>
+              <div style={{ fontSize: ".72rem", fontWeight: 600, textAlign: "center" }}>{u.name.split(" ")[0]}</div>
+              <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".65rem", color: "var(--mt)" }}>{u.score}h</div>
+              <div style={{ width: "100%", height, background: isFirst ? "rgba(255,215,0,.15)" : "rgba(255,255,255,.05)", border: `1px solid ${isFirst ? "#ffd700" : "var(--bd)"}`, borderRadius: "8px 8px 0 0", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fira Code',monospace", fontWeight: 700, color: isFirst ? "#ffd700" : "var(--mt)", fontSize: ".8rem" }}>
+                {["2nd", "1st", "3rd"][i]}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* List */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        {MOCK_LEADERBOARD.map((u, i) => (
+          <div key={u.rank} className="card" style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, borderColor: u.rank === 47 ? "rgba(79,158,255,.3)" : "var(--bd)", background: u.rank === 47 ? "rgba(79,158,255,.04)" : "var(--bg2)" }}>
+            <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".82rem", fontWeight: 700, color: u.rank <= 3 ? "var(--gd)" : "var(--mt)", minWidth: 24, textAlign: "center" }}>{u.badge || u.rank}</div>
+            <div style={{ width: 38, height: 38, borderRadius: "50%", background: u.color, display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: ".85rem", color: "#fff", flexShrink: 0 }}>{u.avatar}</div>
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: ".86rem", fontWeight: 600 }}>{u.name}</div>
+              <div style={{ fontSize: ".68rem", color: "var(--mt)", marginTop: 2 }}>🔥 {u.streak} day streak</div>
+            </div>
+            <div style={{ textAlign: "right" }}>
+              <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".88rem", fontWeight: 700, color: "var(--a)" }}>{u.score}h</div>
+              <div style={{ fontSize: ".62rem", color: "var(--mt)" }}>{u.score * 40} pts</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// PROFILE PAGE
+function ProfilePage({ user, setPage }) {
+  if (!user) { setPage("login"); return null; }
+  const badges = [
+    { icon: "🔥", name: "30-Day", earned: true },
+    { icon: "⚛️", name: "Physics", earned: true },
+    { icon: "📚", name: "100h Club", earned: true },
+    { icon: "🏆", name: "Top 50", earned: true },
+    { icon: "💎", name: "500h Club", earned: false },
+    { icon: "👑", name: "Champion", earned: false },
+    { icon: "🌟", name: "Top 10", earned: false },
+    { icon: "🎓", name: "Mentor", earned: false },
+  ];
+
+  return (
+    <div className="page fade-in" style={{ maxWidth: 700 }}>
+      {/* Cover */}
+      <div style={{ height: 140, background: "linear-gradient(135deg,#060d1a,#1a0a2e,#16213e)", borderRadius: "16px 16px 0 0", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "3.5rem", marginBottom: 0 }}>🌆</div>
+
+      <div className="card" style={{ borderRadius: "0 0 16px 16px", padding: 20, marginBottom: 16 }}>
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 14, marginBottom: 14, marginTop: -50 }}>
+          <div style={{ width: 80, height: 80, borderRadius: "50%", background: "linear-gradient(135deg,var(--a),var(--pu))", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Sora',sans-serif", fontSize: "1.8rem", fontWeight: 700, color: "#fff", border: "3px solid var(--bg)", flexShrink: 0 }}>
+            {user.name?.slice(0, 2).toUpperCase()}
+          </div>
+          <div style={{ paddingTop: 50 }}>
+            <div style={{ fontFamily: "'Sora',sans-serif", fontSize: "1.05rem", fontWeight: 700, display: "flex", alignItems: "center", gap: 8 }}>
+              {user.name}
+              <span style={{ background: "rgba(79,158,255,.12)", color: "var(--a)", border: "1px solid rgba(79,158,255,.2)", borderRadius: 5, padding: "1px 7px", fontSize: ".65rem" }}>HSC 2025</span>
+            </div>
+            <div style={{ fontSize: ".72rem", color: "var(--mt)", marginTop: 2 }}>@{user.name?.toLowerCase().replace(" ", "_")} · Dhaka · Lv.{user.level} ⭐</div>
+          </div>
+        </div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 6, marginBottom: 14 }}>
+          {[["348", "Posts"], ["1.2K", "Friends"], ["🔥12", "Streak"], [`🪙${user.coins}`, "Coins"]].map(([n, l], i) => (
+            <div key={i} style={{ background: "var(--bg3)", borderRadius: 9, padding: "9px 5px", textAlign: "center" }}>
+              <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".9rem", fontWeight: 700, color: "var(--a)" }}>{n}</div>
+              <div style={{ fontSize: ".58rem", color: "var(--mt)", marginTop: 2 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+
+        <div style={{ display: "flex", gap: 8 }}>
+          <button className="btn-primary" style={{ flex: 1, padding: 9 }}>✏️ Edit Profile</button>
+          <button className="btn-secondary" style={{ flex: 1, padding: 9 }}>📊 Share Stats</button>
+        </div>
+      </div>
+
+      {/* Badges */}
+      <div className="card" style={{ padding: 18, marginBottom: 16 }}>
+        <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".6rem", letterSpacing: 2, color: "var(--a)", marginBottom: 14, textTransform: "uppercase" }}>🏅 Badges & Achievements</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 10 }}>
+          {badges.map((b, i) => (
+            <div key={i} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
+              <div style={{ width: 46, height: 46, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "1.3rem", border: `2px solid ${b.earned ? "var(--gd)" : "var(--bd)"}`, boxShadow: b.earned ? "0 0 12px rgba(245,197,66,.25)" : "none", filter: b.earned ? "none" : "grayscale(1)", opacity: b.earned ? 1 : .35 }}>{b.icon}</div>
+              <div style={{ fontSize: ".58rem", color: "var(--mt)", textAlign: "center" }}>{b.name}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div className="card" style={{ padding: 18 }}>
+        <div style={{ fontFamily: "'Fira Code',monospace", fontSize: ".6rem", letterSpacing: 2, color: "var(--a)", marginBottom: 14, textTransform: "uppercase" }}>📈 All-Time Stats</div>
+        <div className="grid-4">
+          {[["547h", "Total Study"], ["12.8K", "Points"], ["8", "Comp Won"], ["128", "Videos"]].map(([n, l], i) => (
+            <div key={i} style={{ background: "var(--bg3)", borderRadius: 9, padding: "11px 6px", textAlign: "center" }}>
+              <div style={{ fontFamily: "'Fira Code',monospace", fontSize: "1rem", fontWeight: 700, color: ["var(--a)", "var(--gr)", "var(--gd)", "var(--pu)"][i] }}>{n}</div>
+              <div style={{ fontSize: ".6rem", color: "var(--mt)", marginTop: 2 }}>{l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ══════════════════════════════
+// REELS PAGE
+// ══════════════════════════════
+function ReelsPage() {
+  const reels = [
+    { id:1, user:"Ashraf Ahmed", avatar:"As", color:"linear-gradient(135deg,#ffd700,#ff8c00)", emoji:"⚛️", caption:"Newton's 2nd Law ৬০ সেকেন্ডে শিখে নাও! F=ma মনে রাখার সহজ trick 🔥", likes:1243, comments:89, subject:"Physics", music:"Lo-Fi Study Beats", bg:"linear-gradient(180deg,#0d1829,#060d1a)" },
+    { id:2, user:"Khadiza Juha", avatar:"Kh", color:"#42b883", emoji:"🧮", caption:"Integration এর এই shortcut কেউ বলেনি আগে! Exam-এ কাজে লাগবেই 💯", likes:2876, comments:234, subject:"Math", music:"Focus Music", bg:"linear-gradient(180deg,#1a0533,#060d1a)" },
+    { id:3, user:"Jisan Khan", avatar:"Ji", color:"#ff5722", emoji:"💻", caption:"Python দিয়ে ১০ লাইনে website বানাও! Beginner-দের জন্য 🐍", likes:4521, comments:567, subject:"Coding", music:"Chill Hop", bg:"linear-gradient(180deg,#001a0d,#060d1a)" },
+    { id:4, user:"Akbor Hossen", avatar:"Ak", color:"#9c27b0", emoji:"🧪", caption:"Organic Chemistry-র সব reaction মনে রাখার magic formula! 🧪✨", likes:987, comments:123, subject:"Chemistry", music:"Study Vibes", bg:"linear-gradient(180deg,#1a0a2e,#060d1a)" },
+    { id:5, user:"Amjad Hossain", avatar:"Am", color:"#00bcd4", emoji:"📖", caption:"BCS-এর ৪০ BCS-এ যা এসেছে, সব এখানে! একটা video-তে সব 🎯", likes:6789, comments:890, subject:"BCS", music:"Bengali Motivation", bg:"linear-gradient(180deg,#16213e,#060d1a)" },
+  ];
+
+  const [current, setCurrent] = useState(0);
+  const [liked, setLiked] = useState({});
+  const [saved, setSaved] = useState({});
+  const [showComments, setShowComments] = useState(false);
+  const [playing, setPlaying] = useState(true);
+
+  const reel = reels[current];
+
+  const handleLike = () => {
+    setLiked(l => ({ ...l, [reel.id]: !l[reel.id] }));
+  };
+
+  return (
+    <div style={{ position:"fixed", inset:0, background:"#000", zIndex:50, display:"flex", flexDirection:"column" }}>
+      {/* Reel Background */}
+      <div style={{ flex:1, background:reel.bg, display:"flex", alignItems:"center", justifyContent:"center", position:"relative", overflow:"hidden" }}>
+        
+        {/* Main Content */}
+        <div style={{ fontSize:"8rem", filter:"drop-shadow(0 0 40px rgba(79,158,255,.4))", animation:"float 3s ease-in-out infinite" }} onClick={() => setPlaying(!playing)}>
+          {reel.emoji}
+        </div>
+
+        {/* Play/Pause overlay */}
+        {!playing && (
+          <div style={{ position:"absolute", inset:0, background:"rgba(0,0,0,.3)", display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <div style={{ width:64, height:64, borderRadius:"50%", background:"rgba(255,255,255,.2)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.8rem" }}>▶️</div>
+          </div>
+        )}
+
+        {/* Top Bar */}
+        <div style={{ position:"absolute", top:0, left:0, right:0, padding:"16px 16px 0", display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ fontFamily:"'Sora',sans-serif", fontSize:"1rem", fontWeight:700, color:"#fff" }}>Reels</div>
+          <div style={{ display:"flex", gap:10 }}>
+            <button style={{ background:"none", border:"none", color:"#fff", fontSize:"1.1rem", cursor:"pointer" }}>🔍</button>
+            <button style={{ background:"none", border:"none", color:"#fff", fontSize:"1.1rem", cursor:"pointer" }}>📷</button>
+          </div>
+        </div>
+
+        {/* Progress bars */}
+        <div style={{ position:"absolute", top:52, left:10, right:10, display:"flex", gap:3 }}>
+          {reels.map((_, i) => (
+            <div key={i} style={{ flex:1, height:2, background:"rgba(255,255,255,.3)", borderRadius:1, overflow:"hidden", cursor:"pointer" }} onClick={() => setCurrent(i)}>
+              <div style={{ height:"100%", background:"#fff", borderRadius:1, width: i < current ? "100%" : i === current ? "60%" : "0%", transition:"width .3s" }}></div>
+            </div>
+          ))}
+        </div>
+
+        {/* Right Actions */}
+        <div style={{ position:"absolute", right:12, bottom:120, display:"flex", flexDirection:"column", alignItems:"center", gap:20 }}>
+          {/* Like */}
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, cursor:"pointer" }} onClick={handleLike}>
+            <div style={{ width:44, height:44, borderRadius:"50%", background:"rgba(255,255,255,.15)", backdropFilter:"blur(10px)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.2rem", transform: liked[reel.id] ? "scale(1.2)" : "scale(1)", transition:"transform .2s" }}>
+              {liked[reel.id] ? "❤️" : "🤍"}
+            </div>
+            <div style={{ fontSize:".65rem", color:"#fff", fontWeight:600 }}>{(reel.likes + (liked[reel.id] ? 1 : 0)).toLocaleString()}</div>
+          </div>
+          {/* Comment */}
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, cursor:"pointer" }} onClick={() => setShowComments(!showComments)}>
+            <div style={{ width:44, height:44, borderRadius:"50%", background:"rgba(255,255,255,.15)", backdropFilter:"blur(10px)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.2rem" }}>💬</div>
+            <div style={{ fontSize:".65rem", color:"#fff", fontWeight:600 }}>{reel.comments}</div>
+          </div>
+          {/* Share */}
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, cursor:"pointer" }}>
+            <div style={{ width:44, height:44, borderRadius:"50%", background:"rgba(255,255,255,.15)", backdropFilter:"blur(10px)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.2rem" }}>🔗</div>
+            <div style={{ fontSize:".65rem", color:"#fff", fontWeight:600 }}>Share</div>
+          </div>
+          {/* Save */}
+          <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:4, cursor:"pointer" }} onClick={() => setSaved(s => ({ ...s, [reel.id]: !s[reel.id] }))}>
+            <div style={{ width:44, height:44, borderRadius:"50%", background:"rgba(255,255,255,.15)", backdropFilter:"blur(10px)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.2rem" }}>
+              {saved[reel.id] ? "🔖" : "📌"}
+            </div>
+            <div style={{ fontSize:".65rem", color:"#fff", fontWeight:600 }}>Save</div>
+          </div>
+          {/* Creator */}
+          <div style={{ position:"relative" }}>
+            <div style={{ width:44, height:44, borderRadius:"50%", background:reel.color, border:"2px solid #fff", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:".85rem", color:"#fff", cursor:"pointer" }}>{reel.avatar}</div>
+            <div style={{ position:"absolute", bottom:-6, left:"50%", transform:"translateX(-50%)", width:18, height:18, borderRadius:"50%", background:"var(--a)", border:"2px solid #000", display:"flex", alignItems:"center", justifyContent:"center", fontSize:".6rem", color:"#fff", fontWeight:700 }}>+</div>
+          </div>
+        </div>
+
+        {/* Bottom Info */}
+        <div style={{ position:"absolute", bottom:80, left:0, right:70, padding:"0 14px" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:8, marginBottom:8 }}>
+            <div style={{ fontWeight:700, color:"#fff", fontSize:".86rem" }}>@{reel.user.toLowerCase().replace(" ","_")}</div>
+            <div style={{ padding:"2px 8px", border:"1px solid #fff", borderRadius:4, fontSize:".6rem", color:"#fff", cursor:"pointer" }}>Follow</div>
+            <div style={{ background:"rgba(79,158,255,.3)", borderRadius:4, padding:"2px 7px", fontSize:".6rem", color:"var(--a)", fontWeight:600 }}>{reel.subject}</div>
+          </div>
+          <div style={{ fontSize:".8rem", color:"#fff", lineHeight:1.5, marginBottom:8, textShadow:"0 1px 4px rgba(0,0,0,.8)" }}>{reel.caption}</div>
+          <div style={{ display:"flex", alignItems:"center", gap:7 }}>
+            <div style={{ width:20, height:20, borderRadius:"50%", background:"linear-gradient(135deg,var(--pu),var(--a))", display:"flex", alignItems:"center", justifyContent:"center", fontSize:".6rem", animation:"spin 3s linear infinite" }}>🎵</div>
+            <div style={{ fontSize:".7rem", color:"#fff", opacity:.85 }}>{reel.music}</div>
+          </div>
+        </div>
+
+        {/* Navigation arrows */}
+        <div style={{ position:"absolute", left:0, top:0, bottom:0, width:"40%", cursor:"pointer" }} onClick={() => setCurrent(c => Math.max(0, c-1))}></div>
+        <div style={{ position:"absolute", right:0, top:0, bottom:0, width:"40%", cursor:"pointer" }} onClick={() => setCurrent(c => Math.min(reels.length-1, c+1))}></div>
+
+        {/* Comments Panel */}
+        {showComments && (
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, background:"var(--bg2)", borderRadius:"20px 20px 0 0", padding:20, maxHeight:"50vh", overflowY:"auto" }}>
+            <div style={{ textAlign:"center", width:40, height:4, background:"var(--bd)", borderRadius:2, margin:"0 auto 16px" }}></div>
+            <div style={{ fontWeight:700, marginBottom:14, fontSize:".9rem" }}>💬 Comments ({reel.comments})</div>
+            {["দারুণ! অনেক কিছু শিখলাম 🔥", "Please আরো video দাও!", "Physics এত সহজ মনে হয়নি আগে!", "Share করলাম friends দের সাথে ❤️"].map((c,i) => (
+              <div key={i} style={{ display:"flex", gap:9, marginBottom:12 }}>
+                <div style={{ width:32, height:32, borderRadius:"50%", background:["#1877f2","#42b883","#ff5722","#9c27b0"][i], display:"flex", alignItems:"center", justifyContent:"center", fontSize:".7rem", fontWeight:700, color:"#fff", flexShrink:0 }}>
+                  {["As","Kh","Ji","Ak"][i]}
+                </div>
+                <div style={{ background:"var(--bg3)", borderRadius:"4px 12px 12px 12px", padding:"8px 12px", fontSize:".8rem", flex:1 }}>{c}</div>
+              </div>
+            ))}
+            <div style={{ display:"flex", gap:8, marginTop:12 }}>
+              <input style={{ flex:1, background:"var(--bg3)", border:"1px solid var(--bd)", borderRadius:20, padding:"8px 14px", color:"var(--text)", fontSize:".82rem", outline:"none", fontFamily:"inherit" }} placeholder="Comment করো..." />
+              <button style={{ padding:"8px 16px", borderRadius:20, background:"linear-gradient(135deg,var(--a),#1a5fc4)", border:"none", color:"#fff", fontSize:".78rem", fontWeight:600, cursor:"pointer" }}>Send</button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// STATUS PAGE
+// ══════════════════════════════
+function StatusPage({ setPage }) {
+  const [viewing, setViewing] = useState(null);
+  const [progress, setProgress] = useState(0);
+  const [showCreate, setShowCreate] = useState(false);
+  const [statusText, setStatusText] = useState("");
+  const [selectedBg, setSelectedBg] = useState(0);
+
+  const statuses = [
+    { id:1, user:"Ashraf Ahmed", avatar:"As", color:"linear-gradient(135deg,#ffd700,#ff8c00)", time:"2m ago", seen:false, items:[
+      { type:"text", text:"আজকে Physics-এর সব chapter শেষ! 🎉 Exam ready!", bg:"linear-gradient(135deg,#0d1829,#1a0a2e)" },
+      { type:"emoji", text:"🔥 Study Streak: 12 days! কেউ challenge করতে পারবে?", bg:"linear-gradient(135deg,#1a0a00,#0d1829)" }
+    ]},
+    { id:2, user:"Khadiza Juha", avatar:"Kh", color:"#42b883", time:"15m ago", seen:false, items:[
+      { type:"text", text:"Integration শেষ! Math এখন easy মনে হচ্ছে 🧮✨", bg:"linear-gradient(135deg,#001a00,#0d1829)" }
+    ]},
+    { id:3, user:"Jisan Khan", avatar:"Ji", color:"#ff5722", time:"1h ago", seen:true, items:[
+      { type:"text", text:"Python project done! First website deployed 💻🚀", bg:"linear-gradient(135deg,#1a0a00,#060d1a)" }
+    ]},
+    { id:4, user:"Akbor Hossen", avatar:"Ak", color:"#9c27b0", time:"2h ago", seen:true, items:[
+      { type:"text", text:"Chemistry exam দিলাম! ভালো গেছে মনে হয় 🧪🤞", bg:"linear-gradient(135deg,#1a0033,#060d1a)" }
+    ]},
+    { id:5, user:"Amjad Hossain", avatar:"Am", color:"#00bcd4", time:"3h ago", seen:true, items:[
+      { type:"text", text:"BCS prelim-এ পাস! Alhamdulillah 🙏📖", bg:"linear-gradient(135deg,#001a1a,#060d1a)" }
+    ]},
+  ];
+
+  const bgs = [
+    "linear-gradient(135deg,#0d1829,#1a0a2e)",
+    "linear-gradient(135deg,#1a0000,#0d1829)",
+    "linear-gradient(135deg,#001a00,#0d1829)",
+    "linear-gradient(135deg,#1a1a00,#0d1829)",
+    "linear-gradient(135deg,#00001a,#1a0a2e)",
+    "linear-gradient(135deg,#1a000d,#0d1829)",
+  ];
+
+  const [currentItem, setCurrentItem] = useState(0);
+
+  useEffect(() => {
+    if (!viewing) return;
+    setProgress(0);
+    setCurrentItem(0);
+    const items = statuses.find(s => s.id === viewing)?.items || [];
+    let p = 0;
+    const int = setInterval(() => {
+      p += 2;
+      setProgress(p);
+      if (p >= 100) {
+        if (currentItem < items.length - 1) {
+          setCurrentItem(c => c + 1);
+          p = 0;
+          setProgress(0);
+        } else {
+          setViewing(null);
+          clearInterval(int);
+        }
+      }
+    }, 60);
+    return () => clearInterval(int);
+  }, [viewing, currentItem]);
+
+  const viewingStatus = statuses.find(s => s.id === viewing);
+
+  return (
+    <div style={{ background:"var(--bg)", minHeight:"100vh", paddingTop:70 }}>
+      {/* Story Viewer */}
+      {viewing && viewingStatus && (
+        <div style={{ position:"fixed", inset:0, zIndex:500, background:"#000", display:"flex", flexDirection:"column" }}>
+          {/* Progress */}
+          <div style={{ display:"flex", gap:4, padding:"50px 12px 10px" }}>
+            {viewingStatus.items.map((_, i) => (
+              <div key={i} style={{ flex:1, height:2, background:"rgba(255,255,255,.3)", borderRadius:1, overflow:"hidden" }}>
+                <div style={{ height:"100%", background:"#fff", width: i < currentItem ? "100%" : i === currentItem ? `${progress}%` : "0%", transition:"width .06s linear" }}></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Header */}
+          <div style={{ display:"flex", alignItems:"center", gap:10, padding:"8px 14px" }}>
+            <div style={{ width:38, height:38, borderRadius:"50%", background:viewingStatus.color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:".85rem", color:"#fff" }}>{viewingStatus.avatar}</div>
+            <div>
+              <div style={{ fontWeight:600, color:"#fff", fontSize:".85rem" }}>{viewingStatus.user}</div>
+              <div style={{ fontSize:".62rem", color:"rgba(255,255,255,.6)" }}>{viewingStatus.time}</div>
+            </div>
+            <button onClick={() => setViewing(null)} style={{ marginLeft:"auto", background:"none", border:"none", color:"#fff", fontSize:"1.3rem", cursor:"pointer" }}>✕</button>
+          </div>
+
+          {/* Content */}
+          <div style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", background: viewingStatus.items[currentItem]?.bg || "#000", padding:24 }}>
+            <div style={{ fontFamily:"'Sora',sans-serif", fontSize:"1.2rem", fontWeight:700, color:"#fff", textAlign:"center", lineHeight:1.6, textShadow:"0 2px 8px rgba(0,0,0,.5)" }}>
+              {viewingStatus.items[currentItem]?.text}
+            </div>
+          </div>
+
+          {/* Reply */}
+          <div style={{ padding:"12px 14px 30px", display:"flex", gap:9 }}>
+            <input style={{ flex:1, background:"rgba(255,255,255,.1)", border:"1px solid rgba(255,255,255,.2)", borderRadius:20, padding:"9px 14px", color:"#fff", fontSize:".82rem", outline:"none", fontFamily:"inherit" }} placeholder={`Reply to ${viewingStatus.user}...`} />
+            <button style={{ padding:"9px 16px", borderRadius:20, background:"linear-gradient(135deg,var(--a),#1a5fc4)", border:"none", color:"#fff", fontSize:".78rem", cursor:"pointer" }}>Send</button>
+          </div>
+
+          {/* Nav */}
+          <div style={{ position:"absolute", left:0, top:80, bottom:80, width:"40%" }} onClick={() => { if(currentItem > 0) setCurrentItem(c=>c-1); else setViewing(null); }}></div>
+          <div style={{ position:"absolute", right:0, top:80, bottom:80, width:"40%" }} onClick={() => { const items=viewingStatus.items; if(currentItem < items.length-1) setCurrentItem(c=>c+1); else setViewing(null); }}></div>
+        </div>
+      )}
+
+      {/* Create Status Modal */}
+      {showCreate && (
+        <div style={{ position:"fixed", inset:0, zIndex:400, background:"rgba(0,0,0,.85)", display:"flex", alignItems:"center", justifyContent:"center", padding:20 }}>
+          <div style={{ background:"var(--bg2)", border:"1px solid var(--bd)", borderRadius:20, padding:24, width:"100%", maxWidth:400 }}>
+            <div style={{ fontFamily:"'Sora',sans-serif", fontSize:"1rem", fontWeight:700, marginBottom:16 }}>📸 Create Status</div>
+            {/* Preview */}
+            <div style={{ width:"100%", height:160, borderRadius:12, background:bgs[selectedBg], display:"flex", alignItems:"center", justifyContent:"center", marginBottom:14, fontSize:statusText ? ".95rem" : ".8rem", fontWeight:statusText ? 700 : 400, color:statusText ? "#fff" : "rgba(255,255,255,.3)", padding:16, textAlign:"center", lineHeight:1.5 }}>
+              {statusText || "// তোমার status এখানে দেখাবে..."}
+            </div>
+            {/* Background picker */}
+            <div style={{ display:"flex", gap:8, marginBottom:14 }}>
+              {bgs.map((bg, i) => (
+                <div key={i} onClick={() => setSelectedBg(i)} style={{ width:32, height:32, borderRadius:8, background:bg, cursor:"pointer", border:`2px solid ${selectedBg===i ? "var(--a)" : "transparent"}`, transition:"all .2s" }}></div>
+              ))}
+            </div>
+            <textarea value={statusText} onChange={e=>setStatusText(e.target.value)} style={{ width:"100%", background:"var(--bg3)", border:"1px solid var(--bd)", borderRadius:10, padding:"10px 13px", color:"var(--text)", fontSize:".88rem", outline:"none", resize:"none", height:80, marginBottom:14, fontFamily:"inherit" }} placeholder="কি মনে আছে? লিখো..." />
+            <div style={{ display:"flex", gap:8 }}>
+              <button onClick={()=>setShowCreate(false)} style={{ flex:1, padding:11, borderRadius:10, background:"var(--bg3)", border:"1px solid var(--bd)", color:"var(--mt)", fontFamily:"inherit", cursor:"pointer" }}>Cancel</button>
+              <button onClick={()=>{setShowCreate(false); setStatusText(""); alert("✅ Status share হয়েছে!");}} style={{ flex:2, padding:11, borderRadius:10, background:"linear-gradient(135deg,var(--a),#1a5fc4)", border:"none", color:"#fff", fontFamily:"'Sora',sans-serif", fontWeight:700, cursor:"pointer" }}>📤 Share Status</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"0 14px" }}>
+        <h2 style={{ fontFamily:"'Sora',sans-serif", fontSize:"1.1rem", fontWeight:700, marginBottom:16 }}>📸 Status</h2>
+
+        {/* Status Row */}
+        <div style={{ display:"flex", gap:12, overflowX:"auto", paddingBottom:8, marginBottom:20 }}>
+          {/* Add Status */}
+          <div style={{ flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center", gap:5, cursor:"pointer" }} onClick={() => setShowCreate(true)}>
+            <div style={{ width:62, height:62, borderRadius:"50%", background:"var(--bg3)", border:"2px dashed var(--mt)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.5rem", position:"relative" }}>
+              📷
+              <div style={{ position:"absolute", bottom:0, right:0, width:20, height:20, borderRadius:"50%", background:"var(--a)", border:"2px solid var(--bg)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:".7rem", color:"#fff", fontWeight:700 }}>+</div>
+            </div>
+            <div style={{ fontSize:".62rem", color:"var(--mt)", textAlign:"center", maxWidth:62 }}>Add Status</div>
+          </div>
+
+          {/* Others' statuses */}
+          {statuses.map(s => (
+            <div key={s.id} style={{ flexShrink:0, display:"flex", flexDirection:"column", alignItems:"center", gap:5, cursor:"pointer" }} onClick={() => setViewing(s.id)}>
+              <div style={{ width:62, height:62, borderRadius:"50%", padding:2.5, background: s.seen ? "var(--bg3)" : "linear-gradient(45deg,var(--a),var(--pu),var(--cy))" }}>
+                <div style={{ width:"100%", height:"100%", borderRadius:"50%", background:s.color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:".85rem", color:"#fff", border:"2.5px solid var(--bg)" }}>{s.avatar}</div>
+              </div>
+              <div style={{ fontSize:".62rem", color: s.seen ? "var(--mt)" : "var(--text)", textAlign:"center", maxWidth:62, whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.user.split(" ")[0]}</div>
+              <div style={{ fontSize:".56rem", color:"var(--mt)" }}>{s.time}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent Updates */}
+        <div style={{ fontFamily:"'Fira Code',monospace", fontSize:".6rem", color:"var(--mt)", letterSpacing:2, textTransform:"uppercase", marginBottom:12 }}>// Recent Updates</div>
+        {statuses.map(s => (
+          <div key={s.id} onClick={() => setViewing(s.id)} style={{ display:"flex", alignItems:"center", gap:12, padding:"12px 14px", background:"var(--bg2)", border:"1px solid var(--bd)", borderRadius:12, marginBottom:8, cursor:"pointer", transition:"all .2s" }}
+            onMouseEnter={e => e.currentTarget.style.borderColor = "var(--a)"}
+            onMouseLeave={e => e.currentTarget.style.borderColor = "var(--bd)"}>
+            <div style={{ width:50, height:50, borderRadius:"50%", padding:2.5, background: s.seen ? "var(--bg3)" : "linear-gradient(45deg,var(--a),var(--pu),var(--cy))", flexShrink:0 }}>
+              <div style={{ width:"100%", height:"100%", borderRadius:"50%", background:s.color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:".9rem", color:"#fff", border:"2px solid var(--bg)" }}>{s.avatar}</div>
+            </div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <div style={{ fontWeight:600, fontSize:".86rem", marginBottom:3 }}>{s.user}</div>
+              <div style={{ fontSize:".72rem", color:"var(--mt)", whiteSpace:"nowrap", overflow:"hidden", textOverflow:"ellipsis" }}>{s.items[0]?.text?.slice(0,50)}...</div>
+            </div>
+            <div style={{ textAlign:"right", flexShrink:0 }}>
+              <div style={{ fontSize:".62rem", color:"var(--mt)" }}>{s.time}</div>
+              {!s.seen && <div style={{ width:8, height:8, borderRadius:"50%", background:"var(--a)", marginLeft:"auto", marginTop:4 }}></div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════
+// POST PAGE
+// ══════════════════════════════
+function PostPage({ user, setPage }) {
+  const [posts, setPosts] = useState([
+    { id:1, user:"Ashraf Ahmed", avatar:"As", color:"linear-gradient(135deg,#ffd700,#ff8c00)", badge:"🏆 Top", time:"2 hrs ago", text:"আজকে Newton's Laws সম্পূর্ণ শেষ! 💪 Study streak 🔥25 days চলছে! সবাই দোয়া করো।", tags:["Physics","SSC2025","Motivated"], likes:87, comments:32, shares:12, liked:false, emoji:"⚛️" },
+    { id:2, user:"Khadiza Juha", avatar:"Kh", color:"#42b883", badge:"🎓 Mentor", time:"5 hrs ago", text:"Integration shortcut দিয়ে exam-এ ৫ মিনিট বাঁচাও! নিচের video-টা দেখো 🔥", tags:["Math","HSC2025"], likes:245, comments:89, shares:56, liked:true, emoji:"🧮", hasVideo:true },
+    { id:3, user:"Jisan Khan", avatar:"Ji", color:"#ff5722", badge:"", time:"Yesterday", text:"🎉 ৩০ দিনের Streak! ১২৮ ঘন্টা পড়েছি। Leaderboard Top 10! #NeverGiveUp 💪", tags:["Achievement","Streak"], likes:456, comments:123, shares:87, liked:false, emoji:"🔥", isMilestone:true },
+    { id:4, user:"Akbor Hossen", avatar:"Ak", color:"#9c27b0", badge:"", time:"2 days ago", text:"Chemistry Lab-এ আজকে অনেক মজা হলো! Organic reactions practice করলাম 🧪", tags:["Chemistry","Lab"], likes:134, comments:45, shares:23, liked:false, emoji:"🧪" },
+  ]);
+
+  const [showPostBox, setShowPostBox] = useState(false);
+  const [newPost, setNewPost] = useState("");
+  const [newTag, setNewTag] = useState("");
+  const [localLikes, setLocalLikes] = useState({});
+
+  const toggleLike = (id) => {
+    setLocalLikes(l => ({ ...l, [id]: !l[id] }));
+  };
+
+  const submitPost = () => {
+    if (!newPost.trim()) return;
+    const post = {
+      id: Date.now(), user: user?.name || "Ashraf Ahmed",
+      avatar: user?.name?.slice(0,2).toUpperCase() || "As",
+      color: "linear-gradient(135deg,var(--a),var(--pu))",
+      badge: "", time: "Just now", text: newPost,
+      tags: newTag ? [newTag] : [], likes: 0, comments: 0, shares: 0, liked: false, emoji: "📝"
+    };
+    setPosts(p => [post, ...p]);
+    setNewPost(""); setNewTag(""); setShowPostBox(false);
+  };
+
+  return (
+    <div style={{ background:"var(--bg)", minHeight:"100vh", paddingTop:70, paddingBottom:40 }}>
+      <div style={{ maxWidth:680, margin:"0 auto", padding:"12px 14px" }}>
+
+        {/* Create Post Box */}
+        <div style={{ background:"var(--bg2)", border:"1px solid var(--bd)", borderRadius:16, padding:16, marginBottom:16 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom: showPostBox ? 14 : 0 }}>
+            <div style={{ width:40, height:40, borderRadius:"50%", background:"linear-gradient(135deg,var(--a),var(--pu))", display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:".85rem", flexShrink:0 }}>
+              {user?.name?.slice(0,2).toUpperCase() || "As"}
+            </div>
+            <div onClick={() => setShowPostBox(true)} style={{ flex:1, background:"var(--bg3)", border:"1px solid var(--bd)", borderRadius:20, padding:"10px 16px", fontSize:".84rem", color:"var(--mt)", cursor:"pointer" }}>
+              আজকে কি পড়লে? শেয়ার করো! 📚
+            </div>
+          </div>
+
+          {showPostBox && (
+            <div>
+              <textarea value={newPost} onChange={e=>setNewPost(e.target.value)} style={{ width:"100%", background:"var(--bg3)", border:"1px solid var(--bd)", borderRadius:12, padding:"10px 14px", color:"var(--text)", fontSize:".88rem", outline:"none", resize:"none", height:100, marginBottom:10, fontFamily:"inherit", lineHeight:1.6 }} placeholder="তোমার study update লিখো..." autoFocus />
+              <input value={newTag} onChange={e=>setNewTag(e.target.value)} style={{ width:"100%", background:"var(--bg3)", border:"1px solid var(--bd)", borderRadius:10, padding:"8px 13px", color:"var(--text)", fontSize:".82rem", outline:"none", marginBottom:10, fontFamily:"inherit" }} placeholder="#tag (e.g. Physics, SSC2025)" />
+              <div style={{ display:"flex", gap:8, justifyContent:"flex-end" }}>
+                <button onClick={()=>setShowPostBox(false)} style={{ padding:"8px 16px", borderRadius:10, background:"var(--bg3)", border:"1px solid var(--bd)", color:"var(--mt)", fontFamily:"inherit", cursor:"pointer" }}>Cancel</button>
+                <button onClick={submitPost} style={{ padding:"8px 20px", borderRadius:10, background:"linear-gradient(135deg,var(--a),#1a5fc4)", border:"none", color:"#fff", fontFamily:"'Sora',sans-serif", fontWeight:700, cursor:"pointer" }}>📤 Post করো</button>
+              </div>
+            </div>
+          )}
+
+          {!showPostBox && (
+            <div style={{ display:"flex", gap:4, borderTop:"1px solid var(--bd)", paddingTop:12, marginTop:12 }}>
+              {[["📹","Live","var(--rd)"],["🖼️","Photo","var(--gr)"],["📝","Notes","var(--a)"],["📊","Progress","var(--gd)"]].map(([ic,lb,cl],i) => (
+                <button key={i} onClick={()=>setShowPostBox(true)} style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:5, padding:"7px", borderRadius:10, background:"none", border:"none", color:cl, fontSize:".74rem", fontWeight:500, cursor:"pointer", fontFamily:"inherit" }}>
+                  <span style={{ fontSize:"1rem" }}>{ic}</span>
+                  <span className="hide-mobile">{lb}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Feed Posts */}
+        {posts.map(post => (
+          <div key={post.id} style={{ background:"var(--bg2)", border:"1px solid var(--bd)", borderRadius:16, marginBottom:14, overflow:"hidden" }}>
+            {/* Header */}
+            <div style={{ display:"flex", alignItems:"center", gap:10, padding:"13px 14px 8px" }}>
+              <div style={{ width:40, height:40, borderRadius:"50%", background:post.color, display:"flex", alignItems:"center", justifyContent:"center", fontWeight:700, fontSize:".88rem", color:"#fff", flexShrink:0 }}>{post.avatar}</div>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:".88rem", fontWeight:600, display:"flex", alignItems:"center", gap:6, flexWrap:"wrap" }}>
+                  {post.user}
+                  {post.badge && <span style={{ background:"rgba(245,197,66,.15)", color:"var(--gd)", border:"1px solid rgba(245,197,66,.25)", borderRadius:4, padding:"1px 6px", fontSize:".6rem", fontWeight:600 }}>{post.badge}</span>}
+                </div>
+                <div style={{ fontSize:".68rem", color:"var(--mt)", marginTop:1 }}>{post.time} · 🌐</div>
+              </div>
+              <button style={{ width:30, height:30, borderRadius:"50%", background:"none", border:"none", color:"var(--mt)", fontSize:".95rem", cursor:"pointer" }}>•••</button>
+            </div>
+
+            {/* Content */}
+            <div style={{ padding:"2px 14px 10px", fontSize:".88rem", lineHeight:1.65 }}>{post.text}</div>
+
+            {/* Tags */}
+            {post.tags.length > 0 && (
+              <div style={{ display:"flex", gap:6, flexWrap:"wrap", padding:"0 14px 10px" }}>
+                {post.tags.map((t,i) => (
+                  <span key={i} style={{ background:"rgba(79,158,255,.1)", color:"var(--a)", borderRadius:20, padding:"2px 9px", fontSize:".68rem", cursor:"pointer" }}>#{t}</span>
+                ))}
+              </div>
+            )}
+
+            {/* Media */}
+            {(post.emoji || post.isMilestone) && (
+              <div style={{ width:"100%", aspectRatio:"16/9", background: post.isMilestone ? "linear-gradient(135deg,rgba(245,197,66,.2),rgba(255,138,61,.1))" : "var(--bg3)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"4rem", borderTop:"1px solid var(--bd)", borderBottom:"1px solid var(--bd)", position:"relative", cursor: post.hasVideo ? "pointer" : "default" }}>
+                {post.emoji}
+                {post.hasVideo && <div style={{ position:"absolute", width:52, height:52, borderRadius:"50%", background:"rgba(255,255,255,.9)", display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.2rem" }}>▶️</div>}
+              </div>
+            )}
+
+            {/* Stats */}
+            <div style={{ padding:"8px 14px", display:"flex", justifyContent:"space-between", borderBottom:"1px solid var(--bd)", fontSize:".72rem", color:"var(--mt)" }}>
+              <span>👍❤️🎉 {(post.likes + (localLikes[post.id] ? 1 : 0)).toLocaleString()} জন</span>
+              <span>{post.comments} comments · {post.shares} shares</span>
+            </div>
+
+            {/* Actions */}
+            <div style={{ display:"flex" }}>
+              {[
+                { icon: localLikes[post.id] || post.liked ? "👍" : "👍", label:"Like", active: localLikes[post.id] || post.liked, fn:()=>toggleLike(post.id) },
+                { icon:"💬", label:"Comment", fn:()=>{} },
+                { icon:"🔁", label:"Share", fn:()=>{} },
+                { icon:"🔖", label:"Save", fn:()=>{} },
+              ].map((a,i) => (
+                <button key={i} onClick={a.fn} style={{ flex:1, display:"flex", alignItems:"center", justifyContent:"center", gap:5, padding:"9px", fontSize:".78rem", fontWeight:500, border:"none", background:"none", color: a.active ? "var(--a)" : "var(--mt)", cursor:"pointer", transition:"all .2s", fontFamily:"inherit" }}
+                  onMouseEnter={e=>e.currentTarget.style.background="var(--bg3)"}
+                  onMouseLeave={e=>e.currentTarget.style.background="none"}>
+                  <span style={{ fontSize:"1rem" }}>{a.icon}</span>
+                  <span className="hide-mobile">{a.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+
+// ══════════════════════════════
+// MAIN APP
+// ══════════════════════════════
+export default function App() {
+  const [page, setPage] = useState("home");
+  const [user, setUser] = useState(null);
+
+  return (
+    <>
+      <style>{styles}</style>
+      <AppContext.Provider value={{ page, setPage, user, setUser }}>
+        <Navbar page={page} setPage={setPage} user={user} setUser={setUser} />
+        {page === "home" && <HomePage setPage={setPage} />}
+        {page === "courses" && <CoursesPage />}
+        {page === "login" && <LoginPage setPage={setPage} setUser={setUser} />}
+        {page === "register" && <RegisterPage setPage={setPage} setUser={setUser} />}
+        {page === "dashboard" && <DashboardPage user={user} setPage={setPage} />}
+        {page === "ai" && <AITutorPage />}
+        {page === "leaderboard" && <LeaderboardPage />}
+        {page === "profile" && <ProfilePage user={user} setPage={setPage} />}
+        {page === "reels" && <ReelsPage />}
+        {page === "status" && <StatusPage setPage={setPage} />}
+        {page === "post" && <PostPage user={user} setPage={setPage} />}
+      </AppContext.Provider>
+    </>
+  );
+}
