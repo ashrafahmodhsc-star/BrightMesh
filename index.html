@@ -1,7 +1,19 @@
 bash
 
-cat > /home/claude/bm_part1.html << 'EOF'
-<!DOCTYPE html>
+wc -c /home/claude/bm_part1.html /home/claude/bm_part2.html /home/claude/bm_part3.js /home/claude/bm_video_feature.html
+Output
+
+ 37479 /home/claude/bm_part1.html
+ 41461 /home/claude/bm_part2.html
+ 65334 /home/claude/bm_part3.js
+ 47888 /home/claude/bm_video_feature.html
+192162 total
+
+ash
+
+# Write the complete merged file - Part A (HTML head + CSS)
+python3 - << 'PYEOF'
+content = '''<!DOCTYPE html>
 <html lang="bn" data-theme="dark">
 <head>
 <meta charset="UTF-8">
@@ -31,12 +43,11 @@ cat > /home/claude/bm_part1.html << 'EOF'
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 html{scroll-behavior:smooth;}
-body{background:var(--bg);font-family:'Inter',sans-serif;color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
+body{background:var(--bg);font-family:\'Inter\',sans-serif;color:var(--text);min-height:100vh;transition:background .3s,color .3s;}
 button{cursor:pointer;font-family:inherit;}
 input,textarea,select{font-family:inherit;}
 ::-webkit-scrollbar{width:4px;height:4px;}
 ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:2px;}
-
 @keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:translateY(0)}}
 @keyframes pop{0%{transform:scale(0.85)}60%{transform:scale(1.05)}100%{transform:scale(1)}}
@@ -48,11 +59,11 @@ input,textarea,select{font-family:inherit;}
 @keyframes notifIn{from{transform:translateX(110%);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes spin360{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 @keyframes streakFire{0%,100%{transform:scale(1) rotate(-2deg)}50%{transform:scale(1.08) rotate(2deg)}}
-@keyframes shimmer{0%{background-position:200%}100%{background-position:-200%}}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
-@keyframes glow{0%,100%{box-shadow:0 0 5px var(--a)}50%{box-shadow:0 0 20px var(--a),0 0 40px var(--a-light)}}
 @keyframes bounceIn{0%{transform:scale(0);opacity:0}60%{transform:scale(1.15)}80%{transform:scale(0.95)}100%{transform:scale(1);opacity:1}}
-
+@keyframes progressPulse{0%,100%{opacity:1}50%{opacity:.6}}
+@keyframes uploadBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+/* SHARED */
 .card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);transition:all .2s;}
 .btn{padding:9px 18px;border-radius:var(--r2);border:none;font-size:.88rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;}
 .btn-primary{background:var(--a);color:#fff;}
@@ -60,8 +71,6 @@ input,textarea,select{font-family:inherit;}
 .btn-secondary{background:var(--bg3);border:1.5px solid var(--bd);color:var(--text2);}
 .btn-secondary:hover{border-color:var(--a);color:var(--a);}
 .btn-sm{padding:6px 14px;font-size:.78rem;}
-.btn-gr{background:var(--gr);color:#fff;}
-.btn-rd{background:var(--rd);color:#fff;}
 .inp{width:100%;background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r2);padding:11px 14px;font-size:.9rem;color:var(--text);outline:none;transition:border-color .2s;}
 .inp:focus{border-color:var(--a);box-shadow:0 0 0 3px rgba(0,102,255,.1);}
 .inp::placeholder{color:var(--text4);}
@@ -73,13 +82,11 @@ input,textarea,select{font-family:inherit;}
 .es-icon{font-size:2.8rem;margin-bottom:11px;}
 .es-title{font-size:.95rem;font-weight:600;color:var(--text2);margin-bottom:5px;}
 .es-desc{font-size:.8rem;line-height:1.6;}
-
-/* GLOBAL LOADER */
+/* LOADER */
 #globalLoader{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;}
 .gl-logo{font-size:3rem;animation:float 2s ease-in-out infinite;}
 .gl-name{font-size:1.3rem;font-weight:800;color:var(--a);}
 .gl-spin{width:34px;height:34px;border:3px solid var(--bd);border-top-color:var(--a);border-radius:50%;animation:spin360 .8s linear infinite;}
-
 /* AUTH */
 #authScreen{position:fixed;inset:0;z-index:9000;background:var(--bg);display:none;align-items:center;justify-content:center;padding:20px;overflow-y:auto;}
 #authScreen.show{display:flex;}
@@ -93,11 +100,10 @@ input,textarea,select{font-family:inherit;}
 .auth-error{background:#fff5f5;border:1px solid #ffd0d0;border-radius:var(--r2);padding:10px 13px;font-size:.8rem;color:var(--rd);margin-bottom:12px;display:none;}
 [data-theme="dark"] .auth-error{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.3);}
 .auth-divider{display:flex;align-items:center;gap:10px;margin:14px 0;font-size:.75rem;color:var(--text3);}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--bd);}
+.auth-divider::before,.auth-divider::after{content:\'\';flex:1;height:1px;background:var(--bd);}
 .google-btn{width:100%;padding:11px;border:1.5px solid var(--bd);border-radius:var(--r2);background:var(--bg3);color:var(--text2);font-size:.88rem;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;transition:all .2s;}
 .google-btn:hover{border-color:var(--a);}
-
-/* PWA BAR */
+/* PWA */
 #pwaBar{position:fixed;bottom:68px;left:10px;right:10px;z-index:8000;background:var(--a);color:#fff;border-radius:var(--r);padding:12px 15px;display:none;align-items:center;gap:10px;box-shadow:var(--shadow-lg);animation:slideUp .4s ease;}
 #pwaBar.show{display:flex;}
 .pwa-text{flex:1;}
@@ -105,7 +111,6 @@ input,textarea,select{font-family:inherit;}
 .pwa-sub{font-size:.7rem;opacity:.85;}
 .pwa-install{background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.5);border-radius:8px;padding:6px 14px;color:#fff;font-size:.78rem;font-weight:700;cursor:pointer;flex-shrink:0;}
 .pwa-close{background:none;border:none;color:rgba(255,255,255,.75);font-size:1.2rem;cursor:pointer;}
-
 /* TOPBAR */
 .topbar{position:fixed;top:0;left:0;right:0;z-index:300;background:var(--bg);border-bottom:1px solid var(--bd);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;box-shadow:var(--shadow);}
 .logo{display:flex;align-items:center;gap:8px;}
@@ -117,7 +122,6 @@ input,textarea,select{font-family:inherit;}
 .tb-btn:hover{border-color:var(--a);}
 .tb-badge{position:absolute;top:0;right:0;width:14px;height:14px;background:var(--rd);border-radius:50%;font-size:7px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;border:2px solid var(--bg);}
 .tb-av{width:32px;height:32px;border-radius:50%;background:var(--a);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.78rem;color:#fff;cursor:pointer;border:2px solid var(--bd);}
-
 /* SEARCH */
 .search-wrap{position:relative;margin-bottom:12px;}
 .s-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text4);}
@@ -129,19 +133,16 @@ input,textarea,select{font-family:inherit;}
 .sd-item:hover{background:var(--bg3);}
 .sd-title{font-size:.86rem;font-weight:500;margin-bottom:2px;}
 .sd-meta{font-size:.72rem;color:var(--text3);}
-
 /* BOTTOM NAV */
 .bnav{position:fixed;bottom:0;left:0;right:0;z-index:300;background:var(--bg);border-top:1px solid var(--bd);display:flex;height:58px;box-shadow:0 -2px 10px rgba(0,0,0,.06);}
 .bni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:.54rem;font-weight:500;color:var(--text3);border:none;background:none;cursor:pointer;transition:color .2s;position:relative;}
 .bni.active{color:var(--a);}
 .bni .ni{font-size:1.15rem;line-height:1;}
 .bni .ndot{position:absolute;top:7px;right:calc(50% - 16px);width:7px;height:7px;background:var(--rd);border-radius:50%;border:1.5px solid var(--bg);}
-
 /* MAIN */
 .main{padding:56px 0 60px;min-height:100vh;}
 .panel{display:none;}
 .panel.active{display:block;animation:fadeIn .3s ease;}
-
 /* STORIES */
 .stories-row{display:flex;gap:10px;overflow-x:auto;padding-bottom:4px;margin-bottom:13px;}
 .stories-row::-webkit-scrollbar{display:none;}
@@ -151,17 +152,14 @@ input,textarea,select{font-family:inherit;}
 .story-ring.seen-st{background:var(--bd2);}
 .story-av{width:100%;height:100%;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;border:2.5px solid var(--bg);color:#fff;}
 .story-name{font-size:.58rem;color:var(--text3);max-width:58px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-
 /* CREATE POST */
 .create-post{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:13px;margin-bottom:13px;}
 .cp-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
 .cp-inp{flex:1;background:var(--bg3);border:1.5px solid var(--bd);border-radius:24px;padding:9px 15px;font-size:.86rem;color:var(--text);outline:none;transition:border-color .2s;cursor:pointer;}
-.cp-inp:focus{border-color:var(--a);}
 .cp-inp::placeholder{color:var(--text4);}
 .cp-actions{display:flex;gap:3px;border-top:1px solid var(--bd);padding-top:9px;}
 .cp-action{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:7px;border-radius:var(--r2);font-size:.74rem;font-weight:500;border:none;background:none;color:var(--text3);cursor:pointer;transition:background .2s;}
 .cp-action:hover{background:var(--bg3);}
-
 /* POST CARD */
 .post-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:11px;overflow:hidden;animation:fadeIn .4s ease;}
 .post-header{display:flex;align-items:center;gap:10px;padding:12px 13px 7px;}
@@ -171,7 +169,6 @@ input,textarea,select{font-family:inherit;}
 .post-more{width:28px;height:28px;border-radius:50%;border:none;background:none;font-size:1rem;color:var(--text3);cursor:pointer;transition:background .2s;}
 .post-more:hover{background:var(--bg3);}
 .post-text{padding:2px 13px 10px;font-size:.9rem;line-height:1.65;}
-.post-tags{display:flex;flex-wrap:wrap;gap:5px;padding:0 13px 10px;}
 .post-stats{padding:7px 13px;display:flex;justify-content:space-between;border-bottom:1px solid var(--bd);font-size:.7rem;color:var(--text3);}
 .post-actions{display:flex;}
 .post-action{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:9px;font-size:.76rem;font-weight:500;border:none;background:none;color:var(--text3);cursor:pointer;transition:background .2s;}
@@ -184,7 +181,6 @@ input,textarea,select{font-family:inherit;}
 .ci-bubble{background:var(--bg3);border-radius:10px;padding:7px 11px;flex:1;font-size:.8rem;line-height:1.55;}
 .ci-name{font-size:.68rem;font-weight:700;color:var(--a);margin-bottom:2px;}
 .ci-inp-row{display:flex;gap:7px;margin-top:8px;}
-
 /* POST MODAL */
 #postModal{position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.55);display:none;align-items:flex-end;justify-content:center;}
 #postModal.show{display:flex;}
@@ -200,54 +196,43 @@ input,textarea,select{font-family:inherit;}
 .pm-cat.on{border-color:var(--a);color:var(--a);background:var(--a-light);}
 .pm-footer{display:flex;align-items:center;justify-content:space-between;margin-top:11px;}
 .pm-char{font-size:.72rem;color:var(--text3);}
-
 /* XP HERO */
 .xp-hero{background:linear-gradient(135deg,var(--a),var(--pu));color:#fff;border-radius:var(--r);padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
-.xp-hero::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);}
-.xp-hero::after{content:'';position:absolute;bottom:-25px;left:-10px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.07);}
+.xp-hero::before{content:\'\';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);}
 .xp-row{display:flex;align-items:center;gap:12px;margin-bottom:11px;position:relative;z-index:1;}
 .xp-badge{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;cursor:pointer;flex-shrink:0;transition:all .3s;}
 .xp-badge:hover{background:rgba(255,255,255,.35);transform:scale(1.1);}
 .xp-bar-bg{height:10px;background:rgba(255,255,255,.25);border-radius:5px;overflow:hidden;position:relative;z-index:1;}
 .xp-bar-fill{height:100%;background:rgba(255,255,255,.9);border-radius:5px;transition:width .8s;}
 .xp-labels{display:flex;justify-content:space-between;font-size:.6rem;opacity:.8;margin-top:4px;position:relative;z-index:1;}
-
 /* STAT GRID */
 .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:12px;}
 .stat-box{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;text-align:center;cursor:pointer;transition:all .2s;}
 .stat-box:hover{border-color:var(--a);transform:translateY(-2px);}
-.stat-val{font-size:1.4rem;font-weight:700;color:var(--a);display:block;font-family:'Fira Code',monospace;}
+.stat-val{font-size:1.4rem;font-weight:700;color:var(--a);display:block;font-family:\'Fira Code\',monospace;}
 .stat-lbl{font-size:.68rem;color:var(--text3);margin-top:3px;}
-
 /* TIMER */
 .timer-card{background:var(--a);color:#fff;border-radius:var(--r);padding:18px;margin-bottom:12px;position:relative;overflow:hidden;}
-.timer-card::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);}
+.timer-card::before{content:\'\';position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,.1);}
 .timer-modes{display:flex;gap:5px;justify-content:center;flex-wrap:wrap;margin-bottom:13px;position:relative;z-index:1;}
 .t-mode{padding:5px 13px;border-radius:20px;border:1.5px solid rgba(255,255,255,.4);background:rgba(255,255,255,.1);font-size:.72rem;font-weight:600;color:#fff;cursor:pointer;transition:all .2s;}
 .t-mode.on{background:rgba(255,255,255,.25);border-color:#fff;}
-.timer-disp{font-family:'Fira Code',monospace;font-size:3.2rem;font-weight:700;text-align:center;letter-spacing:4px;margin:12px 0;position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.15);}
+.timer-disp{font-family:\'Fira Code\',monospace;font-size:3.2rem;font-weight:700;text-align:center;letter-spacing:4px;margin:12px 0;position:relative;z-index:1;text-shadow:0 2px 8px rgba(0,0,0,.15);}
 .timer-task{width:100%;background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:10px;padding:9px 13px;font-size:.85rem;color:#fff;outline:none;margin-bottom:12px;position:relative;z-index:1;}
-.timer-task::placeholder{color:rgba(255,255,255,.6);}
-.timer-task::placeholder{color:rgba(255,255,255,.6);}
 .timer-btns{display:flex;gap:7px;justify-content:center;position:relative;z-index:1;}
 .t-btn{padding:9px 20px;border-radius:10px;border:none;font-size:.82rem;font-weight:700;cursor:pointer;transition:all .2s;font-family:inherit;}
 .t-start{background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.5);}
 .t-start:hover{background:rgba(255,255,255,.3);}
 .t-alt{background:rgba(0,0,0,.15);color:#fff;}
 .timer-info{text-align:center;font-size:.72rem;opacity:.8;margin-top:10px;position:relative;z-index:1;}
-.timer-progress-ring{position:absolute;top:10px;right:10px;z-index:1;}
-
-/* POMODORO SESSIONS */
 .pomo-row{display:flex;gap:5px;justify-content:center;margin-top:9px;position:relative;z-index:1;}
 .pomo-dot{width:10px;height:10px;border-radius:50%;border:1.5px solid rgba(255,255,255,.5);transition:all .3s;}
 .pomo-dot.done{background:#fff;border-color:#fff;}
 .pomo-dot.current{background:rgba(255,255,255,.5);border-color:#fff;animation:pulse 1s ease-in-out infinite;}
-
 /* MYSTERY BOX */
 .mystery-box{background:linear-gradient(135deg,var(--pu),#4f46e5);border-radius:var(--r);padding:18px;text-align:center;color:#fff;cursor:pointer;transition:all .3s;margin-bottom:12px;}
 .mystery-box:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(124,58,237,.3);}
 .mb-emoji{font-size:2.8rem;display:block;margin-bottom:9px;animation:float 3s ease-in-out infinite;}
-
 /* QUEST */
 .quest-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:11px;}
 .quest-item{display:flex;align-items:center;gap:11px;padding:9px 0;border-bottom:1px solid var(--bd);}
@@ -262,23 +247,19 @@ input,textarea,select{font-family:inherit;}
 .qi-btn{background:var(--gr);color:#fff;border:none;border-radius:6px;padding:5px 11px;font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;}
 .qi-btn:hover{transform:scale(1.05);}
 .qi-btn:disabled{background:var(--text4);cursor:not-allowed;}
-
 /* STREAK */
 .streak-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:16px;text-align:center;margin-bottom:12px;border-left:4px solid var(--gd);}
 .s-days{display:flex;justify-content:center;gap:5px;margin:10px 0;}
 .sday{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:600;color:var(--text3);}
 .sday.done{background:var(--gd);border-color:var(--gd);color:#fff;}
 .sday.today{border-color:var(--gd);color:var(--gd);}
-
 /* PROG */
 .prog-item{margin-bottom:11px;}
 .prog-label{display:flex;justify-content:space-between;font-size:.8rem;margin-bottom:5px;}
 .prog-bar-bg{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
 .prog-fill{height:100%;border-radius:4px;transition:width .6s;}
-
 /* SPIN */
 #spinCanvas{display:block;margin:0 auto;}
-
 /* LB */
 .lb-tabs{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--bd);border-radius:10px;padding:3px;margin-bottom:12px;}
 .lb-tab{flex:1;padding:7px;border-radius:8px;border:none;background:transparent;font-size:.72rem;font-weight:500;color:var(--text3);cursor:pointer;transition:all .2s;}
@@ -286,16 +267,15 @@ input,textarea,select{font-family:inherit;}
 .lb-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;transition:all .2s;}
 .lb-item:hover{border-color:var(--a);}
 .lb-item.me{border-color:var(--a);background:var(--a-light);}
-.lb-rank{font-size:.8rem;font-weight:700;color:var(--text3);min-width:22px;text-align:center;font-family:'Fira Code',monospace;}
+.lb-rank{font-size:.8rem;font-weight:700;color:var(--text3);min-width:22px;text-align:center;font-family:\'Fira Code\',monospace;}
 .lb-info{flex:1;}
 .lb-name{font-size:.88rem;font-weight:600;}
 .lb-sub{font-size:.7rem;color:var(--text3);margin-top:2px;}
 .lb-score{text-align:right;}
-.lb-hrs{font-size:.9rem;font-weight:700;color:var(--a);font-family:'Fira Code',monospace;}
+.lb-hrs{font-size:.9rem;font-weight:700;color:var(--a);font-family:\'Fira Code\',monospace;}
 .lb-pts{font-size:.62rem;color:var(--text3);}
 .live-badge{display:inline-flex;align-items:center;gap:4px;background:var(--rd);color:#fff;border-radius:5px;padding:2px 7px;font-size:.6rem;font-weight:700;}
 .live-dot{width:5px;height:5px;border-radius:50%;background:#fff;animation:blink 1s infinite;}
-
 /* GROUPS */
 .g-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:3px;margin-bottom:13px;}
 .g-tabs::-webkit-scrollbar{display:none;}
@@ -315,15 +295,13 @@ input,textarea,select{font-family:inherit;}
 .create-grp-btn{display:flex;align-items:center;gap:11px;background:var(--bg2);border:1.5px dashed var(--bd2);border-radius:var(--r);padding:13px;cursor:pointer;transition:all .2s;margin-bottom:13px;}
 .create-grp-btn:hover{border-color:var(--a);background:var(--a-light);}
 .cgb-icon{width:44px;height:44px;border-radius:12px;background:var(--a-light);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-
-/* FULLSCREEN */
+/* FULLSCREEN CHAT */
 .fullscreen{position:fixed;inset:0;z-index:400;background:var(--bg);display:none;flex-direction:column;}
 .fullscreen.show{display:flex;}
 .fs-hd{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid var(--bd);background:var(--bg);}
 .fs-back{width:34px;height:34px;border-radius:50%;background:var(--bg3);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:.9rem;cursor:pointer;}
 .fs-title{font-size:1rem;font-weight:700;flex:1;}
 .fs-acts{display:flex;gap:6px;}
-
 /* CHAT */
 .chat-area{flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px;}
 .chat-msg{display:flex;gap:8px;align-items:flex-start;}
@@ -337,11 +315,8 @@ input,textarea,select{font-family:inherit;}
 .chat-msg:not(.me) .cm-bubble{background:var(--bg3);color:var(--text);}
 .cm-time{font-size:.58rem;color:var(--text4);margin-top:3px;}
 .chat-msg.me .cm-time{text-align:right;}
-.cm-reactions{display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;}
-.cm-react{background:var(--bg4);border-radius:10px;padding:2px 6px;font-size:.7rem;cursor:pointer;border:1px solid var(--bd);transition:all .2s;}
-.cm-react:hover{border-color:var(--a);}
 .date-sep{text-align:center;font-size:.68rem;color:var(--text3);font-weight:500;margin:6px 0;display:flex;align-items:center;gap:8px;}
-.date-sep::before,.date-sep::after{content:'';flex:1;height:1px;background:var(--bd);}
+.date-sep::before,.date-sep::after{content:\'\';flex:1;height:1px;background:var(--bd);}
 .typing-dots{display:flex;gap:3px;background:var(--bg3);padding:9px 13px;border-radius:16px;}
 .typing-dot{width:7px;height:7px;border-radius:50%;background:var(--text3);animation:pulse .8s ease-in-out infinite;}
 .typing-dot:nth-child(2){animation-delay:.15s;}
@@ -356,7 +331,6 @@ input,textarea,select{font-family:inherit;}
 .cia-inp::placeholder{color:var(--text4);}
 .cia-send{width:38px;height:38px;border-radius:50%;background:var(--a);border:none;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.95rem;flex-shrink:0;cursor:pointer;transition:all .2s;}
 .cia-send:hover{background:var(--a2);transform:scale(1.05);}
-
 /* DM */
 .dm-item{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:8px;cursor:pointer;transition:all .2s;}
 .dm-item:hover{border-color:var(--a);}
@@ -371,7 +345,6 @@ input,textarea,select{font-family:inherit;}
 .dmi-right{text-align:right;flex-shrink:0;}
 .dmi-time{font-size:.65rem;color:var(--text4);}
 .dmi-unread{width:18px;height:18px;border-radius:50%;background:var(--a);color:#fff;font-size:.62rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:3px 0 0 auto;}
-
 /* PROFILE */
 .p-cover{height:120px;background:linear-gradient(135deg,var(--a),var(--pu));display:flex;align-items:center;justify-content:center;font-size:3rem;}
 .p-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px;}
@@ -385,7 +358,6 @@ input,textarea,select{font-family:inherit;}
 .si-txt h4{font-size:.86rem;font-weight:500;}
 .si-txt p{font-size:.7rem;color:var(--text3);margin-top:1px;}
 .si-arr{margin-left:auto;color:var(--text3);}
-
 /* BADGES */
 .badges-grid{display:flex;gap:8px;flex-wrap:wrap;}
 .badge-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
@@ -393,7 +365,6 @@ input,textarea,select{font-family:inherit;}
 .badge-ic.earned{border-color:var(--gd);box-shadow:0 0 10px rgba(245,166,35,.2);}
 .badge-ic.locked{opacity:.35;filter:grayscale(1);}
 .badge-nm{font-size:.56rem;color:var(--text3);text-align:center;}
-
 /* VIDEO */
 .v-cats{display:flex;gap:7px;overflow-x:auto;padding-bottom:5px;margin-bottom:12px;}
 .v-cats::-webkit-scrollbar{display:none;}
@@ -403,20 +374,97 @@ input,textarea,select{font-family:inherit;}
 .vc{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all .2s;}
 .vc:hover{border-color:var(--a);transform:translateY(-2px);box-shadow:var(--shadow);}
 .vc-thumb{width:100%;aspect-ratio:16/9;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:2rem;position:relative;}
-.vc-dur{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.75);color:#fff;font-size:.6rem;padding:2px 6px;border-radius:4px;font-family:'Fira Code',monospace;}
-.vc-progress{position:absolute;bottom:0;left:0;height:3px;background:var(--rd);border-radius:2px;}
+.vc-dur{position:absolute;bottom:4px;right:4px;background:rgba(0,0,0,.75);color:#fff;font-size:.6rem;padding:2px 6px;border-radius:4px;font-family:\'Fira Code\',monospace;}
 .vc-info{padding:9px;}
 .vc-title{font-size:.78rem;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:3px;}
 .vc-meta{font-size:.65rem;color:var(--text3);}
-
+/* VIDEO FEED CARD */
+.vf-card{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);margin-bottom:12px;overflow:hidden;animation:fadeIn .4s ease;transition:all .2s;}
+.vf-card:hover{border-color:var(--a);box-shadow:var(--shadow);}
+.vf-thumb-wrap{width:100%;aspect-ratio:16/9;background:#000;position:relative;cursor:pointer;overflow:hidden;}
+.vf-thumb-wrap img{width:100%;height:100%;object-fit:cover;}
+.vf-thumb-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:3rem;background:linear-gradient(135deg,var(--bg3),var(--bg4));}
+.vf-play-btn{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);transition:all .2s;}
+.vf-play-btn:hover{background:rgba(0,0,0,.5);}
+.vf-play-ic{width:54px;height:54px;border-radius:50%;background:rgba(255,255,255,.95);display:flex;align-items:center;justify-content:center;font-size:1.3rem;transition:transform .2s;box-shadow:0 4px 16px rgba(0,0,0,.3);}
+.vf-play-btn:hover .vf-play-ic{transform:scale(1.08);}
+.vf-dur{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.8);color:#fff;font-size:.65rem;padding:2px 8px;border-radius:5px;font-family:\'Fira Code\',monospace;font-weight:600;}
+.vf-views{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;font-size:.62rem;padding:2px 7px;border-radius:5px;}
+.vf-info{padding:13px;}
+.vf-meta-row{display:flex;align-items:center;gap:9px;margin-bottom:8px;}
+.vf-av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;color:#fff;flex-shrink:0;}
+.vf-author-info{flex:1;}
+.vf-author{font-size:.82rem;font-weight:700;}
+.vf-time{font-size:.66rem;color:var(--text3);margin-top:1px;}
+.vf-subject-tag{padding:3px 10px;border-radius:20px;font-size:.65rem;font-weight:600;flex-shrink:0;}
+.vf-title{font-size:.95rem;font-weight:700;line-height:1.45;margin-bottom:6px;}
+.vf-desc{font-size:.8rem;color:var(--text3);line-height:1.55;margin-bottom:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.vf-stats{display:flex;justify-content:space-between;font-size:.7rem;color:var(--text3);padding-top:8px;border-top:1px solid var(--bd);}
+.vf-actions{display:flex;border-top:1px solid var(--bd);}
+.vf-action{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;padding:10px;font-size:.75rem;font-weight:500;border:none;background:none;color:var(--text3);cursor:pointer;transition:background .2s;}
+.vf-action:hover{background:var(--bg3);}
+.vf-action.liked{color:var(--rd);}
+.vf-action.saved{color:var(--gd);}
+/* VIDEO UPLOAD MODAL */
+#videoUploadModal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.7);display:none;align-items:flex-end;justify-content:center;}
+#videoUploadModal.show{display:flex;}
+.vum-card{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:680px;padding:18px 16px 32px;animation:slideUp .35s ease;max-height:92vh;overflow-y:auto;}
+.vum-handle{width:40px;height:4px;background:var(--bd2);border-radius:2px;margin:0 auto 16px;}
+.vum-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+.vum-title{font-size:1rem;font-weight:700;}
+.vum-close{background:none;border:none;font-size:1.2rem;color:var(--text3);cursor:pointer;}
+.drop-zone{border:2px dashed var(--bd2);border-radius:var(--r);padding:30px 20px;text-align:center;cursor:pointer;transition:all .3s;position:relative;background:var(--bg3);margin-bottom:14px;}
+.drop-zone:hover,.drop-zone.drag-over{border-color:var(--a);background:var(--a-light);}
+.drop-zone.has-file{border-color:var(--gr);border-style:solid;background:rgba(0,166,81,.05);}
+.dz-icon{font-size:2.5rem;margin-bottom:10px;animation:uploadBounce 2s ease-in-out infinite;}
+.drop-zone.has-file .dz-icon{animation:none;}
+.dz-text{font-size:.88rem;font-weight:600;color:var(--text2);margin-bottom:4px;}
+.dz-sub{font-size:.72rem;color:var(--text3);}
+.dz-input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.dz-preview{display:none;margin-top:12px;}
+.drop-zone.has-file .dz-preview{display:block;}
+.dz-prev-video{width:100%;border-radius:10px;max-height:200px;object-fit:cover;background:#000;}
+.dz-file-info{display:flex;align-items:center;gap:10px;background:var(--bg2);border-radius:10px;padding:10px 13px;margin-top:10px;}
+.dz-file-name{font-size:.82rem;font-weight:600;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dz-file-size{font-size:.7rem;color:var(--text3);flex-shrink:0;}
+.dz-remove{background:var(--rd);color:#fff;border:none;border-radius:6px;padding:4px 10px;font-size:.7rem;cursor:pointer;flex-shrink:0;}
+.thumb-zone{border:1.5px dashed var(--bd2);border-radius:var(--r2);padding:14px;text-align:center;cursor:pointer;transition:all .3s;background:var(--bg3);position:relative;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.thumb-zone:hover{border-color:var(--a);}
+.thumb-zone.has-thumb{border-color:var(--gr);border-style:solid;}
+.tz-preview{width:80px;height:50px;border-radius:8px;object-fit:cover;display:none;flex-shrink:0;}
+.thumb-zone.has-thumb .tz-preview{display:block;}
+.tz-input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.tz-text{font-size:.8rem;font-weight:500;color:var(--text3);}
+.thumb-zone.has-thumb .tz-text{color:var(--gr);}
+.upload-progress{display:none;margin-bottom:14px;}
+.upload-progress.show{display:block;}
+.up-bar-wrap{background:var(--bg3);border-radius:20px;height:10px;overflow:hidden;margin-bottom:8px;}
+.up-bar-fill{height:100%;background:linear-gradient(90deg,var(--a),var(--pu));border-radius:20px;transition:width .3s ease;animation:progressPulse 1.5s ease-in-out infinite;}
+.up-status{display:flex;justify-content:space-between;font-size:.75rem;color:var(--text3);}
+.up-pct{font-family:\'Fira Code\',monospace;font-weight:700;color:var(--a);}
+/* VIDEO PLAYER */
+#videoPlayer{position:fixed;inset:0;z-index:700;background:#000;display:none;flex-direction:column;}
+#videoPlayer.show{display:flex;}
+.vp-header{display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(0,0,0,.8);position:absolute;top:0;left:0;right:0;z-index:10;}
+.vp-back{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.15);border:none;color:#fff;display:flex;align-items:center;justify-content:center;font-size:1rem;cursor:pointer;}
+.vp-title{flex:1;font-size:.9rem;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.vp-video{width:100%;height:100%;object-fit:contain;}
+.vp-controls{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));padding:20px 14px 16px;z-index:10;}
+.vp-progress{width:100%;height:4px;background:rgba(255,255,255,.3);border-radius:2px;cursor:pointer;margin-bottom:10px;position:relative;}
+.vp-progress-fill{height:100%;background:var(--a);border-radius:2px;pointer-events:none;}
+.vp-progress-thumb{position:absolute;top:50%;width:14px;height:14px;border-radius:50%;background:#fff;transform:translateY(-50%);box-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none;}
+.vp-btns{display:flex;align-items:center;gap:12px;}
+.vp-btn{background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;opacity:.9;padding:4px;}
+.vp-btn:hover{opacity:1;}
+.vp-time{font-family:\'Fira Code\',monospace;font-size:.75rem;color:rgba(255,255,255,.8);flex:1;text-align:center;}
+.vp-vol{width:70px;accent-color:var(--a);}
 /* FOMO */
 .fomo-card{border-radius:var(--r);padding:11px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:.82rem;}
 .fomo-card.urgent{background:#fff5f5;border:1px solid #ffd0d0;color:var(--rd);}
 .fomo-card.info{background:var(--a-light);border:1px solid rgba(0,102,255,.2);color:var(--a);}
 [data-theme="dark"] .fomo-card.urgent{background:rgba(220,53,69,.1);border-color:rgba(220,53,69,.3);}
 [data-theme="dark"] .fomo-card.info{background:rgba(0,102,255,.1);border-color:rgba(0,102,255,.25);}
-.fomo-timer{font-family:'Fira Code',monospace;font-size:.88rem;font-weight:700;color:var(--rd);}
-
+.fomo-timer{font-family:\'Fira Code\',monospace;font-size:.88rem;font-weight:700;color:var(--rd);}
 /* SHOP */
 .shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
 .shop-item{background:var(--bg2);border:1.5px solid var(--bd);border-radius:var(--r);padding:13px;text-align:center;cursor:pointer;position:relative;transition:all .22s;}
@@ -426,10 +474,9 @@ input,textarea,select{font-family:inherit;}
 .shop-ic{font-size:1.8rem;margin-bottom:6px;display:block;}
 .shop-nm{font-size:.8rem;font-weight:600;margin-bottom:3px;}
 .shop-desc{font-size:.66rem;color:var(--text3);margin-bottom:7px;line-height:1.4;}
-.shop-price{font-size:.82rem;font-weight:700;color:var(--gd);font-family:'Fira Code',monospace;}
+.shop-price{font-size:.82rem;font-weight:700;color:var(--gd);font-family:\'Fira Code\',monospace;}
 .shop-owned{font-size:.75rem;color:var(--gr);font-weight:600;}
-
-/* QUIZ BATTLE */
+/* QUIZ */
 #quizModal{position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.65);display:none;align-items:center;justify-content:center;padding:20px;}
 #quizModal.show{display:flex;}
 .quiz-card{background:var(--bg);border-radius:20px;width:100%;max-width:440px;padding:22px;box-shadow:var(--shadow-lg);animation:bounceIn .5s ease;}
@@ -443,25 +490,19 @@ input,textarea,select{font-family:inherit;}
 .qz-opt.wrong{border-color:var(--rd);background:rgba(220,53,69,.1);color:var(--rd);animation:shake .4s ease;}
 .qz-vs{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
 .qz-player{flex:1;text-align:center;}
-.qz-score{font-size:1.4rem;font-weight:800;font-family:'Fira Code',monospace;}
+.qz-score{font-size:1.4rem;font-weight:800;font-family:\'Fira Code\',monospace;}
 .qz-vs-badge{width:28px;height:28px;border-radius:50%;background:var(--gd);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:800;color:#fff;flex-shrink:0;}
-
-/* NOTIF + XP POP */
+/* NOTIF */
 #notifC{position:fixed;top:64px;right:12px;z-index:9990;display:flex;flex-direction:column;gap:7px;pointer-events:none;max-width:270px;}
 .notif-toast{background:var(--bg);border:1px solid var(--bd);border-radius:13px;padding:10px 13px;display:flex;align-items:center;gap:9px;box-shadow:var(--shadow-lg);animation:notifIn .35s ease;pointer-events:auto;}
 .nt-ic{font-size:1.1rem;flex-shrink:0;}
 .nt-title{font-size:.78rem;font-weight:700;margin-bottom:1px;}
 .nt-text{font-size:.72rem;color:var(--text3);}
-.xp-pop-el{position:fixed;pointer-events:none;z-index:9995;font-size:1rem;font-weight:700;font-family:'Fira Code',monospace;color:var(--gr);animation:xpFly 1.2s ease forwards;}
+.xp-pop-el{position:fixed;pointer-events:none;z-index:9995;font-size:1rem;font-weight:700;font-family:\'Fira Code\',monospace;color:var(--gr);animation:xpFly 1.2s ease forwards;}
 #confettiC{position:fixed;inset:0;pointer-events:none;z-index:9994;overflow:hidden;}
-
-/* LEVEL UP MODAL */
 #luModal{position:fixed;inset:0;z-index:9991;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;}
 #luModal.show{display:flex;}
 .lu-card{background:var(--bg);border-radius:20px;padding:28px 24px;text-align:center;max-width:300px;width:90%;animation:pop .5s ease;box-shadow:var(--shadow-lg);border:1px solid var(--bd);}
-.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gr);animation:blink 2s infinite;vertical-align:middle;}
-
-/* STATS DETAIL */
 .stats-panel{background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:12px;}
 .heat-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-top:8px;}
 .heat-cell{aspect-ratio:1;border-radius:3px;background:var(--bg4);}
@@ -469,8 +510,6 @@ input,textarea,select{font-family:inherit;}
 .heat-cell.h2{background:rgba(0,166,81,.4);}
 .heat-cell.h3{background:rgba(0,166,81,.7);}
 .heat-cell.h4{background:#00a651;}
-
-/* NOTIFICATION CENTER */
 #notifPanel{position:fixed;inset:0;z-index:500;background:var(--bg);display:none;flex-direction:column;}
 #notifPanel.show{display:flex;}
 .notif-item{display:flex;gap:11px;padding:13px 14px;border-bottom:1px solid var(--bd);align-items:flex-start;cursor:pointer;transition:background .2s;}
@@ -481,56 +520,57 @@ input,textarea,select{font-family:inherit;}
 .ni-title{font-size:.86rem;font-weight:600;margin-bottom:3px;}
 .ni-text{font-size:.78rem;color:var(--text3);line-height:1.5;}
 .ni-time{font-size:.65rem;color:var(--text4);margin-top:3px;}
+.online-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--gr);animation:blink 2s infinite;vertical-align:middle;}
 </style>
-EOF
+</head>
+<body>
+'''
+with open('/home/claude/bm_head.html', 'w') as f:
+    f.write(content)
+print(f"Head written: {len(content)} bytes")
+PYEOF
+Output
 
+Head written: 43923 bytes
+  bash
 
-
-cat > /home/claude/bm_part2.html << 'EOF'
-<!-- GLOBAL LOADER -->
-<div id="globalLoader">
-  <div class="gl-logo">📚</div>
-  <div class="gl-name">BrightMesh</div>
-  <div class="gl-spin"></div>
-</div>
+cat > /home/claude/bm_body.html << 'BODYEOF'
+<!-- LOADER -->
+<div id="globalLoader"><div class="gl-logo">📚</div><div class="gl-name">BrightMesh</div><div class="gl-spin"></div></div>
 <div id="confettiC"></div>
 <div id="notifC"></div>
 
 <!-- LEVEL UP MODAL -->
-<div id="luModal">
-  <div class="lu-card">
-    <div style="font-size:3rem;margin-bottom:10px;animation:float 2s ease-in-out infinite;">🎊</div>
-    <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;" id="luNum">Level 2!</div>
-    <div style="font-weight:700;margin-bottom:6px;">Congrats! 🎓</div>
-    <div style="font-size:.82rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">নতুন level-এ উঠেছ! চালিয়ে যাও!</div>
-    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--gd);" id="luCoins">+500🪙</div><div style="font-size:.6rem;color:var(--text3);">Coins</div></div>
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--a);" id="luXP">+100⭐</div><div style="font-size:.6rem;color:var(--text3);">XP</div></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="document.getElementById('luModal').classList.remove('show')">🚀 চালিয়ে যাও!</button>
+<div id="luModal"><div class="lu-card">
+  <div style="font-size:3rem;margin-bottom:10px;animation:float 2s ease-in-out infinite;">🎊</div>
+  <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;" id="luNum">Level 2!</div>
+  <div style="font-weight:700;margin-bottom:6px;">Congrats! 🎓</div>
+  <div style="font-size:.82rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">নতুন level-এ উঠেছ! চালিয়ে যাও!</div>
+  <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
+    <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--gd);" id="luCoins">+500🪙</div><div style="font-size:.6rem;color:var(--text3);">Coins</div></div>
+    <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--a);" id="luXP">+100⭐</div><div style="font-size:.6rem;color:var(--text3);">XP</div></div>
   </div>
-</div>
+  <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="document.getElementById('luModal').classList.remove('show')">🚀 চালিয়ে যাও!</button>
+</div></div>
 
-<!-- QUIZ BATTLE MODAL -->
-<div id="quizModal">
-  <div class="quiz-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;">
-      <span style="font-size:.75rem;font-weight:600;color:var(--text3);">Q<span id="qNum">1</span>/5 · <span id="qSubj" style="color:var(--a);">Physics</span></span>
-      <span style="font-family:'Fira Code',monospace;font-size:.85rem;font-weight:700;color:var(--gd);" id="qTimer">15s</span>
-      <button style="border:none;background:none;color:var(--text3);cursor:pointer;font-size:.85rem;" onclick="endQuiz()">✕ Quit</button>
-    </div>
-    <div class="qz-timer-bar"><div class="qz-timer-fill" id="qTimerBar" style="width:100%;"></div></div>
-    <div class="qz-vs" id="qzVs">
-      <div class="qz-player"><div class="qz-score" id="myQScore">0</div><div style="font-size:.7rem;color:var(--text3);margin-top:2px;" id="myQName">তুমি</div></div>
-      <div class="qz-vs-badge">VS</div>
-      <div class="qz-player"><div class="qz-score" id="opQScore">0</div><div style="font-size:.7rem;color:var(--text3);margin-top:2px;" id="opQName">Khadiza</div></div>
-    </div>
-    <div class="qz-q" id="qzQ">Question here</div>
-    <div class="qz-opts" id="qzOpts"></div>
+<!-- QUIZ MODAL -->
+<div id="quizModal"><div class="quiz-card">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;">
+    <span style="font-size:.75rem;font-weight:600;color:var(--text3);">Q<span id="qNum">1</span>/5 · <span id="qSubj" style="color:var(--a);">Physics</span></span>
+    <span style="font-family:'Fira Code',monospace;font-size:.85rem;font-weight:700;color:var(--gd);" id="qTimer">15s</span>
+    <button style="border:none;background:none;color:var(--text3);cursor:pointer;font-size:.85rem;" onclick="endQuiz()">✕ Quit</button>
   </div>
-</div>
+  <div class="qz-timer-bar"><div class="qz-timer-fill" id="qTimerBar" style="width:100%;"></div></div>
+  <div class="qz-vs">
+    <div class="qz-player"><div class="qz-score" id="myQScore">0</div><div style="font-size:.7rem;color:var(--text3);margin-top:2px;" id="myQName">তুমি</div></div>
+    <div class="qz-vs-badge">VS</div>
+    <div class="qz-player"><div class="qz-score" id="opQScore">0</div><div style="font-size:.7rem;color:var(--text3);margin-top:2px;" id="opQName">Khadiza</div></div>
+  </div>
+  <div class="qz-q" id="qzQ">Question here</div>
+  <div class="qz-opts" id="qzOpts"></div>
+</div></div>
 
-<!-- NOTIFICATION PANEL -->
+<!-- NOTIF PANEL -->
 <div id="notifPanel">
   <div class="fs-hd">
     <button class="fs-back" onclick="document.getElementById('notifPanel').classList.remove('show')">←</button>
@@ -540,45 +580,41 @@ cat > /home/claude/bm_part2.html << 'EOF'
   <div style="flex:1;overflow-y:auto;" id="notifList"></div>
 </div>
 
-<!-- AUTH SCREEN -->
-<div id="authScreen">
-  <div class="auth-card">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="auth-logo-icon">B</div>
-      <div style="font-size:1.4rem;font-weight:800;margin-top:6px;">BrightMesh</div>
-      <div style="font-size:.8rem;color:var(--text3);">Learn Together 📚</div>
-    </div>
-    <div class="auth-tabs">
-      <button class="auth-tab on" id="loginTab" onclick="switchAuth('login')">🔑 Login</button>
-      <button class="auth-tab" id="signupTab" onclick="switchAuth('signup')">✨ Sign Up</button>
-    </div>
-    <div class="auth-error" id="authErr"></div>
-    <div id="loginForm">
-      <div class="auth-field"><label>Email</label><input class="inp" type="email" id="liEmail" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input class="inp" type="password" id="liPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-      <button class="btn btn-primary" style="width:100%;padding:12px;margin-bottom:10px;" onclick="doLogin()" id="liBtn">🚀 Login</button>
-      <div class="auth-divider">অথবা</div>
-      <button class="google-btn" onclick="doGoogle()">🔵 Continue with Google</button>
-    </div>
-    <div id="signupForm" style="display:none;">
-      <div class="auth-field"><label>Full Name</label><input class="inp" type="text" id="suName" placeholder="তোমার নাম"/></div>
-      <div class="auth-field"><label>Email</label><input class="inp" type="email" id="suEmail" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input class="inp" type="password" id="suPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
-      <div class="auth-field">
-        <label>Class / Level</label>
-        <select class="inp" id="suClass">
-          <option value="">Select class</option>
-          <option>SSC 2025</option><option>HSC 2025</option>
-          <option>University</option><option>BCS Prep</option>
-          <option>Bank Job</option><option>IELTS</option><option>Other</option>
-        </select>
-      </div>
-      <button class="btn" style="width:100%;padding:12px;background:var(--gr);color:#fff;" onclick="doSignup()" id="suBtn">✅ Create Account</button>
-    </div>
+<!-- AUTH -->
+<div id="authScreen"><div class="auth-card">
+  <div style="text-align:center;margin-bottom:20px;">
+    <div class="auth-logo-icon">B</div>
+    <div style="font-size:1.4rem;font-weight:800;margin-top:6px;">BrightMesh</div>
+    <div style="font-size:.8rem;color:var(--text3);">Learn Together 📚</div>
   </div>
-</div>
+  <div class="auth-tabs">
+    <button class="auth-tab on" id="loginTab" onclick="switchAuth('login')">🔑 Login</button>
+    <button class="auth-tab" id="signupTab" onclick="switchAuth('signup')">✨ Sign Up</button>
+  </div>
+  <div class="auth-error" id="authErr"></div>
+  <div id="loginForm">
+    <div class="auth-field"><label>Email</label><input class="inp" type="email" id="liEmail" placeholder="your@email.com"/></div>
+    <div class="auth-field"><label>Password</label><input class="inp" type="password" id="liPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+    <button class="btn btn-primary" style="width:100%;padding:12px;margin-bottom:10px;" onclick="doLogin()" id="liBtn">🚀 Login</button>
+    <div class="auth-divider">অথবা</div>
+    <button class="google-btn" onclick="doGoogle()">🔵 Continue with Google</button>
+  </div>
+  <div id="signupForm" style="display:none;">
+    <div class="auth-field"><label>Full Name</label><input class="inp" type="text" id="suName" placeholder="তোমার নাম"/></div>
+    <div class="auth-field"><label>Email</label><input class="inp" type="email" id="suEmail" placeholder="your@email.com"/></div>
+    <div class="auth-field"><label>Password</label><input class="inp" type="password" id="suPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
+    <div class="auth-field"><label>Class / Level</label>
+      <select class="inp" id="suClass">
+        <option value="">Select class</option>
+        <option>SSC 2025</option><option>HSC 2025</option><option>University</option>
+        <option>BCS Prep</option><option>Bank Job</option><option>IELTS</option><option>Other</option>
+      </select>
+    </div>
+    <button class="btn" style="width:100%;padding:12px;background:var(--gr);color:#fff;" onclick="doSignup()" id="suBtn">✅ Create Account</button>
+  </div>
+</div></div>
 
-<!-- PWA BAR -->
+<!-- PWA -->
 <div id="pwaBar">
   <div style="font-size:1.4rem;">📱</div>
   <div class="pwa-text"><div class="pwa-title">BrightMesh Install করো!</div><div class="pwa-sub">Home screen-এ add করো!</div></div>
@@ -596,51 +632,37 @@ cat > /home/claude/bm_part2.html << 'EOF'
   </div>
 </div>
 
-<!-- MAIN -->
+<!-- MAIN APP -->
 <div class="main" id="mainApp" style="display:none;">
 
-<!-- ═══ FEED ═══ -->
-<div class="panel active" id="panel-feed">
-<div class="wrap">
-  <div class="fomo-card urgent">
-    <span>⏰</span>
-    <div style="flex:1;"><strong>Streak শেষ হচ্ছে!</strong> আজ রাত ১২টায়!</div>
-    <span class="fomo-timer" id="fomoT">03:24:15</span>
-  </div>
-  <div class="fomo-card info">
-    <span>👀</span>
-    <div style="flex:1;">৫ জন তোমাকে <strong>group-এ invite</strong> করেছে!</div>
-    <button class="btn btn-primary btn-sm" onclick="showP('groups',document.querySelectorAll('.bni')[3])">View</button>
-  </div>
-  <!-- Stories -->
-  <div class="stories-row" id="storiesRow">
+<!-- FEED -->
+<div class="panel active" id="panel-feed"><div class="wrap">
+  <div class="fomo-card urgent"><span>⏰</span><div style="flex:1;"><strong>Streak শেষ হচ্ছে!</strong> আজ রাত ১২টায়!</div><span class="fomo-timer" id="fomoT">03:24:15</span></div>
+  <div class="fomo-card info"><span>👀</span><div style="flex:1;">৫ জন তোমাকে <strong>group-এ invite</strong> করেছে!</div><button class="btn btn-primary btn-sm" onclick="showP('groups',document.querySelectorAll('.bni')[3])">View</button></div>
+  <div class="stories-row">
     <div class="story-item" onclick="openStoryCreate()"><div class="story-ring add-st"><div class="story-av" style="background:var(--bg4);color:var(--a);font-size:1.3rem;">+</div></div><div class="story-name">Add</div></div>
     <div class="story-item" onclick="viewStory('Ashraf')"><div class="story-ring"><div class="story-av" style="background:#1877f2;">As</div></div><div class="story-name">Ashraf</div></div>
     <div class="story-item" onclick="viewStory('Khadiza')"><div class="story-ring"><div class="story-av" style="background:#42b883;">Kh</div></div><div class="story-name">Khadiza</div></div>
     <div class="story-item" onclick="viewStory('Jisan')"><div class="story-ring seen-st"><div class="story-av" style="background:#ff5722;">Ji</div></div><div class="story-name">Jisan</div></div>
-    <div class="story-item" onclick="viewStory('Akbor')"><div class="story-ring seen-st"><div class="story-av" style="background:#9c27b0;">Ak</div></div><div class="story-name">Akbor</div></div>
   </div>
-  <!-- Search Bar -->
   <div class="search-wrap">
     <span class="s-icon">🔍</span>
-    <input class="inp search-inp" id="searchInp" placeholder="Search posts, topics, notes..." oninput="doSearch(this.value)" onfocus="this.nextElementSibling.nextElementSibling.style.display='block'"/>
+    <input class="inp search-inp" id="searchInp" placeholder="Search posts, topics..." oninput="doSearch(this.value)"/>
     <button class="s-clear" id="searchClear" onclick="clearSearch()">✕</button>
     <div class="search-drop" id="searchDrop"></div>
   </div>
-  <!-- Create Post -->
   <div class="create-post">
     <div class="cp-row">
       <div class="avatar" id="cpAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
       <input class="cp-inp" placeholder="কি মনে আছে? শেয়ার করো! 📚" onclick="openPostModal()"/>
     </div>
     <div class="cp-actions">
-      <button class="cp-action" style="color:var(--rd);" onclick="openPostModal('live')">📹 Live</button>
+      <button class="cp-action" style="color:var(--rd);" onclick="openVideoUpload()">📹 Video</button>
       <button class="cp-action" style="color:var(--gr);" onclick="openPostModal('photo')">🖼️ Photo</button>
       <button class="cp-action" style="color:var(--a);" onclick="openPostModal('note')">📝 Note</button>
       <button class="cp-action" style="color:var(--gd);" onclick="openPostModal('progress')">📊 Progress</button>
     </div>
   </div>
-  <!-- Sort/Filter -->
   <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:3px;">
     <button class="g-tab on" onclick="filterFeed(this,'all')">All</button>
     <button class="g-tab" onclick="filterFeed(this,'study')">📚 Study</button>
@@ -648,52 +670,34 @@ cat > /home/claude/bm_part2.html << 'EOF'
     <button class="g-tab" onclick="filterFeed(this,'math')">🧮 Math</button>
     <button class="g-tab" onclick="filterFeed(this,'coding')">💻 Code</button>
   </div>
-  <!-- Posts Feed (real-time) -->
-  <div id="postsFeed">
-    <div class="empty-state"><div class="es-icon">📭</div><div class="es-title">Loading posts...</div><div class="es-desc">Firebase থেকে real-time data আসছে</div></div>
-  </div>
-</div>
-</div>
+  <div id="postsFeed"><div class="empty-state"><div class="es-icon">📭</div><div class="es-title">Loading...</div></div></div>
+</div></div>
 
-<!-- ═══ STUDY + DOPAMINE ═══ -->
-<div class="panel" id="panel-study">
-<div class="wrap">
-  <!-- XP Hero -->
+<!-- STUDY -->
+<div class="panel" id="panel-study"><div class="wrap">
   <div class="xp-hero">
     <div class="xp-row">
       <div class="xp-badge" onclick="triggerLevelUp()" id="lvBadge">Lv.<span id="userLv">1</span></div>
-      <div style="flex:1;position:relative;z-index:1;">
-        <div style="font-size:.9rem;font-weight:700;" id="rankTitle">Beginner</div>
-        <div style="font-size:.72rem;opacity:.85;">Level up হতে <strong id="xpNeeded">100</strong> XP বাকি!</div>
-      </div>
-      <div style="text-align:right;position:relative;z-index:1;">
-        <div style="font-family:'Fira Code',monospace;font-size:.88rem;font-weight:700;" id="xpDisp">0</div>
-        <div style="font-size:.6rem;opacity:.8;">Total XP</div>
-      </div>
+      <div style="flex:1;position:relative;z-index:1;"><div style="font-size:.9rem;font-weight:700;" id="rankTitle">Beginner</div><div style="font-size:.72rem;opacity:.85;">Level up হতে <strong id="xpNeeded">100</strong> XP বাকি!</div></div>
+      <div style="text-align:right;position:relative;z-index:1;"><div style="font-family:'Fira Code',monospace;font-size:.88rem;font-weight:700;" id="xpDisp">0</div><div style="font-size:.6rem;opacity:.8;">Total XP</div></div>
     </div>
     <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:5%;"></div></div>
     <div class="xp-labels"><span id="xpL">0</span><span id="xpC">0/100</span><span id="xpR">100</span></div>
   </div>
-  <!-- Stat grid -->
   <div class="stat-grid">
-    <div class="stat-box" onclick="showDetailStats()"><span class="stat-val" id="todayH">0.0h</span><div class="stat-lbl">আজকের পড়া</div></div>
+    <div class="stat-box"><span class="stat-val" id="todayH">0.0h</span><div class="stat-lbl">আজকের পড়া</div></div>
     <div class="stat-box"><span class="stat-val">🔥<span id="streakD">0</span></span><div class="stat-lbl">Day Streak</div></div>
     <div class="stat-box"><span class="stat-val" id="totalH">0h</span><div class="stat-lbl">মোট study</div></div>
     <div class="stat-box"><span class="stat-val">🪙<span id="coinsD">0</span></span><div class="stat-lbl">Coins</div></div>
   </div>
-  <!-- Streak -->
   <div class="streak-card">
     <div style="font-size:2.5rem;animation:streakFire 2s ease-in-out infinite;margin-bottom:6px;">🔥</div>
     <div style="font-size:1.8rem;font-weight:800;color:var(--gd);" id="streakNum">0</div>
     <div style="font-size:.8rem;color:var(--text3);margin-bottom:10px;">দিনের Study Streak!</div>
-    <div class="s-days" id="streakDays">
-      <div class="sday done">S</div><div class="sday done">M</div><div class="sday done">T</div>
-      <div class="sday done">W</div><div class="sday today">T</div><div class="sday">F</div><div class="sday">S</div>
-    </div>
+    <div class="s-days"><div class="sday done">S</div><div class="sday done">M</div><div class="sday done">T</div><div class="sday done">W</div><div class="sday today">T</div><div class="sday">F</div><div class="sday">S</div></div>
     <div style="font-size:.75rem;color:var(--rd);margin-bottom:11px;">⚠️ শেষ হবে: <span id="streakCd" style="font-family:'Fira Code',monospace;font-weight:700;">03:24:15</span></div>
     <button class="btn btn-primary" onclick="studyNow()">📚 এখনই পড়ো!</button>
   </div>
-  <!-- Timer -->
   <div class="timer-card">
     <div style="font-size:.72rem;font-weight:600;letter-spacing:1px;opacity:.8;margin-bottom:9px;position:relative;z-index:1;">⏱️ FOCUS TIMER — Firebase sync</div>
     <div class="timer-modes">
@@ -709,22 +713,16 @@ cat > /home/claude/bm_part2.html << 'EOF'
       <button class="t-btn t-alt" onclick="resetTimer()">🔄 Reset</button>
       <button class="t-btn t-alt" onclick="skipTimer()">⏭ Skip</button>
     </div>
-    <!-- Pomodoro dots -->
-    <div class="pomo-row" id="pomoDots">
-      <div class="pomo-dot current"></div>
-      <div class="pomo-dot"></div>
-      <div class="pomo-dot"></div>
-      <div class="pomo-dot"></div>
-    </div>
+    <div class="pomo-row" id="pomoDots"><div class="pomo-dot current"></div><div class="pomo-dot"></div><div class="pomo-dot"></div><div class="pomo-dot"></div></div>
     <div class="timer-info">Sessions: <span id="sesCount">0</span> · Focus: <span id="focusPct">100%</span> · Live 🔥</div>
   </div>
-  <!-- 1v1 Quiz Battle -->
+  <!-- 1v1 Quiz -->
   <div class="card" style="padding:16px;margin-bottom:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-color:#0f3460;">
     <div style="font-size:.72rem;font-weight:600;color:#e94560;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">⚔️ 1v1 QUIZ BATTLE</div>
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
       <div style="text-align:center;flex:1;"><div class="avatar" style="width:44px;height:44px;background:var(--a);font-size:.9rem;color:#fff;margin:0 auto 4px;" id="myQuizAv">U</div><div style="font-size:.72rem;color:#aaa;">তুমি</div></div>
-      <div style="text-align:center;"><div style="font-size:1.1rem;font-weight:800;color:#e94560;">VS</div></div>
-      <div style="text-align:center;flex:1;" id="opponentPreview"><div class="avatar" style="width:44px;height:44px;background:#42b883;font-size:.9rem;color:#fff;margin:0 auto 4px;">Kh</div><div style="font-size:.72rem;color:#aaa;">Khadiza</div></div>
+      <div style="font-size:1.1rem;font-weight:800;color:#e94560;">VS</div>
+      <div style="text-align:center;flex:1;"><div class="avatar" style="width:44px;height:44px;background:#42b883;font-size:.9rem;color:#fff;margin:0 auto 4px;">Kh</div><div style="font-size:.72rem;color:#aaa;">Khadiza</div></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
       <button class="btn" style="background:#e94560;color:#fff;padding:10px;" onclick="startQuiz('Physics')">⚛️ Physics</button>
@@ -733,7 +731,6 @@ cat > /home/claude/bm_part2.html << 'EOF'
       <button class="btn" style="background:#0f3460;color:#fff;border:1px solid #e94560;padding:10px;" onclick="startQuiz('General')">📖 BCS</button>
     </div>
   </div>
-  <!-- Mystery Box -->
   <div class="mystery-box" onclick="openBox()">
     <span class="mb-emoji" id="boxEmoji">🎁</span>
     <div style="font-size:.95rem;font-weight:700;margin-bottom:5px;">Mystery Reward Box!</div>
@@ -741,81 +738,40 @@ cat > /home/claude/bm_part2.html << 'EOF'
     <button style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:22px;padding:9px 22px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;">🎲 Open Now!</button>
     <div style="font-size:.65rem;opacity:.7;margin-top:8px;" id="boxCd">Available now!</div>
   </div>
-  <!-- Spin Wheel -->
   <div class="card" style="padding:16px;margin-bottom:12px;">
     <div class="section-title">🎯 Daily Spin</div>
     <canvas id="spinCanvas" width="240" height="240"></canvas>
-    <div style="text-align:center;margin-top:11px;">
-      <button class="btn btn-primary" id="spinBtn" onclick="doSpin()">🎯 Spin!</button>
-      <div id="spinRes" style="font-size:.84rem;font-weight:700;margin-top:9px;min-height:18px;"></div>
-    </div>
+    <div style="text-align:center;margin-top:11px;"><button class="btn btn-primary" id="spinBtn" onclick="doSpin()">🎯 Spin!</button><div id="spinRes" style="font-size:.84rem;font-weight:700;margin-top:9px;min-height:18px;"></div></div>
   </div>
-  <!-- Variable Reward -->
   <div style="background:var(--bg2);border:2px dashed var(--bd2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;margin-bottom:12px;" onclick="claimBonus(this)">
     <div style="font-size:.65rem;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">🎰 Variable Reward</div>
     <div style="font-size:2rem;font-weight:800;color:var(--a);font-family:'Fira Code',monospace;" id="bonusAmt">???</div>
     <div style="font-size:.76rem;color:var(--text3);margin-top:4px;">Click → কখনো 10, কখনো 1000 XP 😈</div>
     <div style="font-size:.68rem;color:var(--text4);margin-top:3px;">Resets in: <span id="bonusCd">Available</span></div>
   </div>
-  <!-- Daily Quests -->
   <div class="quest-card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
       <div class="section-title" style="margin:0;">🎯 Daily Quests</div>
       <div style="font-size:.72rem;color:var(--text3);">Resets: <span id="questReset" style="font-family:'Fira Code',monospace;color:var(--gd);"></span></div>
     </div>
-    <div class="quest-item" id="q1item">
-      <div class="qi-icon">⏱️</div>
-      <div class="qi-info"><div class="qi-name">২ ঘন্টা focus করো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q1fill" style="width:0%;background:var(--gr)"></div></div><div class="qi-pct" id="q1pct">0/2h</div></div>
-      <div class="qi-r">+100⭐<br><button class="qi-btn" id="q1btn" onclick="claimQuest(1)" disabled>Claim</button></div>
-    </div>
-    <div class="quest-item" id="q2item">
-      <div class="qi-icon">📝</div>
-      <div class="qi-info"><div class="qi-name">১টি post শেয়ার করো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q2fill" style="width:0%;background:var(--a)"></div></div><div class="qi-pct" id="q2pct">0/1</div></div>
-      <div class="qi-r">+50⭐<br><button class="qi-btn" id="q2btn" onclick="claimQuest(2)" disabled>Claim</button></div>
-    </div>
-    <div class="quest-item" id="q3item">
-      <div class="qi-icon">👥</div>
-      <div class="qi-info"><div class="qi-name">Group-এ message পাঠাও</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q3fill" style="width:0%;background:var(--gd)"></div></div><div class="qi-pct" id="q3pct">0/1</div></div>
-      <div class="qi-r">+75⭐<br><button class="qi-btn" id="q3btn" onclick="claimQuest(3)" disabled>Claim</button></div>
-    </div>
-    <div class="quest-item" id="q4item">
-      <div class="qi-icon">🏆</div>
-      <div class="qi-info"><div class="qi-name">Quiz Battle জিতো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q4fill" style="width:0%;background:var(--pu)"></div></div><div class="qi-pct" id="q4pct">0/1</div></div>
-      <div class="qi-r">+150⭐<br><button class="qi-btn" id="q4btn" onclick="claimQuest(4)" disabled>Claim</button></div>
-    </div>
+    <div class="quest-item"><div class="qi-icon">⏱️</div><div class="qi-info"><div class="qi-name">২ ঘন্টা focus করো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q1fill" style="width:0%;background:var(--gr)"></div></div><div class="qi-pct" id="q1pct">0/2h</div></div><div class="qi-r">+100⭐<br><button class="qi-btn" id="q1btn" onclick="claimQuest(1)" disabled>Claim</button></div></div>
+    <div class="quest-item"><div class="qi-icon">📝</div><div class="qi-info"><div class="qi-name">১টি post শেয়ার করো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q2fill" style="width:0%;background:var(--a)"></div></div><div class="qi-pct" id="q2pct">0/1</div></div><div class="qi-r">+50⭐<br><button class="qi-btn" id="q2btn" onclick="claimQuest(2)" disabled>Claim</button></div></div>
+    <div class="quest-item"><div class="qi-icon">👥</div><div class="qi-info"><div class="qi-name">Group-এ message পাঠাও</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q3fill" style="width:0%;background:var(--gd)"></div></div><div class="qi-pct" id="q3pct">0/1</div></div><div class="qi-r">+75⭐<br><button class="qi-btn" id="q3btn" onclick="claimQuest(3)" disabled>Claim</button></div></div>
+    <div class="quest-item"><div class="qi-icon">🏆</div><div class="qi-info"><div class="qi-name">Quiz Battle জিতো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q4fill" style="width:0%;background:var(--pu)"></div></div><div class="qi-pct" id="q4pct">0/1</div></div><div class="qi-r">+150⭐<br><button class="qi-btn" id="q4btn" onclick="claimQuest(4)" disabled>Claim</button></div></div>
   </div>
-  <!-- Subject Progress -->
   <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="section-title" style="margin:0;">📚 Subject Progress</div>
-      <button class="btn btn-secondary btn-sm" onclick="editSubject()">Edit</button>
-    </div>
-    <div id="subjectProgs">
-      <div class="prog-item"><div class="prog-label"><span>⚛️ Physics</span><span style="color:var(--a);" id="pPhy">72%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bPhy" style="width:72%;background:linear-gradient(90deg,var(--a),var(--pu))"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🧮 Math</span><span style="color:var(--gr);" id="pMath">85%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bMath" style="width:85%;background:linear-gradient(90deg,var(--gr),#00796b)"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🧪 Chemistry</span><span style="color:var(--gd);" id="pChem">45%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bChem" style="width:45%;background:linear-gradient(90deg,var(--gd),#e65100)"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🌿 Biology</span><span style="color:var(--gr);" id="pBio">60%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bBio" style="width:60%;background:linear-gradient(90deg,#56ab2f,#a8e063)"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🌐 English</span><span style="color:var(--rd);" id="pEng">88%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bEng" style="width:88%;background:linear-gradient(90deg,var(--rd),var(--pu))"></div></div></div>
-    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;"><div class="section-title" style="margin:0;">📚 Subject Progress</div></div>
+    <div class="prog-item"><div class="prog-label"><span>⚛️ Physics</span><span style="color:var(--a);">72%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:72%;background:linear-gradient(90deg,var(--a),var(--pu))"></div></div></div>
+    <div class="prog-item"><div class="prog-label"><span>🧮 Math</span><span style="color:var(--gr);">85%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:85%;background:linear-gradient(90deg,var(--gr),#00796b)"></div></div></div>
+    <div class="prog-item"><div class="prog-label"><span>🧪 Chemistry</span><span style="color:var(--gd);">45%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:45%;background:linear-gradient(90deg,var(--gd),#e65100)"></div></div></div>
+    <div class="prog-item"><div class="prog-label"><span>🌿 Biology</span><span style="color:var(--gr);">60%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:60%;background:linear-gradient(90deg,#56ab2f,#a8e063)"></div></div></div>
+    <div class="prog-item"><div class="prog-label"><span>🌐 English</span><span style="color:var(--rd);">88%</span></div><div class="prog-bar-bg"><div class="prog-fill" style="width:88%;background:linear-gradient(90deg,var(--rd),var(--pu))"></div></div></div>
   </div>
-  <!-- Study Heat Map -->
-  <div class="stats-panel">
-    <div class="section-title">📊 Study Heatmap (last 28 days)</div>
-    <div class="heat-grid" id="heatmap"></div>
-    <div style="display:flex;gap:4px;align-items:center;margin-top:8px;font-size:.62rem;color:var(--text3);">
-      <span>Less</span>
-      <div style="width:10px;height:10px;border-radius:2px;background:var(--bg4);"></div>
-      <div style="width:10px;height:10px;border-radius:2px;background:rgba(0,166,81,.3);"></div>
-      <div style="width:10px;height:10px;border-radius:2px;background:rgba(0,166,81,.6);"></div>
-      <div style="width:10px;height:10px;border-radius:2px;background:#00a651;"></div>
-      <span>More</span>
-    </div>
-  </div>
-  <!-- AI Tutor -->
+  <div class="stats-panel"><div class="section-title">📊 Study Heatmap (last 28 days)</div><div class="heat-grid" id="heatmap"></div></div>
   <div class="card" style="padding:16px;margin-bottom:12px;">
     <div class="section-title">🤖 AI Study Tutor</div>
     <div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r);height:190px;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:8px;margin-bottom:9px;" id="aiMsgs">
-      <div style="padding:9px 13px;background:var(--bg2);border:1px solid var(--bd);border-radius:4px 14px 14px 14px;font-size:.84rem;line-height:1.6;align-self:flex-start;">👋 যেকোনো subject-এ প্রশ্ন করো! Physics, Math, Chemistry, BCS সব!</div>
+      <div style="padding:9px 13px;background:var(--bg2);border:1px solid var(--bd);border-radius:4px 14px 14px 14px;font-size:.84rem;line-height:1.6;align-self:flex-start;">👋 যেকোনো subject-এ প্রশ্ন করো!</div>
     </div>
     <div style="display:flex;gap:8px;">
       <input class="inp" id="aiInp" placeholder="প্রশ্ন করো..." onkeydown="if(event.key==='Enter')sendAI()" style="border-radius:22px;"/>
@@ -823,33 +779,24 @@ cat > /home/claude/bm_part2.html << 'EOF'
     </div>
     <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;">
       <button class="pm-cat" onclick="quickAI('Newton-এর গতিসূত্র কি?')">⚛️ Newton</button>
-      <button class="pm-cat" onclick="quickAI('Integration কি?')">🧮 Integration</button>
-      <button class="pm-cat" onclick="quickAI('Organic Chemistry basics')">🧪 Organic</button>
-      <button class="pm-cat" onclick="quickAI('BCS এর জন্য কিভাবে পড়বো?')">📖 BCS Tips</button>
+      <button class="pm-cat" onclick="quickAI('Integration কি?')">🧮 Math</button>
+      <button class="pm-cat" onclick="quickAI('BCS এর জন্য কিভাবে পড়বো?')">📖 BCS</button>
     </div>
   </div>
-  <!-- Shop -->
   <div class="section-title">🛒 Coins Shop</div>
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-family:'Fira Code',monospace;font-size:.8rem;"><span style="color:var(--text3);">Balance:</span><span style="color:var(--gd);font-weight:700;">🪙 <span id="shopBal">0</span></span></div>
   <div class="shop-grid">
-    <div class="shop-item feat" onclick="buyItem(this,'Streak Freeze',500,'🧊')"><div class="shop-hot">HOT</div><span class="shop-ic">🧊</span><div class="shop-nm">Streak Freeze</div><div class="shop-desc">Streak বাঁচাও! ১ দিন</div><div class="shop-price">🪙 500</div></div>
+    <div class="shop-item feat" onclick="buyItem(this,'Streak Freeze',500,'🧊')"><div class="shop-hot">HOT</div><span class="shop-ic">🧊</span><div class="shop-nm">Streak Freeze</div><div class="shop-desc">Streak বাঁচাও!</div><div class="shop-price">🪙 500</div></div>
     <div class="shop-item" onclick="buyItem(this,'XP Booster',800,'⚡')"><span class="shop-ic">⚡</span><div class="shop-nm">XP Booster 2x</div><div class="shop-desc">24h double XP!</div><div class="shop-price">🪙 800</div></div>
     <div class="shop-item" onclick="buyItem(this,'Gold Frame',300,'🎭')"><span class="shop-ic">🎭</span><div class="shop-nm">Gold Frame</div><div class="shop-desc">Special avatar!</div><div class="shop-price">🪙 300</div></div>
     <div class="shop-item feat" onclick="buyItem(this,'Extra Box',600,'🎁')"><div class="shop-hot">NEW</div><span class="shop-ic">🎁</span><div class="shop-nm">Extra Box</div><div class="shop-desc">Random reward!</div><div class="shop-price">🪙 600</div></div>
-    <div class="shop-item" onclick="buyItem(this,'Name Color',1000,'🌈')"><span class="shop-ic">🌈</span><div class="shop-nm">Name Color</div><div class="shop-desc">Leaderboard highlight!</div><div class="shop-price">🪙 1000</div></div>
-    <div class="shop-item feat" onclick="buyItem(this,'Quiz Shield',400,'🛡️')"><span class="shop-ic">🛡️</span><div class="shop-nm">Quiz Shield</div><div class="shop-desc">Quiz-এ extra time!</div><div class="shop-price">🪙 400</div></div>
   </div>
-</div>
-</div>
+</div></div>
 
-<!-- ═══ LEADERBOARD ═══ -->
-<div class="panel" id="panel-lb">
-<div class="wrap">
+<!-- LEADERBOARD -->
+<div class="panel" id="panel-lb"><div class="wrap">
   <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">🏆 Leaderboard</div>
-  <div style="font-size:.78rem;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-    <span class="live-badge"><span class="live-dot"></span>LIVE</span> Firebase Real-time — Study করলে rank change হয়!
-  </div>
-  <!-- My rank card -->
+  <div style="font-size:.78rem;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px;"><span class="live-badge"><span class="live-dot"></span>LIVE</span> Firebase Real-time</div>
   <div style="background:var(--a-light);border:1.5px solid var(--a);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:11px;">
     <div style="font-size:1.2rem;font-weight:800;font-family:'Fira Code',monospace;color:var(--a);" id="myRankNum">#?</div>
     <div class="avatar" id="lbMyAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
@@ -862,73 +809,57 @@ cat > /home/claude/bm_part2.html << 'EOF'
     <button class="lb-tab" onclick="selLbTab(this,'all')">🏅 All Time</button>
   </div>
   <div id="lbList"><div class="empty-state"><div class="es-icon">⏳</div><div class="es-title">Loading...</div></div></div>
-</div>
-</div>
+</div></div>
 
-<!-- ═══ GROUPS ═══ -->
-<div class="panel" id="panel-groups">
-<div class="wrap">
+<!-- GROUPS -->
+<div class="panel" id="panel-groups"><div class="wrap">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;">
     <div><div style="font-size:1.1rem;font-weight:800;">Groups</div><div style="font-size:.76rem;color:var(--text3);">Study together, grow together</div></div>
     <button class="btn btn-primary btn-sm" onclick="openCreateGroup()">+ Create</button>
   </div>
-  <div class="create-grp-btn" onclick="openCreateGroup()">
-    <div class="cgb-icon">➕</div>
-    <div><div style="font-size:.88rem;font-weight:600;color:var(--a);">নতুন Group তৈরি করো</div><div style="font-size:.72rem;color:var(--text3);">Subject-based group বানাও</div></div>
-  </div>
+  <div class="create-grp-btn" onclick="openCreateGroup()"><div class="cgb-icon">➕</div><div><div style="font-size:.88rem;font-weight:600;color:var(--a);">নতুন Group তৈরি করো</div><div style="font-size:.72rem;color:var(--text3);">Subject-based group বানাও</div></div></div>
   <div class="g-tabs">
     <button class="g-tab on" onclick="selGTab(this,'my')">My Groups</button>
     <button class="g-tab" onclick="selGTab(this,'discover')">Discover</button>
     <button class="g-tab" onclick="selGTab(this,'popular')">Popular</button>
   </div>
   <div id="groupsContainer"></div>
-</div>
-</div>
+</div></div>
 
-<!-- ═══ MESSAGES ═══ -->
-<div class="panel" id="panel-msg">
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <div style="font-size:1.1rem;font-weight:800;">Messages</div>
-    <button class="btn btn-primary btn-sm" onclick="showNotif('✏️','New DM','নতুন conversation আসছে!','var(--a)')">✏️ New</button>
-  </div>
-  <div class="search-wrap" style="margin-bottom:12px;">
-    <span class="s-icon">🔍</span>
-    <input class="inp search-inp" placeholder="Search conversations..." oninput="filterDMs(this.value)"/>
-  </div>
+<!-- MESSAGES -->
+<div class="panel" id="panel-msg"><div class="wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;"><div style="font-size:1.1rem;font-weight:800;">Messages</div><button class="btn btn-primary btn-sm">✏️ New</button></div>
+  <div class="search-wrap" style="margin-bottom:12px;"><span class="s-icon">🔍</span><input class="inp search-inp" placeholder="Search conversations..." oninput="filterDMs(this.value)"/></div>
   <div class="section-title">Online Now</div>
   <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;">
     <div class="story-item" onclick="openDM('Khadiza Juha','Kh','#42b883',true)"><div class="story-ring"><div class="story-av" style="background:#42b883;">Kh</div></div><div class="story-name">Khadiza</div></div>
     <div class="story-item" onclick="openDM('Ahmod Hossain','Ah','#e91e63',true)"><div class="story-ring"><div class="story-av" style="background:#e91e63;">Ah</div></div><div class="story-name">Ahmod</div></div>
     <div class="story-item" onclick="openDM('Jisan Khan','Ji','#ff5722',false)"><div class="story-ring seen-st"><div class="story-av" style="background:#ff5722;">Ji</div></div><div class="story-name">Jisan</div></div>
-    <div class="story-item" onclick="openDM('Akbor Hossen','Ak','#9c27b0',false)"><div class="story-ring seen-st"><div class="story-av" style="background:#9c27b0;">Ak</div></div><div class="story-name">Akbor</div></div>
   </div>
   <div class="section-title">Recent Chats</div>
   <div id="dmListC"></div>
-</div>
-</div>
+</div></div>
 
-<!-- ═══ VIDEOS ═══ -->
-<div class="panel" id="panel-video">
-<div class="wrap">
-  <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px;">📹 Videos</div>
-  <div class="v-cats">
-    <div class="vcat on" onclick="selCat2(this,'all')">🎯 All</div>
-    <div class="vcat" onclick="selCat2(this,'physics')">⚛️ Physics</div>
-    <div class="vcat" onclick="selCat2(this,'math')">🧮 Math</div>
-    <div class="vcat" onclick="selCat2(this,'chemistry')">🧪 Chemistry</div>
-    <div class="vcat" onclick="selCat2(this,'coding')">💻 Coding</div>
-    <div class="vcat" onclick="selCat2(this,'bcs')">📖 BCS</div>
+<!-- VIDEOS -->
+<div class="panel" id="panel-video"><div class="wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+    <div><div style="font-size:1.1rem;font-weight:800;">📹 Videos</div><div style="font-size:.72rem;color:var(--text3);margin-top:2px;">Study videos share করো</div></div>
+    <button class="btn btn-primary" onclick="openVideoUpload()" style="display:flex;align-items:center;gap:6px;">📤 Upload</button>
   </div>
-  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:12px;cursor:pointer;" onclick="watchVideo(this,'HSC Physics','15:32',0)">
-    <div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#0a0a2e,#1a1a4e);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative;">⚛️<div style="position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">▶️</div><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;font-size:.62rem;padding:2px 8px;border-radius:5px;font-family:'Fira Code',monospace;">15:32</div></div>
-    <div style="padding:12px;"><div style="font-size:.92rem;font-weight:700;margin-bottom:5px;">HSC Physics: Electrostatics সম্পূর্ণ গাইড</div><div style="font-size:.72rem;color:var(--text3);">Ashraf Ahmed · 1.2M views · 2 days ago</div></div>
+  <div class="v-cats" id="videoCats">
+    <div class="vcat on" onclick="filterVideos(this,'all')">🎯 All</div>
+    <div class="vcat" onclick="filterVideos(this,'physics')">⚛️ Physics</div>
+    <div class="vcat" onclick="filterVideos(this,'math')">🧮 Math</div>
+    <div class="vcat" onclick="filterVideos(this,'chemistry')">🧪 Chemistry</div>
+    <div class="vcat" onclick="filterVideos(this,'biology')">🌿 Biology</div>
+    <div class="vcat" onclick="filterVideos(this,'coding')">💻 Coding</div>
+    <div class="vcat" onclick="filterVideos(this,'bcs')">📖 BCS</div>
+    <div class="vcat" onclick="filterVideos(this,'english')">🌐 English</div>
   </div>
-  <div class="vc-grid" id="videoGrid"></div>
-</div>
-</div>
+  <div id="videoFeed"><div class="empty-state"><div class="es-icon">🎬</div><div class="es-title">Loading videos...</div></div></div>
+</div></div>
 
-<!-- ═══ PROFILE ═══ -->
+<!-- PROFILE -->
 <div class="panel" id="panel-profile">
   <div class="p-cover">🌆</div>
   <div class="wrap">
@@ -947,12 +878,11 @@ cat > /home/claude/bm_part2.html << 'EOF'
         <div class="ps-item"><div class="ps-n" id="pHours">0h</div><div class="ps-l">Study</div></div>
         <div class="ps-item"><div class="ps-n">🪙<span id="pCoins">0</span></div><div class="ps-l">Coins</div></div>
       </div>
-      <div style="display:flex;gap:8px;"><button class="btn btn-primary" style="flex:1;padding:9px;" onclick="editProfile()">✏️ Edit Profile</button><button class="btn btn-secondary" style="flex:1;padding:9px;" onclick="shareStats()">📊 Share</button></div>
+      <div style="display:flex;gap:8px;"><button class="btn btn-primary" style="flex:1;padding:9px;">✏️ Edit Profile</button><button class="btn btn-secondary" style="flex:1;padding:9px;" onclick="shareStats()">📊 Share</button></div>
     </div>
-    <!-- Badges -->
     <div class="card" style="padding:16px;margin-bottom:12px;">
       <div class="section-title">🏅 Badges</div>
-      <div class="badges-grid" id="badgesGrid">
+      <div class="badges-grid">
         <div class="badge-item"><div class="badge-ic earned">🔥</div><div class="badge-nm">Streak</div></div>
         <div class="badge-item"><div class="badge-ic earned">⚛️</div><div class="badge-nm">Physics</div></div>
         <div class="badge-item"><div class="badge-ic earned">📚</div><div class="badge-nm">100h</div></div>
@@ -963,7 +893,6 @@ cat > /home/claude/bm_part2.html << 'EOF'
         <div class="badge-item"><div class="badge-ic locked">🎓</div><div class="badge-nm">Mentor</div></div>
       </div>
     </div>
-    <!-- Settings -->
     <div class="card" style="overflow:hidden;">
       <div class="set-item"><div class="si-icon" style="background:var(--a-light);">🌓</div><div class="si-txt"><h4>Theme</h4><p id="themeLbl">Dark Mode</p></div><button class="btn btn-secondary btn-sm si-arr" onclick="toggleTheme()">Toggle</button></div>
       <div class="set-item"><div class="si-icon" style="background:#e8f5e9;">📱</div><div class="si-txt"><h4>Install App</h4><p>Add to Home Screen</p></div><button class="btn btn-primary btn-sm si-arr" onclick="installPWA()">Install</button></div>
@@ -977,44 +906,121 @@ cat > /home/claude/bm_part2.html << 'EOF'
 </div><!-- /main -->
 
 <!-- POST MODAL -->
-<div id="postModal">
-  <div class="pm-card">
-    <div class="pm-handle"></div>
-    <div class="pm-top"><div class="pm-title">📝 Create Post</div><button class="pm-close" onclick="closePost()">✕</button></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-      <div class="avatar" id="pmAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
-      <div><div style="font-size:.88rem;font-weight:600;" id="pmName">User</div><div style="font-size:.72rem;color:var(--text3);">🌐 Public · <span id="pmClass" style="color:var(--a);">HSC 2025</span></div></div>
+<div id="postModal"><div class="pm-card">
+  <div class="pm-handle"></div>
+  <div class="pm-top"><div class="pm-title">📝 Create Post</div><button class="pm-close" onclick="closePost()">✕</button></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+    <div class="avatar" id="pmAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
+    <div><div style="font-size:.88rem;font-weight:600;" id="pmName">User</div><div style="font-size:.72rem;color:var(--text3);">🌐 Public · <span id="pmClass" style="color:var(--a);">HSC 2025</span></div></div>
+  </div>
+  <textarea class="pm-textarea" id="pmText" placeholder="কি শিখলে? Notes, shortcuts, tips... min 10 chars" maxlength="500" oninput="document.getElementById('pmChar').textContent=this.value.length"></textarea>
+  <div class="pm-cats">
+    <button class="pm-cat on" onclick="selPCat(this)">📚 Study</button>
+    <button class="pm-cat" onclick="selPCat(this)">⚛️ Physics</button>
+    <button class="pm-cat" onclick="selPCat(this)">🧮 Math</button>
+    <button class="pm-cat" onclick="selPCat(this)">🧪 Chemistry</button>
+    <button class="pm-cat" onclick="selPCat(this)">💻 Coding</button>
+    <button class="pm-cat" onclick="selPCat(this)">📖 BCS</button>
+    <button class="pm-cat" onclick="selPCat(this)">🌿 Biology</button>
+    <button class="pm-cat" onclick="selPCat(this)">🌐 English</button>
+  </div>
+  <div class="pm-footer"><span class="pm-char"><span id="pmChar">0</span>/500</span><button class="btn btn-primary" onclick="submitPost()" id="pmBtn" style="padding:9px 22px;">📤 Post</button></div>
+</div></div>
+
+<!-- VIDEO UPLOAD MODAL -->
+<div id="videoUploadModal"><div class="vum-card">
+  <div class="vum-handle"></div>
+  <div class="vum-top"><div class="vum-title">📹 Video Upload করো</div><button class="vum-close" onclick="closeVideoUpload()">✕</button></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:11px;background:var(--bg3);border-radius:var(--r2);">
+    <div class="avatar" id="vumAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
+    <div><div style="font-size:.88rem;font-weight:600;" id="vumName">User</div><div style="font-size:.7rem;color:var(--text3);">🌐 Public · Cloudinary hosted</div></div>
+  </div>
+  <div class="drop-zone" id="dropZone" ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleDrop(event)">
+    <input type="file" class="dz-input" id="videoFileInput" accept="video/mp4,video/webm,video/mov,video/avi" onchange="handleVideoFile(this.files[0])"/>
+    <div id="dzDefault">
+      <div class="dz-icon">📹</div>
+      <div class="dz-text">Video drag করো বা click করো</div>
+      <div class="dz-sub">MP4, WebM, MOV · Max 100MB</div>
+      <div style="margin-top:10px;"><span style="background:var(--a);color:#fff;padding:7px 18px;border-radius:22px;font-size:.78rem;font-weight:600;">📁 Choose File</span></div>
     </div>
-    <textarea class="pm-textarea" id="pmText" placeholder="কি শিখলে? Notes, shortcuts, tips... minimum 10 characters" maxlength="500" oninput="document.getElementById('pmChar').textContent=this.value.length"></textarea>
-    <div class="pm-cats">
-      <button class="pm-cat on" onclick="selPCat(this)">📚 Study</button>
-      <button class="pm-cat" onclick="selPCat(this)">⚛️ Physics</button>
-      <button class="pm-cat" onclick="selPCat(this)">🧮 Math</button>
-      <button class="pm-cat" onclick="selPCat(this)">🧪 Chemistry</button>
-      <button class="pm-cat" onclick="selPCat(this)">💻 Coding</button>
-      <button class="pm-cat" onclick="selPCat(this)">📖 BCS</button>
-      <button class="pm-cat" onclick="selPCat(this)">🌿 Biology</button>
-      <button class="pm-cat" onclick="selPCat(this)">🌐 English</button>
+    <div class="dz-preview" id="dzPreview">
+      <video class="dz-prev-video" id="previewVideo" controls muted playsinline></video>
+      <div class="dz-file-info">
+        <span style="font-size:1.1rem;">🎬</span>
+        <div class="dz-file-name" id="dzFileName">video.mp4</div>
+        <div class="dz-file-size" id="dzFileSize">0 MB</div>
+        <button class="dz-remove" onclick="removeVideo()">✕ Remove</button>
+      </div>
     </div>
-    <div class="pm-footer"><span class="pm-char"><span id="pmChar">0</span>/500</span><button class="btn btn-primary" onclick="submitPost()" id="pmBtn" style="padding:9px 22px;">📤 Post</button></div>
+  </div>
+  <div style="font-size:.78rem;font-weight:600;color:var(--text2);margin-bottom:7px;">🖼️ Thumbnail (optional)</div>
+  <div class="thumb-zone" id="thumbZone">
+    <input type="file" class="tz-input" id="thumbInput" accept="image/*" onchange="handleThumb(this.files[0])"/>
+    <img class="tz-preview" id="thumbPreview" alt="Thumbnail"/>
+    <div class="tz-text" id="thumbText">📷 Click করে thumbnail add করো</div>
+  </div>
+  <div style="margin-bottom:11px;"><label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">📌 Video Title *</label><input class="inp" id="videoTitle" placeholder="যেমন: HSC Physics — Electrostatics গাইড" maxlength="100"/></div>
+  <div style="margin-bottom:11px;"><label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">📝 Description</label><textarea class="inp" id="videoDesc" placeholder="Video-তে কি আছে? Chapter, topics..." style="resize:none;min-height:70px;line-height:1.6;" maxlength="500"></textarea></div>
+  <div style="margin-bottom:11px;">
+    <label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:7px;">📚 Subject</label>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;" id="subjectPicker">
+      <button class="vcat on" onclick="selSubject(this,'physics')" style="border-radius:20px;">⚛️ Physics</button>
+      <button class="vcat" onclick="selSubject(this,'math')" style="border-radius:20px;">🧮 Math</button>
+      <button class="vcat" onclick="selSubject(this,'chemistry')" style="border-radius:20px;">🧪 Chemistry</button>
+      <button class="vcat" onclick="selSubject(this,'biology')" style="border-radius:20px;">🌿 Biology</button>
+      <button class="vcat" onclick="selSubject(this,'coding')" style="border-radius:20px;">💻 Coding</button>
+      <button class="vcat" onclick="selSubject(this,'bcs')" style="border-radius:20px;">📖 BCS</button>
+      <button class="vcat" onclick="selSubject(this,'english')" style="border-radius:20px;">🌐 English</button>
+    </div>
+  </div>
+  <div style="margin-bottom:14px;"><label style="font-size:.78rem;font-weight:600;color:var(--text2);display:block;margin-bottom:5px;">🎓 Class Level</label>
+    <select class="inp" id="videoClass"><option>HSC 2025</option><option>SSC 2025</option><option>University</option><option>BCS Prep</option><option>IELTS</option><option>General</option></select>
+  </div>
+  <div class="upload-progress" id="uploadProgress">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+      <div style="width:18px;height:18px;border:2.5px solid var(--a);border-top-color:transparent;border-radius:50%;animation:spin360 .7s linear infinite;flex-shrink:0;"></div>
+      <div style="font-size:.8rem;font-weight:600;" id="uploadStatusText">Uploading...</div>
+    </div>
+    <div class="up-bar-wrap"><div class="up-bar-fill" id="upBarFill" style="width:0%"></div></div>
+    <div class="up-status"><span id="upDetail">Preparing...</span><span class="up-pct" id="upPct">0%</span></div>
+  </div>
+  <button class="btn btn-primary" id="uploadSubmitBtn" onclick="uploadVideo()" style="width:100%;padding:13px;font-size:.92rem;">🚀 Upload & Publish</button>
+  <div style="text-align:center;font-size:.68rem;color:var(--text3);margin-top:8px;">Cloudinary → Firebase → Live! ✅</div>
+</div></div>
+
+<!-- VIDEO PLAYER -->
+<div id="videoPlayer">
+  <div class="vp-header">
+    <button class="vp-back" onclick="closePlayer()">←</button>
+    <div class="vp-title" id="vpTitle">Video</div>
+    <button style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;padding:5px 11px;font-size:.75rem;cursor:pointer;" onclick="shareVideoPost()">🔗 Share</button>
+  </div>
+  <video class="vp-video" id="mainVideo" playsinline controlsList="nodownload"></video>
+  <div class="vp-controls">
+    <div class="vp-progress" id="vpProgress" onclick="seekVideo(event)">
+      <div class="vp-progress-fill" id="vpProgressFill" style="width:0%"></div>
+      <div class="vp-progress-thumb" id="vpProgressThumb" style="left:0%"></div>
+    </div>
+    <div class="vp-btns">
+      <button class="vp-btn" id="vpPlayBtn" onclick="togglePlay()">▶</button>
+      <span class="vp-time" id="vpTime">0:00 / 0:00</span>
+      <input type="range" class="vp-vol" min="0" max="1" step="0.1" value="1" oninput="setVol(this.value)">
+      <button class="vp-btn" onclick="toggleFullscreen()">⛶</button>
+    </div>
   </div>
 </div>
 
-<!-- GROUP CHAT SCREEN -->
+<!-- GROUP CHAT -->
 <div class="fullscreen" id="gcScreen">
   <div class="fs-hd">
     <button class="fs-back" onclick="closeGC()">←</button>
     <div style="font-size:1.3rem;" id="gcIcon">📚</div>
     <div style="margin-left:8px;flex:1;"><div class="fs-title" id="gcName">Group</div><div style="font-size:.7rem;color:var(--text3);" id="gcMeta"></div></div>
-    <div class="fs-acts">
-      <div class="tb-btn" onclick="showGCInfo()">ℹ️</div>
-      <div class="tb-btn">🔍</div>
-    </div>
+    <div class="fs-acts"><div class="tb-btn" onclick="showGCInfo()">ℹ️</div></div>
   </div>
   <div class="chat-area" id="gcArea"></div>
   <div class="chat-inp-area">
     <div class="cia-tools">
-      <div class="cia-tool" onclick="showNotif('🖼️','Photo','Image sharing coming soon!','var(--a)')">🖼️</div>
       <div class="cia-tool" onclick="sendGCQuiz()">🎯</div>
       <div class="cia-tool" onclick="sendGCEmoji()">😊</div>
       <div class="cia-tool" onclick="sendGCPoll()">📊</div>
@@ -1026,12 +1032,12 @@ cat > /home/claude/bm_part2.html << 'EOF'
   </div>
 </div>
 
-<!-- DM CHAT SCREEN -->
+<!-- DM CHAT -->
 <div class="fullscreen" id="dmScreen">
   <div class="fs-hd">
     <button class="fs-back" onclick="closeDM()">←</button>
     <div style="position:relative;"><div class="avatar" id="dmAv" style="width:36px;height:36px;font-size:.8rem;color:#fff;"></div><div class="dmi-sts online" id="dmSts"></div></div>
-    <div style="margin-left:10px;flex:1;"><div class="fs-title" id="dmNm">Name</div><div style="font-size:.7rem;color:var(--gr);" id="dmOnl">Online</div></div>
+    <div style="margin-left:10px;flex:1;"><div class="fs-title" id="dmNm">Name</div><div style="font-size:.7rem;" id="dmOnl">Online</div></div>
     <div class="fs-acts">
       <div class="tb-btn" onclick="showNotif('📞','Call','Voice call আসছে!','var(--gr)')">📞</div>
       <div class="tb-btn" onclick="showNotif('📹','Video','Video call আসছে!','var(--a)')">📹</div>
@@ -1040,7 +1046,6 @@ cat > /home/claude/bm_part2.html << 'EOF'
   <div class="chat-area" id="dmArea"></div>
   <div class="chat-inp-area">
     <div class="cia-tools">
-      <div class="cia-tool">🖼️</div>
       <div class="cia-tool" onclick="sendDMQuickReply('🙏')">🙏</div>
       <div class="cia-tool" onclick="sendDMQuickReply('👍')">👍</div>
       <div class="cia-tool" onclick="sendDMQuickReply('❤️')">❤️</div>
@@ -1059,584 +1064,11 @@ cat > /home/claude/bm_part2.html << 'EOF'
   <button class="bni" onclick="showP('lb',this)"><span class="ni">🏆</span>Rank</button>
   <button class="bni" onclick="showP('groups',this);renderGroups()"><span class="ni">👥</span>Groups<span class="ndot"></span></button>
   <button class="bni" onclick="showP('msg',this);renderDmList()"><span class="ni">💬</span>Msgs<span class="ndot"></span></button>
-  <button class="bni" onclick="showP('video',this);renderVideos()"><span class="ni">🎬</span>Videos</button>
+  <button class="bni" onclick="showP('video',this);startVideosListener()"><span class="ni">🎬</span>Videos</button>
   <button class="bni" onclick="showP('profile',this)"><span class="ni">👤</span>Profile</button>
 </div>
+BODYEOF
+echo "Body written: $(wc -c < /home/claude/bm_body.html) bytes"
+Output
 
-
-cat > /home/claude/bm_part2.html << 'EOF'
-<!-- GLOBAL LOADER -->
-<div id="globalLoader">
-  <div class="gl-logo">📚</div>
-  <div class="gl-name">BrightMesh</div>
-  <div class="gl-spin"></div>
-</div>
-<div id="confettiC"></div>
-<div id="notifC"></div>
-
-<!-- LEVEL UP MODAL -->
-<div id="luModal">
-  <div class="lu-card">
-    <div style="font-size:3rem;margin-bottom:10px;animation:float 2s ease-in-out infinite;">🎊</div>
-    <div style="font-size:1.6rem;font-weight:800;color:var(--a);margin-bottom:5px;" id="luNum">Level 2!</div>
-    <div style="font-weight:700;margin-bottom:6px;">Congrats! 🎓</div>
-    <div style="font-size:.82rem;color:var(--text3);margin-bottom:14px;line-height:1.6;">নতুন level-এ উঠেছ! চালিয়ে যাও!</div>
-    <div style="display:flex;justify-content:center;gap:10px;margin-bottom:16px;">
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--gd);" id="luCoins">+500🪙</div><div style="font-size:.6rem;color:var(--text3);">Coins</div></div>
-      <div style="background:var(--bg3);border-radius:10px;padding:9px 14px;text-align:center;"><div style="font-weight:700;color:var(--a);" id="luXP">+100⭐</div><div style="font-size:.6rem;color:var(--text3);">XP</div></div>
-    </div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="document.getElementById('luModal').classList.remove('show')">🚀 চালিয়ে যাও!</button>
-  </div>
-</div>
-
-<!-- QUIZ BATTLE MODAL -->
-<div id="quizModal">
-  <div class="quiz-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;">
-      <span style="font-size:.75rem;font-weight:600;color:var(--text3);">Q<span id="qNum">1</span>/5 · <span id="qSubj" style="color:var(--a);">Physics</span></span>
-      <span style="font-family:'Fira Code',monospace;font-size:.85rem;font-weight:700;color:var(--gd);" id="qTimer">15s</span>
-      <button style="border:none;background:none;color:var(--text3);cursor:pointer;font-size:.85rem;" onclick="endQuiz()">✕ Quit</button>
-    </div>
-    <div class="qz-timer-bar"><div class="qz-timer-fill" id="qTimerBar" style="width:100%;"></div></div>
-    <div class="qz-vs" id="qzVs">
-      <div class="qz-player"><div class="qz-score" id="myQScore">0</div><div style="font-size:.7rem;color:var(--text3);margin-top:2px;" id="myQName">তুমি</div></div>
-      <div class="qz-vs-badge">VS</div>
-      <div class="qz-player"><div class="qz-score" id="opQScore">0</div><div style="font-size:.7rem;color:var(--text3);margin-top:2px;" id="opQName">Khadiza</div></div>
-    </div>
-    <div class="qz-q" id="qzQ">Question here</div>
-    <div class="qz-opts" id="qzOpts"></div>
-  </div>
-</div>
-
-<!-- NOTIFICATION PANEL -->
-<div id="notifPanel">
-  <div class="fs-hd">
-    <button class="fs-back" onclick="document.getElementById('notifPanel').classList.remove('show')">←</button>
-    <div class="fs-title">🔔 Notifications</div>
-    <button class="btn btn-secondary btn-sm" onclick="markAllRead()">All Read</button>
-  </div>
-  <div style="flex:1;overflow-y:auto;" id="notifList"></div>
-</div>
-
-<!-- AUTH SCREEN -->
-<div id="authScreen">
-  <div class="auth-card">
-    <div style="text-align:center;margin-bottom:20px;">
-      <div class="auth-logo-icon">B</div>
-      <div style="font-size:1.4rem;font-weight:800;margin-top:6px;">BrightMesh</div>
-      <div style="font-size:.8rem;color:var(--text3);">Learn Together 📚</div>
-    </div>
-    <div class="auth-tabs">
-      <button class="auth-tab on" id="loginTab" onclick="switchAuth('login')">🔑 Login</button>
-      <button class="auth-tab" id="signupTab" onclick="switchAuth('signup')">✨ Sign Up</button>
-    </div>
-    <div class="auth-error" id="authErr"></div>
-    <div id="loginForm">
-      <div class="auth-field"><label>Email</label><input class="inp" type="email" id="liEmail" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input class="inp" type="password" id="liPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-      <button class="btn btn-primary" style="width:100%;padding:12px;margin-bottom:10px;" onclick="doLogin()" id="liBtn">🚀 Login</button>
-      <div class="auth-divider">অথবা</div>
-      <button class="google-btn" onclick="doGoogle()">🔵 Continue with Google</button>
-    </div>
-    <div id="signupForm" style="display:none;">
-      <div class="auth-field"><label>Full Name</label><input class="inp" type="text" id="suName" placeholder="তোমার নাম"/></div>
-      <div class="auth-field"><label>Email</label><input class="inp" type="email" id="suEmail" placeholder="your@email.com"/></div>
-      <div class="auth-field"><label>Password</label><input class="inp" type="password" id="suPass" placeholder="Min 6 characters" onkeydown="if(event.key==='Enter')doSignup()"/></div>
-      <div class="auth-field">
-        <label>Class / Level</label>
-        <select class="inp" id="suClass">
-          <option value="">Select class</option>
-          <option>SSC 2025</option><option>HSC 2025</option>
-          <option>University</option><option>BCS Prep</option>
-          <option>Bank Job</option><option>IELTS</option><option>Other</option>
-        </select>
-      </div>
-      <button class="btn" style="width:100%;padding:12px;background:var(--gr);color:#fff;" onclick="doSignup()" id="suBtn">✅ Create Account</button>
-    </div>
-  </div>
-</div>
-
-<!-- PWA BAR -->
-<div id="pwaBar">
-  <div style="font-size:1.4rem;">📱</div>
-  <div class="pwa-text"><div class="pwa-title">BrightMesh Install করো!</div><div class="pwa-sub">Home screen-এ add করো!</div></div>
-  <button class="pwa-install" onclick="installPWA()">Install</button>
-  <button class="pwa-close" onclick="document.getElementById('pwaBar').classList.remove('show')">✕</button>
-</div>
-
-<!-- TOPBAR -->
-<div class="topbar" id="topbar" style="display:none;">
-  <div class="logo"><div class="logo-icon">B</div><div class="logo-text">Bright<span>Mesh</span></div></div>
-  <div class="tb-right">
-    <div class="tb-btn" id="themeBtn" onclick="toggleTheme()">🌙</div>
-    <div class="tb-btn" onclick="openNotifPanel()">🔔<span class="tb-badge" id="notifBadge">3</span></div>
-    <div class="tb-av" id="tbAv" onclick="showP('profile',document.querySelector('.bni:last-child'))">U</div>
-  </div>
-</div>
-
-<!-- MAIN -->
-<div class="main" id="mainApp" style="display:none;">
-
-<!-- ═══ FEED ═══ -->
-<div class="panel active" id="panel-feed">
-<div class="wrap">
-  <div class="fomo-card urgent">
-    <span>⏰</span>
-    <div style="flex:1;"><strong>Streak শেষ হচ্ছে!</strong> আজ রাত ১২টায়!</div>
-    <span class="fomo-timer" id="fomoT">03:24:15</span>
-  </div>
-  <div class="fomo-card info">
-    <span>👀</span>
-    <div style="flex:1;">৫ জন তোমাকে <strong>group-এ invite</strong> করেছে!</div>
-    <button class="btn btn-primary btn-sm" onclick="showP('groups',document.querySelectorAll('.bni')[3])">View</button>
-  </div>
-  <!-- Stories -->
-  <div class="stories-row" id="storiesRow">
-    <div class="story-item" onclick="openStoryCreate()"><div class="story-ring add-st"><div class="story-av" style="background:var(--bg4);color:var(--a);font-size:1.3rem;">+</div></div><div class="story-name">Add</div></div>
-    <div class="story-item" onclick="viewStory('Ashraf')"><div class="story-ring"><div class="story-av" style="background:#1877f2;">As</div></div><div class="story-name">Ashraf</div></div>
-    <div class="story-item" onclick="viewStory('Khadiza')"><div class="story-ring"><div class="story-av" style="background:#42b883;">Kh</div></div><div class="story-name">Khadiza</div></div>
-    <div class="story-item" onclick="viewStory('Jisan')"><div class="story-ring seen-st"><div class="story-av" style="background:#ff5722;">Ji</div></div><div class="story-name">Jisan</div></div>
-    <div class="story-item" onclick="viewStory('Akbor')"><div class="story-ring seen-st"><div class="story-av" style="background:#9c27b0;">Ak</div></div><div class="story-name">Akbor</div></div>
-  </div>
-  <!-- Search Bar -->
-  <div class="search-wrap">
-    <span class="s-icon">🔍</span>
-    <input class="inp search-inp" id="searchInp" placeholder="Search posts, topics, notes..." oninput="doSearch(this.value)" onfocus="this.nextElementSibling.nextElementSibling.style.display='block'"/>
-    <button class="s-clear" id="searchClear" onclick="clearSearch()">✕</button>
-    <div class="search-drop" id="searchDrop"></div>
-  </div>
-  <!-- Create Post -->
-  <div class="create-post">
-    <div class="cp-row">
-      <div class="avatar" id="cpAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
-      <input class="cp-inp" placeholder="কি মনে আছে? শেয়ার করো! 📚" onclick="openPostModal()"/>
-    </div>
-    <div class="cp-actions">
-      <button class="cp-action" style="color:var(--rd);" onclick="openPostModal('live')">📹 Live</button>
-      <button class="cp-action" style="color:var(--gr);" onclick="openPostModal('photo')">🖼️ Photo</button>
-      <button class="cp-action" style="color:var(--a);" onclick="openPostModal('note')">📝 Note</button>
-      <button class="cp-action" style="color:var(--gd);" onclick="openPostModal('progress')">📊 Progress</button>
-    </div>
-  </div>
-  <!-- Sort/Filter -->
-  <div style="display:flex;gap:6px;margin-bottom:10px;overflow-x:auto;padding-bottom:3px;">
-    <button class="g-tab on" onclick="filterFeed(this,'all')">All</button>
-    <button class="g-tab" onclick="filterFeed(this,'study')">📚 Study</button>
-    <button class="g-tab" onclick="filterFeed(this,'physics')">⚛️ Physics</button>
-    <button class="g-tab" onclick="filterFeed(this,'math')">🧮 Math</button>
-    <button class="g-tab" onclick="filterFeed(this,'coding')">💻 Code</button>
-  </div>
-  <!-- Posts Feed (real-time) -->
-  <div id="postsFeed">
-    <div class="empty-state"><div class="es-icon">📭</div><div class="es-title">Loading posts...</div><div class="es-desc">Firebase থেকে real-time data আসছে</div></div>
-  </div>
-</div>
-</div>
-
-<!-- ═══ STUDY + DOPAMINE ═══ -->
-<div class="panel" id="panel-study">
-<div class="wrap">
-  <!-- XP Hero -->
-  <div class="xp-hero">
-    <div class="xp-row">
-      <div class="xp-badge" onclick="triggerLevelUp()" id="lvBadge">Lv.<span id="userLv">1</span></div>
-      <div style="flex:1;position:relative;z-index:1;">
-        <div style="font-size:.9rem;font-weight:700;" id="rankTitle">Beginner</div>
-        <div style="font-size:.72rem;opacity:.85;">Level up হতে <strong id="xpNeeded">100</strong> XP বাকি!</div>
-      </div>
-      <div style="text-align:right;position:relative;z-index:1;">
-        <div style="font-family:'Fira Code',monospace;font-size:.88rem;font-weight:700;" id="xpDisp">0</div>
-        <div style="font-size:.6rem;opacity:.8;">Total XP</div>
-      </div>
-    </div>
-    <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpFill" style="width:5%;"></div></div>
-    <div class="xp-labels"><span id="xpL">0</span><span id="xpC">0/100</span><span id="xpR">100</span></div>
-  </div>
-  <!-- Stat grid -->
-  <div class="stat-grid">
-    <div class="stat-box" onclick="showDetailStats()"><span class="stat-val" id="todayH">0.0h</span><div class="stat-lbl">আজকের পড়া</div></div>
-    <div class="stat-box"><span class="stat-val">🔥<span id="streakD">0</span></span><div class="stat-lbl">Day Streak</div></div>
-    <div class="stat-box"><span class="stat-val" id="totalH">0h</span><div class="stat-lbl">মোট study</div></div>
-    <div class="stat-box"><span class="stat-val">🪙<span id="coinsD">0</span></span><div class="stat-lbl">Coins</div></div>
-  </div>
-  <!-- Streak -->
-  <div class="streak-card">
-    <div style="font-size:2.5rem;animation:streakFire 2s ease-in-out infinite;margin-bottom:6px;">🔥</div>
-    <div style="font-size:1.8rem;font-weight:800;color:var(--gd);" id="streakNum">0</div>
-    <div style="font-size:.8rem;color:var(--text3);margin-bottom:10px;">দিনের Study Streak!</div>
-    <div class="s-days" id="streakDays">
-      <div class="sday done">S</div><div class="sday done">M</div><div class="sday done">T</div>
-      <div class="sday done">W</div><div class="sday today">T</div><div class="sday">F</div><div class="sday">S</div>
-    </div>
-    <div style="font-size:.75rem;color:var(--rd);margin-bottom:11px;">⚠️ শেষ হবে: <span id="streakCd" style="font-family:'Fira Code',monospace;font-weight:700;">03:24:15</span></div>
-    <button class="btn btn-primary" onclick="studyNow()">📚 এখনই পড়ো!</button>
-  </div>
-  <!-- Timer -->
-  <div class="timer-card">
-    <div style="font-size:.72rem;font-weight:600;letter-spacing:1px;opacity:.8;margin-bottom:9px;position:relative;z-index:1;">⏱️ FOCUS TIMER — Firebase sync</div>
-    <div class="timer-modes">
-      <button class="t-mode on" onclick="setMode(25,this)">🍅 25m</button>
-      <button class="t-mode" onclick="setMode(5,this)">☕ 5m</button>
-      <button class="t-mode" onclick="setMode(50,this)">💪 50m</button>
-      <button class="t-mode" onclick="setMode(90,this)">🎯 90m</button>
-    </div>
-    <input class="timer-task" id="timerTask" placeholder="এখন কি পড়ছ? (ex: Physics ch.3)"/>
-    <div class="timer-disp" id="timerDisp">25:00</div>
-    <div class="timer-btns">
-      <button class="t-btn t-start" id="tStartBtn" onclick="toggleTimer()">▶ Start</button>
-      <button class="t-btn t-alt" onclick="resetTimer()">🔄 Reset</button>
-      <button class="t-btn t-alt" onclick="skipTimer()">⏭ Skip</button>
-    </div>
-    <!-- Pomodoro dots -->
-    <div class="pomo-row" id="pomoDots">
-      <div class="pomo-dot current"></div>
-      <div class="pomo-dot"></div>
-      <div class="pomo-dot"></div>
-      <div class="pomo-dot"></div>
-    </div>
-    <div class="timer-info">Sessions: <span id="sesCount">0</span> · Focus: <span id="focusPct">100%</span> · Live 🔥</div>
-  </div>
-  <!-- 1v1 Quiz Battle -->
-  <div class="card" style="padding:16px;margin-bottom:12px;background:linear-gradient(135deg,#1a1a2e,#16213e);border-color:#0f3460;">
-    <div style="font-size:.72rem;font-weight:600;color:#e94560;letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">⚔️ 1v1 QUIZ BATTLE</div>
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
-      <div style="text-align:center;flex:1;"><div class="avatar" style="width:44px;height:44px;background:var(--a);font-size:.9rem;color:#fff;margin:0 auto 4px;" id="myQuizAv">U</div><div style="font-size:.72rem;color:#aaa;">তুমি</div></div>
-      <div style="text-align:center;"><div style="font-size:1.1rem;font-weight:800;color:#e94560;">VS</div></div>
-      <div style="text-align:center;flex:1;" id="opponentPreview"><div class="avatar" style="width:44px;height:44px;background:#42b883;font-size:.9rem;color:#fff;margin:0 auto 4px;">Kh</div><div style="font-size:.72rem;color:#aaa;">Khadiza</div></div>
-    </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px;">
-      <button class="btn" style="background:#e94560;color:#fff;padding:10px;" onclick="startQuiz('Physics')">⚛️ Physics</button>
-      <button class="btn" style="background:#0f3460;color:#fff;border:1px solid #e94560;padding:10px;" onclick="startQuiz('Math')">🧮 Math</button>
-      <button class="btn" style="background:#0f3460;color:#fff;border:1px solid #e94560;padding:10px;" onclick="startQuiz('Chemistry')">🧪 Chem</button>
-      <button class="btn" style="background:#0f3460;color:#fff;border:1px solid #e94560;padding:10px;" onclick="startQuiz('General')">📖 BCS</button>
-    </div>
-  </div>
-  <!-- Mystery Box -->
-  <div class="mystery-box" onclick="openBox()">
-    <span class="mb-emoji" id="boxEmoji">🎁</span>
-    <div style="font-size:.95rem;font-weight:700;margin-bottom:5px;">Mystery Reward Box!</div>
-    <div style="font-size:.78rem;opacity:.85;margin-bottom:11px;">Study করলে random reward পাও! 🎰</div>
-    <button style="background:rgba(255,255,255,.2);border:1.5px solid rgba(255,255,255,.4);border-radius:22px;padding:9px 22px;color:#fff;font-size:.82rem;font-weight:700;cursor:pointer;">🎲 Open Now!</button>
-    <div style="font-size:.65rem;opacity:.7;margin-top:8px;" id="boxCd">Available now!</div>
-  </div>
-  <!-- Spin Wheel -->
-  <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div class="section-title">🎯 Daily Spin</div>
-    <canvas id="spinCanvas" width="240" height="240"></canvas>
-    <div style="text-align:center;margin-top:11px;">
-      <button class="btn btn-primary" id="spinBtn" onclick="doSpin()">🎯 Spin!</button>
-      <div id="spinRes" style="font-size:.84rem;font-weight:700;margin-top:9px;min-height:18px;"></div>
-    </div>
-  </div>
-  <!-- Variable Reward -->
-  <div style="background:var(--bg2);border:2px dashed var(--bd2);border-radius:var(--r);padding:16px;text-align:center;cursor:pointer;margin-bottom:12px;" onclick="claimBonus(this)">
-    <div style="font-size:.65rem;font-weight:600;color:var(--text3);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;">🎰 Variable Reward</div>
-    <div style="font-size:2rem;font-weight:800;color:var(--a);font-family:'Fira Code',monospace;" id="bonusAmt">???</div>
-    <div style="font-size:.76rem;color:var(--text3);margin-top:4px;">Click → কখনো 10, কখনো 1000 XP 😈</div>
-    <div style="font-size:.68rem;color:var(--text4);margin-top:3px;">Resets in: <span id="bonusCd">Available</span></div>
-  </div>
-  <!-- Daily Quests -->
-  <div class="quest-card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="section-title" style="margin:0;">🎯 Daily Quests</div>
-      <div style="font-size:.72rem;color:var(--text3);">Resets: <span id="questReset" style="font-family:'Fira Code',monospace;color:var(--gd);"></span></div>
-    </div>
-    <div class="quest-item" id="q1item">
-      <div class="qi-icon">⏱️</div>
-      <div class="qi-info"><div class="qi-name">২ ঘন্টা focus করো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q1fill" style="width:0%;background:var(--gr)"></div></div><div class="qi-pct" id="q1pct">0/2h</div></div>
-      <div class="qi-r">+100⭐<br><button class="qi-btn" id="q1btn" onclick="claimQuest(1)" disabled>Claim</button></div>
-    </div>
-    <div class="quest-item" id="q2item">
-      <div class="qi-icon">📝</div>
-      <div class="qi-info"><div class="qi-name">১টি post শেয়ার করো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q2fill" style="width:0%;background:var(--a)"></div></div><div class="qi-pct" id="q2pct">0/1</div></div>
-      <div class="qi-r">+50⭐<br><button class="qi-btn" id="q2btn" onclick="claimQuest(2)" disabled>Claim</button></div>
-    </div>
-    <div class="quest-item" id="q3item">
-      <div class="qi-icon">👥</div>
-      <div class="qi-info"><div class="qi-name">Group-এ message পাঠাও</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q3fill" style="width:0%;background:var(--gd)"></div></div><div class="qi-pct" id="q3pct">0/1</div></div>
-      <div class="qi-r">+75⭐<br><button class="qi-btn" id="q3btn" onclick="claimQuest(3)" disabled>Claim</button></div>
-    </div>
-    <div class="quest-item" id="q4item">
-      <div class="qi-icon">🏆</div>
-      <div class="qi-info"><div class="qi-name">Quiz Battle জিতো</div><div class="qi-bar-bg"><div class="qi-bar-fill" id="q4fill" style="width:0%;background:var(--pu)"></div></div><div class="qi-pct" id="q4pct">0/1</div></div>
-      <div class="qi-r">+150⭐<br><button class="qi-btn" id="q4btn" onclick="claimQuest(4)" disabled>Claim</button></div>
-    </div>
-  </div>
-  <!-- Subject Progress -->
-  <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
-      <div class="section-title" style="margin:0;">📚 Subject Progress</div>
-      <button class="btn btn-secondary btn-sm" onclick="editSubject()">Edit</button>
-    </div>
-    <div id="subjectProgs">
-      <div class="prog-item"><div class="prog-label"><span>⚛️ Physics</span><span style="color:var(--a);" id="pPhy">72%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bPhy" style="width:72%;background:linear-gradient(90deg,var(--a),var(--pu))"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🧮 Math</span><span style="color:var(--gr);" id="pMath">85%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bMath" style="width:85%;background:linear-gradient(90deg,var(--gr),#00796b)"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🧪 Chemistry</span><span style="color:var(--gd);" id="pChem">45%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bChem" style="width:45%;background:linear-gradient(90deg,var(--gd),#e65100)"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🌿 Biology</span><span style="color:var(--gr);" id="pBio">60%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bBio" style="width:60%;background:linear-gradient(90deg,#56ab2f,#a8e063)"></div></div></div>
-      <div class="prog-item"><div class="prog-label"><span>🌐 English</span><span style="color:var(--rd);" id="pEng">88%</span></div><div class="prog-bar-bg"><div class="prog-fill" id="bEng" style="width:88%;background:linear-gradient(90deg,var(--rd),var(--pu))"></div></div></div>
-    </div>
-  </div>
-  <!-- Study Heat Map -->
-  <div class="stats-panel">
-    <div class="section-title">📊 Study Heatmap (last 28 days)</div>
-    <div class="heat-grid" id="heatmap"></div>
-    <div style="display:flex;gap:4px;align-items:center;margin-top:8px;font-size:.62rem;color:var(--text3);">
-      <span>Less</span>
-      <div style="width:10px;height:10px;border-radius:2px;background:var(--bg4);"></div>
-      <div style="width:10px;height:10px;border-radius:2px;background:rgba(0,166,81,.3);"></div>
-      <div style="width:10px;height:10px;border-radius:2px;background:rgba(0,166,81,.6);"></div>
-      <div style="width:10px;height:10px;border-radius:2px;background:#00a651;"></div>
-      <span>More</span>
-    </div>
-  </div>
-  <!-- AI Tutor -->
-  <div class="card" style="padding:16px;margin-bottom:12px;">
-    <div class="section-title">🤖 AI Study Tutor</div>
-    <div style="background:var(--bg3);border:1.5px solid var(--bd);border-radius:var(--r);height:190px;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:8px;margin-bottom:9px;" id="aiMsgs">
-      <div style="padding:9px 13px;background:var(--bg2);border:1px solid var(--bd);border-radius:4px 14px 14px 14px;font-size:.84rem;line-height:1.6;align-self:flex-start;">👋 যেকোনো subject-এ প্রশ্ন করো! Physics, Math, Chemistry, BCS সব!</div>
-    </div>
-    <div style="display:flex;gap:8px;">
-      <input class="inp" id="aiInp" placeholder="প্রশ্ন করো..." onkeydown="if(event.key==='Enter')sendAI()" style="border-radius:22px;"/>
-      <button class="cia-send" onclick="sendAI()">➤</button>
-    </div>
-    <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;">
-      <button class="pm-cat" onclick="quickAI('Newton-এর গতিসূত্র কি?')">⚛️ Newton</button>
-      <button class="pm-cat" onclick="quickAI('Integration কি?')">🧮 Integration</button>
-      <button class="pm-cat" onclick="quickAI('Organic Chemistry basics')">🧪 Organic</button>
-      <button class="pm-cat" onclick="quickAI('BCS এর জন্য কিভাবে পড়বো?')">📖 BCS Tips</button>
-    </div>
-  </div>
-  <!-- Shop -->
-  <div class="section-title">🛒 Coins Shop</div>
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;font-family:'Fira Code',monospace;font-size:.8rem;"><span style="color:var(--text3);">Balance:</span><span style="color:var(--gd);font-weight:700;">🪙 <span id="shopBal">0</span></span></div>
-  <div class="shop-grid">
-    <div class="shop-item feat" onclick="buyItem(this,'Streak Freeze',500,'🧊')"><div class="shop-hot">HOT</div><span class="shop-ic">🧊</span><div class="shop-nm">Streak Freeze</div><div class="shop-desc">Streak বাঁচাও! ১ দিন</div><div class="shop-price">🪙 500</div></div>
-    <div class="shop-item" onclick="buyItem(this,'XP Booster',800,'⚡')"><span class="shop-ic">⚡</span><div class="shop-nm">XP Booster 2x</div><div class="shop-desc">24h double XP!</div><div class="shop-price">🪙 800</div></div>
-    <div class="shop-item" onclick="buyItem(this,'Gold Frame',300,'🎭')"><span class="shop-ic">🎭</span><div class="shop-nm">Gold Frame</div><div class="shop-desc">Special avatar!</div><div class="shop-price">🪙 300</div></div>
-    <div class="shop-item feat" onclick="buyItem(this,'Extra Box',600,'🎁')"><div class="shop-hot">NEW</div><span class="shop-ic">🎁</span><div class="shop-nm">Extra Box</div><div class="shop-desc">Random reward!</div><div class="shop-price">🪙 600</div></div>
-    <div class="shop-item" onclick="buyItem(this,'Name Color',1000,'🌈')"><span class="shop-ic">🌈</span><div class="shop-nm">Name Color</div><div class="shop-desc">Leaderboard highlight!</div><div class="shop-price">🪙 1000</div></div>
-    <div class="shop-item feat" onclick="buyItem(this,'Quiz Shield',400,'🛡️')"><span class="shop-ic">🛡️</span><div class="shop-nm">Quiz Shield</div><div class="shop-desc">Quiz-এ extra time!</div><div class="shop-price">🪙 400</div></div>
-  </div>
-</div>
-</div>
-
-<!-- ═══ LEADERBOARD ═══ -->
-<div class="panel" id="panel-lb">
-<div class="wrap">
-  <div style="font-size:1.1rem;font-weight:800;margin-bottom:4px;">🏆 Leaderboard</div>
-  <div style="font-size:.78rem;color:var(--text3);margin-bottom:12px;display:flex;align-items:center;gap:6px;">
-    <span class="live-badge"><span class="live-dot"></span>LIVE</span> Firebase Real-time — Study করলে rank change হয়!
-  </div>
-  <!-- My rank card -->
-  <div style="background:var(--a-light);border:1.5px solid var(--a);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;gap:11px;">
-    <div style="font-size:1.2rem;font-weight:800;font-family:'Fira Code',monospace;color:var(--a);" id="myRankNum">#?</div>
-    <div class="avatar" id="lbMyAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
-    <div style="flex:1;"><div style="font-size:.88rem;font-weight:700;" id="lbMyName">তুমি</div><div style="font-size:.7rem;color:var(--text3);">Your current position</div></div>
-    <div style="text-align:right;"><div style="font-size:.9rem;font-weight:700;color:var(--a);font-family:'Fira Code',monospace;" id="lbMyHrs">0.0h</div><div style="font-size:.62rem;color:var(--text3);" id="lbMyXP">0 XP</div></div>
-  </div>
-  <div class="lb-tabs">
-    <button class="lb-tab on" onclick="selLbTab(this,'today')">📅 Today</button>
-    <button class="lb-tab" onclick="selLbTab(this,'week')">📆 Week</button>
-    <button class="lb-tab" onclick="selLbTab(this,'all')">🏅 All Time</button>
-  </div>
-  <div id="lbList"><div class="empty-state"><div class="es-icon">⏳</div><div class="es-title">Loading...</div></div></div>
-</div>
-</div>
-
-<!-- ═══ GROUPS ═══ -->
-<div class="panel" id="panel-groups">
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:13px;">
-    <div><div style="font-size:1.1rem;font-weight:800;">Groups</div><div style="font-size:.76rem;color:var(--text3);">Study together, grow together</div></div>
-    <button class="btn btn-primary btn-sm" onclick="openCreateGroup()">+ Create</button>
-  </div>
-  <div class="create-grp-btn" onclick="openCreateGroup()">
-    <div class="cgb-icon">➕</div>
-    <div><div style="font-size:.88rem;font-weight:600;color:var(--a);">নতুন Group তৈরি করো</div><div style="font-size:.72rem;color:var(--text3);">Subject-based group বানাও</div></div>
-  </div>
-  <div class="g-tabs">
-    <button class="g-tab on" onclick="selGTab(this,'my')">My Groups</button>
-    <button class="g-tab" onclick="selGTab(this,'discover')">Discover</button>
-    <button class="g-tab" onclick="selGTab(this,'popular')">Popular</button>
-  </div>
-  <div id="groupsContainer"></div>
-</div>
-</div>
-
-<!-- ═══ MESSAGES ═══ -->
-<div class="panel" id="panel-msg">
-<div class="wrap">
-  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
-    <div style="font-size:1.1rem;font-weight:800;">Messages</div>
-    <button class="btn btn-primary btn-sm" onclick="showNotif('✏️','New DM','নতুন conversation আসছে!','var(--a)')">✏️ New</button>
-  </div>
-  <div class="search-wrap" style="margin-bottom:12px;">
-    <span class="s-icon">🔍</span>
-    <input class="inp search-inp" placeholder="Search conversations..." oninput="filterDMs(this.value)"/>
-  </div>
-  <div class="section-title">Online Now</div>
-  <div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:8px;margin-bottom:12px;">
-    <div class="story-item" onclick="openDM('Khadiza Juha','Kh','#42b883',true)"><div class="story-ring"><div class="story-av" style="background:#42b883;">Kh</div></div><div class="story-name">Khadiza</div></div>
-    <div class="story-item" onclick="openDM('Ahmod Hossain','Ah','#e91e63',true)"><div class="story-ring"><div class="story-av" style="background:#e91e63;">Ah</div></div><div class="story-name">Ahmod</div></div>
-    <div class="story-item" onclick="openDM('Jisan Khan','Ji','#ff5722',false)"><div class="story-ring seen-st"><div class="story-av" style="background:#ff5722;">Ji</div></div><div class="story-name">Jisan</div></div>
-    <div class="story-item" onclick="openDM('Akbor Hossen','Ak','#9c27b0',false)"><div class="story-ring seen-st"><div class="story-av" style="background:#9c27b0;">Ak</div></div><div class="story-name">Akbor</div></div>
-  </div>
-  <div class="section-title">Recent Chats</div>
-  <div id="dmListC"></div>
-</div>
-</div>
-
-<!-- ═══ VIDEOS ═══ -->
-<div class="panel" id="panel-video">
-<div class="wrap">
-  <div style="font-size:1.1rem;font-weight:800;margin-bottom:12px;">📹 Videos</div>
-  <div class="v-cats">
-    <div class="vcat on" onclick="selCat2(this,'all')">🎯 All</div>
-    <div class="vcat" onclick="selCat2(this,'physics')">⚛️ Physics</div>
-    <div class="vcat" onclick="selCat2(this,'math')">🧮 Math</div>
-    <div class="vcat" onclick="selCat2(this,'chemistry')">🧪 Chemistry</div>
-    <div class="vcat" onclick="selCat2(this,'coding')">💻 Coding</div>
-    <div class="vcat" onclick="selCat2(this,'bcs')">📖 BCS</div>
-  </div>
-  <div style="background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;margin-bottom:12px;cursor:pointer;" onclick="watchVideo(this,'HSC Physics','15:32',0)">
-    <div style="width:100%;aspect-ratio:16/9;background:linear-gradient(135deg,#0a0a2e,#1a1a4e);display:flex;align-items:center;justify-content:center;font-size:3.5rem;position:relative;">⚛️<div style="position:absolute;width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;font-size:1.2rem;">▶️</div><div style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.75);color:#fff;font-size:.62rem;padding:2px 8px;border-radius:5px;font-family:'Fira Code',monospace;">15:32</div></div>
-    <div style="padding:12px;"><div style="font-size:.92rem;font-weight:700;margin-bottom:5px;">HSC Physics: Electrostatics সম্পূর্ণ গাইড</div><div style="font-size:.72rem;color:var(--text3);">Ashraf Ahmed · 1.2M views · 2 days ago</div></div>
-  </div>
-  <div class="vc-grid" id="videoGrid"></div>
-</div>
-</div>
-
-<!-- ═══ PROFILE ═══ -->
-<div class="panel" id="panel-profile">
-  <div class="p-cover">🌆</div>
-  <div class="wrap">
-    <div class="card" style="padding:16px;margin-bottom:12px;margin-top:-38px;">
-      <div style="display:flex;align-items:flex-end;gap:12px;margin-bottom:12px;margin-top:-34px;">
-        <div class="avatar" id="profAv" style="width:74px;height:74px;background:var(--a);font-size:1.8rem;font-weight:700;color:#fff;border:3px solid var(--bg);">U</div>
-        <div style="padding-top:38px;">
-          <div style="font-size:1rem;font-weight:800;" id="profName">Loading...</div>
-          <div style="font-size:.75rem;color:var(--text3);" id="profEmail">...</div>
-          <div style="font-size:.7rem;color:var(--a);margin-top:2px;" id="profClass">HSC 2025</div>
-        </div>
-      </div>
-      <div class="p-stats">
-        <div class="ps-item"><div class="ps-n" id="pPosts">0</div><div class="ps-l">Posts</div></div>
-        <div class="ps-item"><div class="ps-n">🔥<span id="pStreak">0</span></div><div class="ps-l">Streak</div></div>
-        <div class="ps-item"><div class="ps-n" id="pHours">0h</div><div class="ps-l">Study</div></div>
-        <div class="ps-item"><div class="ps-n">🪙<span id="pCoins">0</span></div><div class="ps-l">Coins</div></div>
-      </div>
-      <div style="display:flex;gap:8px;"><button class="btn btn-primary" style="flex:1;padding:9px;" onclick="editProfile()">✏️ Edit Profile</button><button class="btn btn-secondary" style="flex:1;padding:9px;" onclick="shareStats()">📊 Share</button></div>
-    </div>
-    <!-- Badges -->
-    <div class="card" style="padding:16px;margin-bottom:12px;">
-      <div class="section-title">🏅 Badges</div>
-      <div class="badges-grid" id="badgesGrid">
-        <div class="badge-item"><div class="badge-ic earned">🔥</div><div class="badge-nm">Streak</div></div>
-        <div class="badge-item"><div class="badge-ic earned">⚛️</div><div class="badge-nm">Physics</div></div>
-        <div class="badge-item"><div class="badge-ic earned">📚</div><div class="badge-nm">100h</div></div>
-        <div class="badge-item"><div class="badge-ic earned">🏆</div><div class="badge-nm">Top 50</div></div>
-        <div class="badge-item"><div class="badge-ic locked">💎</div><div class="badge-nm">500h</div></div>
-        <div class="badge-item"><div class="badge-ic locked">👑</div><div class="badge-nm">Champ</div></div>
-        <div class="badge-item"><div class="badge-ic locked">🌟</div><div class="badge-nm">Top 10</div></div>
-        <div class="badge-item"><div class="badge-ic locked">🎓</div><div class="badge-nm">Mentor</div></div>
-      </div>
-    </div>
-    <!-- Settings -->
-    <div class="card" style="overflow:hidden;">
-      <div class="set-item"><div class="si-icon" style="background:var(--a-light);">🌓</div><div class="si-txt"><h4>Theme</h4><p id="themeLbl">Dark Mode</p></div><button class="btn btn-secondary btn-sm si-arr" onclick="toggleTheme()">Toggle</button></div>
-      <div class="set-item"><div class="si-icon" style="background:#e8f5e9;">📱</div><div class="si-txt"><h4>Install App</h4><p>Add to Home Screen</p></div><button class="btn btn-primary btn-sm si-arr" onclick="installPWA()">Install</button></div>
-      <div class="set-item"><div class="si-icon" style="background:#fff3e0;">🔔</div><div class="si-txt"><h4>Notifications</h4><p>Manage alerts</p></div><button class="btn btn-secondary btn-sm si-arr" onclick="openNotifPanel()">View</button></div>
-      <div class="set-item" onclick="exportData()"><div class="si-icon" style="background:#e3f2fd;">📤</div><div class="si-txt"><h4>Export Data</h4><p>Download your stats</p></div><span class="si-arr">›</span></div>
-      <div class="set-item" onclick="doLogout()"><div class="si-icon" style="background:#ffebee;">🚪</div><div class="si-txt"><h4 style="color:var(--rd);">Logout</h4><p>Sign out</p></div><span class="si-arr">›</span></div>
-    </div>
-  </div>
-</div>
-
-</div><!-- /main -->
-
-<!-- POST MODAL -->
-<div id="postModal">
-  <div class="pm-card">
-    <div class="pm-handle"></div>
-    <div class="pm-top"><div class="pm-title">📝 Create Post</div><button class="pm-close" onclick="closePost()">✕</button></div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
-      <div class="avatar" id="pmAv" style="width:38px;height:38px;background:var(--a);font-size:.8rem;color:#fff;">U</div>
-      <div><div style="font-size:.88rem;font-weight:600;" id="pmName">User</div><div style="font-size:.72rem;color:var(--text3);">🌐 Public · <span id="pmClass" style="color:var(--a);">HSC 2025</span></div></div>
-    </div>
-    <textarea class="pm-textarea" id="pmText" placeholder="কি শিখলে? Notes, shortcuts, tips... minimum 10 characters" maxlength="500" oninput="document.getElementById('pmChar').textContent=this.value.length"></textarea>
-    <div class="pm-cats">
-      <button class="pm-cat on" onclick="selPCat(this)">📚 Study</button>
-      <button class="pm-cat" onclick="selPCat(this)">⚛️ Physics</button>
-      <button class="pm-cat" onclick="selPCat(this)">🧮 Math</button>
-      <button class="pm-cat" onclick="selPCat(this)">🧪 Chemistry</button>
-      <button class="pm-cat" onclick="selPCat(this)">💻 Coding</button>
-      <button class="pm-cat" onclick="selPCat(this)">📖 BCS</button>
-      <button class="pm-cat" onclick="selPCat(this)">🌿 Biology</button>
-      <button class="pm-cat" onclick="selPCat(this)">🌐 English</button>
-    </div>
-    <div class="pm-footer"><span class="pm-char"><span id="pmChar">0</span>/500</span><button class="btn btn-primary" onclick="submitPost()" id="pmBtn" style="padding:9px 22px;">📤 Post</button></div>
-  </div>
-</div>
-
-<!-- GROUP CHAT SCREEN -->
-<div class="fullscreen" id="gcScreen">
-  <div class="fs-hd">
-    <button class="fs-back" onclick="closeGC()">←</button>
-    <div style="font-size:1.3rem;" id="gcIcon">📚</div>
-    <div style="margin-left:8px;flex:1;"><div class="fs-title" id="gcName">Group</div><div style="font-size:.7rem;color:var(--text3);" id="gcMeta"></div></div>
-    <div class="fs-acts">
-      <div class="tb-btn" onclick="showGCInfo()">ℹ️</div>
-      <div class="tb-btn">🔍</div>
-    </div>
-  </div>
-  <div class="chat-area" id="gcArea"></div>
-  <div class="chat-inp-area">
-    <div class="cia-tools">
-      <div class="cia-tool" onclick="showNotif('🖼️','Photo','Image sharing coming soon!','var(--a)')">🖼️</div>
-      <div class="cia-tool" onclick="sendGCQuiz()">🎯</div>
-      <div class="cia-tool" onclick="sendGCEmoji()">😊</div>
-      <div class="cia-tool" onclick="sendGCPoll()">📊</div>
-    </div>
-    <div class="cia-row">
-      <textarea class="cia-inp" id="gcInp" placeholder="Message..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendGC();}"></textarea>
-      <button class="cia-send" onclick="sendGC()">➤</button>
-    </div>
-  </div>
-</div>
-
-<!-- DM CHAT SCREEN -->
-<div class="fullscreen" id="dmScreen">
-  <div class="fs-hd">
-    <button class="fs-back" onclick="closeDM()">←</button>
-    <div style="position:relative;"><div class="avatar" id="dmAv" style="width:36px;height:36px;font-size:.8rem;color:#fff;"></div><div class="dmi-sts online" id="dmSts"></div></div>
-    <div style="margin-left:10px;flex:1;"><div class="fs-title" id="dmNm">Name</div><div style="font-size:.7rem;color:var(--gr);" id="dmOnl">Online</div></div>
-    <div class="fs-acts">
-      <div class="tb-btn" onclick="showNotif('📞','Call','Voice call আসছে!','var(--gr)')">📞</div>
-      <div class="tb-btn" onclick="showNotif('📹','Video','Video call আসছে!','var(--a)')">📹</div>
-    </div>
-  </div>
-  <div class="chat-area" id="dmArea"></div>
-  <div class="chat-inp-area">
-    <div class="cia-tools">
-      <div class="cia-tool">🖼️</div>
-      <div class="cia-tool" onclick="sendDMQuickReply('🙏')">🙏</div>
-      <div class="cia-tool" onclick="sendDMQuickReply('👍')">👍</div>
-      <div class="cia-tool" onclick="sendDMQuickReply('❤️')">❤️</div>
-    </div>
-    <div class="cia-row">
-      <textarea class="cia-inp" id="dmInp" placeholder="Message..." rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendDM();}"></textarea>
-      <button class="cia-send" onclick="sendDM()">➤</button>
-    </div>
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bnav" id="bnav" style="display:none;">
-  <button class="bni active" onclick="showP('feed',this)"><span class="ni">🏠</span>Feed</button>
-  <button class="bni" onclick="showP('study',this)"><span class="ni">📚</span>Study</button>
-  <button class="bni" onclick="showP('lb',this)"><span class="ni">🏆</span>Rank</button>
-  <button class="bni" onclick="showP('groups',this);renderGroups()"><span class="ni">👥</span>Groups<span class="ndot"></span></button>
-  <button class="bni" onclick="showP('msg',this);renderDmList()"><span class="ni">💬</span>Msgs<span class="ndot"></span></button>
-  <button class="bni" onclick="showP('video',this);renderVideos()"><span class="ni">🎬</span>Videos</button>
-  <button class="bni" onclick="showP('profile',this)"><span class="ni">👤</span>Profile</button>
-</div>
+Body written: 43614 bytes
