@@ -168,9 +168,9 @@
       <div class="err" id="authErr"></div>
       <input type="email" id="authEmail" placeholder="ইমেইল">
       <input type="password" id="authPass" placeholder="পাসওয়ার্ড (৬+ অক্ষর)">
-      <button class="btn" id="authActionBtn" onclick="handleAuthAction()">লগইন করুন</button>
+      <button class="btn" id="authActionBtn" onclick="smartAuth()">লগইন / সাইন আপ করুন</button>
       <button class="btn btnOutline" onclick="handleGoogleAuth()">Google দিয়ে লগইন</button>
-      <p class="switchLink" id="switchModeText">অ্যাকাউন্ট নেই? <span onclick="toggleAuthMode()">সাইন আপ করুন</span></p>
+      <p class="switchLink">নতুন হলে যেকোনো ইমেইল-পাসওয়ার্ড দিয়ে উপরে ক্লিক করো - account নিজে তৈরি হয়ে যাবে।</p>
     </div>
   </div>
 
@@ -548,6 +548,35 @@ let timerRunning = false;
 const XP_PER_LEVEL = 100;
 
 /* ---------------- AUTH ---------------- */
+function smartAuth(){
+  const email = document.getElementById('authEmail').value.trim();
+  const pass = document.getElementById('authPass').value.trim();
+  const errEl = document.getElementById('authErr');
+  errEl.textContent = '';
+
+  if(!email || !pass){ errEl.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
+  if(pass.length < 6){ errEl.textContent = 'পাসওয়ার্ড কমপক্ষে ৬ অক্ষর দিন'; return; }
+
+  auth.signInWithEmailAndPassword(email, pass)
+    .catch(err => {
+      if(err.code === 'auth/user-not-found' || err.code === 'auth/invalid-credential'){
+        // try creating account
+        return auth.createUserWithEmailAndPassword(email, pass)
+          .then(cred => {
+            const autoName = 'User' + cred.user.uid.substring(0,5);
+            return db.collection('users').doc(cred.user.uid).set({
+              name: autoName, area: 'এলাকা সেট করুন', email: email,
+              posts: 0, likesReceived: 0,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          })
+          .catch(err2 => errEl.textContent = translateAuthError(err2.code));
+      } else {
+        errEl.textContent = translateAuthError(err.code);
+      }
+    });
+}
+
 function toggleAuthMode(){
   isSignupMode = !isSignupMode;
   document.getElementById('authActionBtn').textContent = isSignupMode ? 'সাইন আপ করুন' : 'লগইন করুন';
