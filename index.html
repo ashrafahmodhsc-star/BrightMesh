@@ -181,7 +181,6 @@
     <div id="topbar">
       <div class="loc">📍 <span id="userAreaDisplay">এলাকা</span></div>
       <div class="right">
-        <div class="streakBadge" onclick="openSheet('streakSheet')">🔥 <span id="streakCount">0</span></div>
         <div class="iconBtn" onclick="openNotifSheet()">🔔<span class="notifDot" id="notifDot" style="display:none;"></span></div>
       </div>
     </div>
@@ -350,16 +349,6 @@
     </div>
   </div>
 
-  <!-- STREAK SHEET -->
-  <div class="overlay center" id="streakSheet">
-    <div class="sheet modal">
-      <div style="font-size:40px; margin-bottom:8px;">🔥</div>
-      <h3>তোমার Streak: <span id="streakModalCount">0</span> দিন</h3>
-      <p style="color:#888780; font-size:13px; margin-bottom:16px;">প্রতিদিন অ্যাপে এসে নতুন পোস্ট/কমেন্ট করো, streak চালু রাখো!</p>
-      <button class="btn" onclick="closeSheet('streakSheet')">ঠিক আছে</button>
-    </div>
-  </div>
-
   <!-- NOTIF SHEET -->
   <div class="overlay" id="notifSheet">
     <div class="sheet">
@@ -503,22 +492,9 @@ auth.onAuthStateChanged(user => {
     currentUser = user;
     const ref = db.collection('users').doc(user.uid);
     ref.get().then(doc => {
-      currentUserData = doc.data() || { name:'User', area:'এলাকা', xp:0, level:1, posts:0, likesReceived:0, streak:1, lastActive:'' };
-
-      // streak logic
-      const today = new Date().toISOString().slice(0,10);
-      const last = currentUserData.lastActive;
-      if(last !== today){
-        const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0,10);
-        let newStreak = (last === yesterday) ? (currentUserData.streak || 0) + 1 : 1;
-        currentUserData.streak = newStreak;
-        currentUserData.lastActive = today;
-        ref.update({ streak: newStreak, lastActive: today });
-      }
+      currentUserData = doc.data() || { name:'User', area:'এলাকা', posts:0, likesReceived:0 };
 
       document.getElementById('userAreaDisplay').textContent = currentUserData.area;
-      document.getElementById('streakCount').textContent = currentUserData.streak || 1;
-      document.getElementById('streakModalCount').textContent = currentUserData.streak || 1;
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('mainScreen').style.display = 'block';
       document.getElementById('bottomnav').style.display = 'flex';
