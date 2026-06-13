@@ -167,9 +167,7 @@
     <div class="authBox">
       <div class="err" id="authErr"></div>
       <input type="email" id="authEmail" placeholder="ইমেইল">
-      <input type="password" id="authPass" placeholder="পাসওয়ার্ড">
-      <input type="text" id="authName" placeholder="তোমার নাম" style="display:none;">
-      <input type="text" id="authArea" placeholder="এলাকার নাম (যেমন Zindabazar, Sylhet)" style="display:none;">
+      <input type="password" id="authPass" placeholder="পাসওয়ার্ড (৬+ অক্ষর)">
       <button class="btn" id="authActionBtn" onclick="handleAuthAction()">লগইন করুন</button>
       <button class="btn btnOutline" onclick="handleGoogleAuth()">Google দিয়ে লগইন</button>
       <p class="switchLink" id="switchModeText">অ্যাকাউন্ট নেই? <span onclick="toggleAuthMode()">সাইন আপ করুন</span></p>
@@ -391,16 +389,16 @@
       </div>
 
       <div class="studySectionTitle">📖 আজকের পড়াশোনার গ্রুপ</div>
-      <div class="studyGroupItem">
-        <div>HSC Physics - Chapter 5<br><small>৮ জন সক্রিয়</small></div>
+      <div class="studyGroupItem" style="cursor:pointer;" onclick="openGroupChat('hsc_physics','HSC Physics - Chapter 5')">
+        <div>HSC Physics - Chapter 5<br><small id="cnt-hsc_physics">লোড হচ্ছে...</small></div>
         <span>→</span>
       </div>
-      <div class="studyGroupItem">
-        <div>BCS Preli Math<br><small>১৪ জন সক্রিয়</small></div>
+      <div class="studyGroupItem" style="cursor:pointer;" onclick="openGroupChat('bcs_math','BCS Preli Math')">
+        <div>BCS Preli Math<br><small id="cnt-bcs_math">লোড হচ্ছে...</small></div>
         <span>→</span>
       </div>
-      <div class="studyGroupItem">
-        <div>English Grammar Group<br><small>৫ জন সক্রিয়</small></div>
+      <div class="studyGroupItem" style="cursor:pointer;" onclick="openGroupChat('eng_grammar','English Grammar Group')">
+        <div>English Grammar Group<br><small id="cnt-eng_grammar">লোড হচ্ছে...</small></div>
         <span>→</span>
       </div>
 
@@ -492,6 +490,21 @@
     </div>
   </div>
 
+  <!-- USER PROFILE VIEW SHEET -->
+  <div class="overlay" id="userProfileSheet">
+    <div class="sheet">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:14px;">
+        <div class="profileAvatar" id="viewProfileAvatar" style="width:50px; height:50px; font-size:18px;">?</div>
+        <div>
+          <h3 id="viewProfileName" style="margin:0;">নাম</h3>
+          <p id="viewProfileArea" style="color:#888780; font-size:13px;">এলাকা</p>
+        </div>
+      </div>
+      <div id="viewProfilePosts" style="max-height:320px; overflow-y:auto;"></div>
+      <p class="closeSheet" onclick="closeSheet('userProfileSheet')">বন্ধ করুন</p>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 </div>
 
@@ -537,8 +550,6 @@ const XP_PER_LEVEL = 100;
 /* ---------------- AUTH ---------------- */
 function toggleAuthMode(){
   isSignupMode = !isSignupMode;
-  document.getElementById('authName').style.display = isSignupMode ? 'block' : 'none';
-  document.getElementById('authArea').style.display = isSignupMode ? 'block' : 'none';
   document.getElementById('authActionBtn').textContent = isSignupMode ? 'সাইন আপ করুন' : 'লগইন করুন';
   document.getElementById('switchModeText').innerHTML = isSignupMode
     ? 'অ্যাকাউন্ট আছে? <span onclick="toggleAuthMode()">লগইন করুন</span>'
@@ -555,16 +566,12 @@ function handleAuthAction(){
   if(!email || !pass){ errEl.textContent = 'ইমেইল ও পাসওয়ার্ড দিন'; return; }
 
   if(isSignupMode){
-    const name = document.getElementById('authName').value.trim();
-    const area = document.getElementById('authArea').value.trim();
-    if(!name || !area){ errEl.textContent = 'নাম ও এলাকা দিন'; return; }
-
     auth.createUserWithEmailAndPassword(email, pass)
       .then(cred => {
+        const autoName = 'User' + cred.user.uid.substring(0,5);
         return db.collection('users').doc(cred.user.uid).set({
-          name: name, area: area, email: email,
-          xp: 0, level: 1, posts: 0, likesReceived: 0,
-          streak: 1, lastActive: new Date().toISOString().slice(0,10),
+          name: autoName, area: 'এলাকা সেট করুন', email: email,
+          posts: 0, likesReceived: 0,
           createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       })
@@ -583,9 +590,8 @@ function handleGoogleAuth(){
       return db.collection('users').doc(user.uid).get().then(doc => {
         if(!doc.exists){
           return db.collection('users').doc(user.uid).set({
-            name: user.displayName || 'User', area: 'অজানা এলাকা', email: user.email,
-            xp: 0, level: 1, posts: 0, likesReceived: 0,
-            streak: 1, lastActive: new Date().toISOString().slice(0,10),
+            name: user.displayName || 'User', area: 'এলাকা সেট করুন', email: user.email,
+            posts: 0, likesReceived: 0,
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
           });
         }
@@ -630,6 +636,13 @@ auth.onAuthStateChanged(user => {
       loadFeed();
       loadStories();
       setupPresence();
+
+      if(currentUserData.area === 'এলাকা সেট করুন'){
+        setTimeout(()=>{
+          document.getElementById('editAreaInput').value = '';
+          openSheet('editAreaSheet');
+        }, 500);
+      }
       renderNotifList();
     });
   } else {
@@ -732,7 +745,7 @@ function renderPost(p){
 
   return `
   <div class="post" id="post-${p.id}">
-    <div class="postHead">
+    <div class="postHead" ${!isAnon ? `onclick="viewUserProfile('${p.authorId}','${escapeHtml(displayName)}')" style="cursor:pointer;"` : ''}>
       <div class="avatar" style="background:${avatarColor}33; color:${avatarColor};">${initials}</div>
       <div class="meta">
         <p>${escapeHtml(displayName)}</p>
@@ -748,6 +761,7 @@ function renderPost(p){
     <div class="postActions">
       <span class="${liked ? 'liked' : ''}" onclick="toggleLike('${p.id}')">❤️ <span id="likeCount-${p.id}">${likeCount}</span></span>
       <span onclick="toggleComments('${p.id}')">💬 ${(p.comments||[]).length}</span>
+      <span onclick="sharePost('${p.id}')">🔗 শেয়ার</span>
       ${msgBtn}
     </div>
     <div class="commentsBox" id="comments-${p.id}">
@@ -1062,6 +1076,7 @@ function toggleFocusMode(){
     studyScreen.classList.add('show');
     toggle.classList.add('on');
     loadNotes();
+    loadGroupCounts();
     document.getElementById('mainScreen').style.display = 'none';
     document.getElementById('profileScreen').classList.remove('show');
     document.getElementById('settingsScreen').classList.remove('show');
@@ -1225,12 +1240,24 @@ function openChat(chatId, otherName){
       box.scrollTop = box.scrollHeight;
     });
   window._activeChatId = chatId;
+  window._activeGroupId = null;
 }
 
 function sendChatMsg(){
   const input = document.getElementById('chatMsgInput');
   const text = input.value.trim();
-  if(!text || !currentUser || !window._activeChatId) return;
+  if(!text || !currentUser) return;
+
+  if(window._activeGroupId){
+    db.collection('groups').doc(window._activeGroupId).collection('messages').add({
+      text: text, senderId: currentUser.uid, senderName: currentUserData.name,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    input.value = '';
+    return;
+  }
+
+  if(!window._activeChatId) return;
   const chatId = window._activeChatId;
   db.collection('chats').doc(chatId).collection('messages').add({
     text: text, senderId: currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp()
@@ -1298,6 +1325,69 @@ function toggleFontSize(){
   const t = document.getElementById('fontToggle');
   t.classList.toggle('on');
   document.body.style.fontSize = t.classList.contains('on') ? '17px' : '';
+}
+
+/* ---------- STUDY GROUP CHAT ---------- */
+function openGroupChat(groupId, groupName){
+  goScreen('chat');
+  document.getElementById('chatPartnerName').textContent = '👥 ' + groupName;
+  if(chatUnsub) chatUnsub();
+  chatUnsub = db.collection('groups').doc(groupId).collection('messages')
+    .orderBy('createdAt','asc').limit(100)
+    .onSnapshot(snap => {
+      const box = document.getElementById('chatMessages');
+      box.innerHTML = '';
+      snap.forEach(doc => {
+        const m = doc.data();
+        const mine = m.senderId === currentUser.uid;
+        const nameTag = mine ? '' : `<b style="display:block; font-size:11px; color:#9FE1CB; margin-bottom:2px;">${escapeHtml(m.senderName||'User')}</b>`;
+        box.innerHTML += `<div class="chatBubble ${mine?'me':'them'}">${nameTag}${escapeHtml(m.text)}</div>`;
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+  window._activeChatId = null;
+  window._activeGroupId = groupId;
+}
+
+function loadGroupCounts(){
+  ['hsc_physics','bcs_math','eng_grammar'].forEach(gid => {
+    db.collection('groups').doc(gid).collection('messages').get().then(snap => {
+      const el = document.getElementById('cnt-'+gid);
+      if(el) el.textContent = snap.size + ' টি মেসেজ';
+    }).catch(()=>{
+      const el = document.getElementById('cnt-'+gid);
+      if(el) el.textContent = 'গ্রুপে যোগ দাও';
+    });
+  });
+}
+
+/* ---------- SHARE / VIEW PROFILE ---------- */
+function sharePost(postId){
+  const post = allPosts.find(p => p.id === postId);
+  const shareText = (post ? post.text.substring(0,100) : '') + '\n\nBrightMesh-এ দেখো 👉 ' + location.href;
+  if(navigator.share){
+    navigator.share({ title:'BrightMesh', text: shareText }).catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(shareText).then(()=> showToast('লিংক কপি হয়েছে 📋'));
+  }
+}
+
+function viewUserProfile(uid, name){
+  document.getElementById('viewProfileName').textContent = name;
+  document.getElementById('viewProfileAvatar').textContent = name.substring(0,2).toUpperCase();
+  document.getElementById('viewProfileAvatar').style.background = stringToColor(name);
+  document.getElementById('viewProfilePosts').innerHTML = '<div class="loadingDot">লোড হচ্ছে...</div>';
+
+  db.collection('users').doc(uid).get().then(doc => {
+    document.getElementById('viewProfileArea').textContent = (doc.data() && doc.data().area) || '';
+  });
+
+  const userPosts = allPosts.filter(p => p.authorId === uid && p.category !== 'spill');
+  document.getElementById('viewProfilePosts').innerHTML = userPosts.length
+    ? userPosts.map(p => renderPost(p)).join('')
+    : '<div class="empty">কোনো পোস্ট নেই</div>';
+
+  openSheet('userProfileSheet');
 }
 
 /* ---------- DELETE / REPORT / BLOCK ---------- */
