@@ -145,6 +145,12 @@
   .studyGroupItem { background:#11161f; border:0.5px solid #1c2530; border-radius:12px; padding:12px 14px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:14px; }
   .studyGroupItem small { color:#5F5E5A; display:block; margin-top:2px; font-size:11px; }
 
+  .chatBubble { max-width:75%; padding:8px 12px; border-radius:14px; font-size:14px; line-height:1.4; }
+  .chatBubble.me { background:#7F77DD; color:#26215C; align-self:flex-end; border-bottom-right-radius:4px; }
+  .chatBubble.them { background:#1a1a1c; color:#D3D1C7; align-self:flex-start; border-bottom-left-radius:4px; }
+  .chatListItem { display:flex; align-items:center; gap:10px; background:#1a1a1c; border-radius:12px; padding:12px 14px; margin-bottom:8px; cursor:pointer; }
+  .chatListItem .meta p { font-size:14px; font-weight:600; margin-bottom:2px; }
+  .chatListItem .meta small { color:#888780; font-size:12px; }
   .empty { text-align:center; color:#5F5E5A; font-size:13px; padding:40px 0; }
   .loadingDot { text-align:center; color:#5F5E5A; font-size:13px; padding:20px 0; }
   .toast { position:fixed; bottom:90px; left:50%; transform:translateX(-50%); background:#1a1a1c; border:1px solid #2c2c2a; padding:10px 20px; border-radius:20px; font-size:13px; z-index:60; opacity:0; transition:opacity 0.3s; pointer-events:none; }
@@ -225,11 +231,13 @@
     <div class="studySectionTitle">🏆 এলাকার Top Vibers (Leaderboard)</div>
     <div id="leaderboardList"><div class="loadingDot">লোড হচ্ছে...</div></div>
 
+    <button class="logoutBtn" style="border-color:#2c2c2a; color:#B4B2A9; margin-bottom:10px;" onclick="goScreen('settings')">⚙️ সেটিংস</button>
     <button class="logoutBtn" onclick="handleLogout()">লগ আউট</button>
   </div>
 
   <!-- SETTINGS SCREEN -->
   <div class="screen" id="settingsScreen">
+    <p class="closeSheet" style="text-align:left; margin-bottom:10px;" onclick="goScreen('profile')">← প্রোফাইলে ফিরে যাও</p>
     <h2 style="font-size:18px; margin-bottom:16px;">⚙️ সেটিংস</h2>
 
     <div class="settingItem">
@@ -295,12 +303,31 @@
     </div>
   </div>
 
+  <!-- CHAT LIST SCREEN -->
+  <div class="screen" id="chatsScreen">
+    <h2 style="font-size:18px; margin-bottom:16px;">💬 মেসেজ</h2>
+    <div id="chatList"><div class="loadingDot">লোড হচ্ছে...</div></div>
+  </div>
+
+  <!-- CHAT CONVERSATION SCREEN -->
+  <div class="screen" id="chatScreen" style="padding-bottom:80px; display:flex; flex-direction:column;">
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+      <span class="closeSheet" style="margin:0;" onclick="goScreen('chats')">← </span>
+      <h2 style="font-size:16px;" id="chatPartnerName">নাম</h2>
+    </div>
+    <div id="chatMessages" style="flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:8px; margin-bottom:10px; min-height:300px;"></div>
+    <div class="commentInputRow">
+      <input type="text" id="chatMsgInput" placeholder="মেসেজ লিখো...">
+      <button onclick="sendChatMsg()">পাঠান</button>
+    </div>
+  </div>
+
   <!-- BOTTOM NAV -->
   <div id="bottomnav" style="display:none;">
     <div class="navIcon active" id="navHome" onclick="goScreen('home')">🏠</div>
     <div class="navIcon" onclick="toggleSearch()">🔍</div>
     <div class="navAdd" onclick="openSheet('composerSheet')">+</div>
-    <div class="navIcon" id="navSettings" onclick="goScreen('settings')">⚙️</div>
+    <div class="navIcon" id="navChat" onclick="goScreen('chats')">💬</div>
     <div class="navIcon" id="navProfile" onclick="goScreen('profile')">👤</div>
   </div>
 
@@ -552,7 +579,7 @@ function renderFeed(){
 }
 
 function catLabel(cat){
-  const map = { vibes:['🔥 Vibes','vibes'], spill:['👻 Spill','spill'], market:['🛍️ Buy/Sell','market'], alert:['⚠️ Alert/Help','alert'] };
+  const map = { vibes:['🔥 Vibes','vibes'], spill:['👻 Spill','spill'], market:['🛍️ Buy/Sell','market'], alert:['⚠️ Alert/Help','alert'], video:['🎥 Video','vibes'] };
   return map[cat] || ['', ''];
 }
 
@@ -573,6 +600,17 @@ function renderPost(p){
     marketHtml = `<div class="badgeMarket"><span>মূল্য</span><span class="price">৳${p.price}</span></div>`;
   }
 
+  let videoHtml = '';
+  if(p.videoUrl){
+    const embed = toEmbedUrl(p.videoUrl);
+    videoHtml = embed
+      ? `<div style="position:relative; padding-top:56%; border-radius:10px; overflow:hidden; margin-bottom:8px;"><iframe src="${embed}" style="position:absolute; top:0; left:0; width:100%; height:100%; border:0;" allowfullscreen></iframe></div>`
+      : `<a href="${escapeHtml(p.videoUrl)}" target="_blank" style="color:#7F77DD; font-size:13px; display:block; margin-bottom:8px;">🎥 ভিডিও দেখুন (লিংক)</a>`;
+  }
+
+  const msgBtn = (!isAnon && currentUser && p.authorId !== currentUser.uid)
+    ? `<span onclick="startChat('${p.authorId}','${escapeHtml(p.authorName)}')">✉️ মেসেজ</span>` : '';
+
   return `
   <div class="post">
     <div class="postHead">
@@ -584,10 +622,12 @@ function renderPost(p){
     </div>
     <span class="catTag ${catClass}">${catText}</span>${trending}
     <div class="postBody">${escapeHtml(p.text)}</div>
+    ${videoHtml}
     ${marketHtml}
     <div class="postActions">
       <span class="${liked ? 'liked' : ''}" onclick="toggleLike('${p.id}')">❤️ <span id="likeCount-${p.id}">${likeCount}</span></span>
       <span onclick="toggleComments('${p.id}')">💬 ${(p.comments||[]).length}</span>
+      ${msgBtn}
     </div>
     <div class="commentsBox" id="comments-${p.id}">
       ${commentsHtml || '<div class="empty" style="padding:8px 0;">কোনো মন্তব্য নেই</div>'}
@@ -633,6 +673,7 @@ function selectCat(el, cat){
   document.querySelectorAll('.catChoice').forEach(c => c.classList.remove('selected'));
   el.classList.add('selected');
   document.getElementById('priceInput').style.display = (cat === 'market') ? 'block' : 'none';
+  document.getElementById('videoInput').style.display = (cat === 'video') ? 'block' : 'none';
 }
 function submitPost(){
   const text = document.getElementById('postText').value.trim();
@@ -648,6 +689,9 @@ function submitPost(){
   if(selectedCategory === 'market'){
     postData.price = document.getElementById('priceInput').value || '0';
   }
+  if(selectedCategory === 'video'){
+    postData.videoUrl = document.getElementById('videoInput').value.trim();
+  }
 
   db.collection('posts').add(postData).then(() => {
     db.collection('users').doc(currentUser.uid).update({
@@ -658,6 +702,8 @@ function submitPost(){
     document.getElementById('postText').value = '';
     document.getElementById('priceInput').value = '';
     document.getElementById('priceInput').style.display = 'none';
+    document.getElementById('videoInput').value = '';
+    document.getElementById('videoInput').style.display = 'none';
     selectedCategory = 'vibes';
     document.querySelectorAll('.catChoice').forEach(c => c.classList.remove('selected'));
     document.querySelector('.catChoice[data-cat="vibes"]').classList.add('selected');
@@ -768,10 +814,12 @@ function goScreen(screen){
   document.getElementById('mainScreen').style.display = screen === 'home' ? 'block' : 'none';
   document.getElementById('profileScreen').classList.toggle('show', screen === 'profile');
   document.getElementById('settingsScreen').classList.toggle('show', screen === 'settings');
+  document.getElementById('chatsScreen').classList.toggle('show', screen === 'chats');
+  document.getElementById('chatScreen').classList.toggle('show', screen === 'chat');
 
   document.getElementById('navHome').classList.toggle('active', screen === 'home');
-  document.getElementById('navProfile').classList.toggle('active', screen === 'profile');
-  document.getElementById('navSettings').classList.toggle('active', screen === 'settings');
+  document.getElementById('navProfile').classList.toggle('active', screen === 'profile' || screen === 'settings');
+  document.getElementById('navChat').classList.toggle('active', screen === 'chats' || screen === 'chat');
 
   if(screen === 'profile'){
     document.getElementById('profileName').textContent = currentUserData.name;
@@ -780,6 +828,9 @@ function goScreen(screen){
     document.getElementById('statPosts').textContent = currentUserData.posts || 0;
     document.getElementById('statLikes').textContent = currentUserData.likesReceived || 0;
     loadLeaderboard();
+  }
+  if(screen === 'chats'){
+    loadChatList();
   }
 }
 
@@ -907,6 +958,91 @@ function viewStory(name, id){
   document.getElementById('storyViewName').textContent = name;
   openSheet('storyViewSheet');
 }
+/* ---------- VIDEO EMBED HELPER ---------- */
+function toEmbedUrl(url){
+  try{
+    const yt = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+    if(yt) return `https://www.youtube.com/embed/${yt[1]}`;
+    if(url.includes('facebook.com')) return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(url)}&show_text=0`;
+  } catch(e){}
+  return null;
+}
+
+/* ---------- CHAT / DM SYSTEM ---------- */
+let chatUnsub = null;
+function chatIdFor(uidA, uidB){
+  return [uidA, uidB].sort().join('_');
+}
+function startChat(otherUid, otherName){
+  if(!currentUser) return;
+  const chatId = chatIdFor(currentUser.uid, otherUid);
+  const ref = db.collection('chats').doc(chatId);
+  ref.get().then(doc => {
+    if(!doc.exists){
+      ref.set({
+        users: [currentUser.uid, otherUid],
+        names: { [currentUser.uid]: currentUserData.name, [otherUid]: otherName },
+        lastMsg: '', lastAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    }
+    openChat(chatId, otherName);
+  });
+}
+
+function loadChatList(){
+  if(!currentUser) return;
+  db.collection('chats').where('users','array-contains', currentUser.uid)
+    .orderBy('lastAt','desc')
+    .onSnapshot(snap => {
+      let html = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        const otherUid = d.users.find(u => u !== currentUser.uid);
+        const otherName = (d.names && d.names[otherUid]) || 'User';
+        html += `<div class="chatListItem" onclick="openChat('${doc.id}','${escapeHtml(otherName)}')">
+          <div class="avatar" style="background:${stringToColor(otherName)}33; color:${stringToColor(otherName)};">${otherName.substring(0,2).toUpperCase()}</div>
+          <div class="meta"><p>${escapeHtml(otherName)}</p><small>${escapeHtml(d.lastMsg || 'কথা শুরু করো...')}</small></div>
+        </div>`;
+      });
+      document.getElementById('chatList').innerHTML = html || '<div class="empty">কোনো মেসেজ নেই। কারো পোস্টে "✉️ মেসেজ" ক্লিক করো।</div>';
+    }, err => {
+      document.getElementById('chatList').innerHTML = '<div class="empty">লোড করা যায়নি</div>';
+    });
+}
+
+function openChat(chatId, otherName){
+  goScreen('chat');
+  document.getElementById('chatPartnerName').textContent = otherName;
+  if(chatUnsub) chatUnsub();
+  chatUnsub = db.collection('chats').doc(chatId).collection('messages')
+    .orderBy('createdAt','asc').limit(100)
+    .onSnapshot(snap => {
+      const box = document.getElementById('chatMessages');
+      box.innerHTML = '';
+      snap.forEach(doc => {
+        const m = doc.data();
+        const mine = m.senderId === currentUser.uid;
+        box.innerHTML += `<div class="chatBubble ${mine?'me':'them'}">${escapeHtml(m.text)}</div>`;
+      });
+      box.scrollTop = box.scrollHeight;
+    });
+  window._activeChatId = chatId;
+}
+
+function sendChatMsg(){
+  const input = document.getElementById('chatMsgInput');
+  const text = input.value.trim();
+  if(!text || !currentUser || !window._activeChatId) return;
+  const chatId = window._activeChatId;
+  db.collection('chats').doc(chatId).collection('messages').add({
+    text: text, senderId: currentUser.uid, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  db.collection('chats').doc(chatId).update({
+    lastMsg: text, lastAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  input.value = '';
+}
+
 function escapeHtml(str){
   if(!str) return '';
   return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
