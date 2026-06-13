@@ -162,20 +162,8 @@
 <div id="app">
 
   <!-- AUTH SCREEN -->
-  <div id="authScreen">
-    <div class="logo">BrightMesh</div>
-    <div class="tagline">তোমার এলাকা, তোমার মানুষ 🔥</div>
-    <div class="authBox">
-      <div class="err" id="authErr"></div>
-      <input type="text" id="authName" placeholder="তোমার নাম">
-      <input type="password" id="authPass" placeholder="পাসওয়ার্ড (৬+ অক্ষর)">
-      <button class="btn" id="authActionBtn" onclick="simpleAuth()">শুরু করো</button>
-      <p class="switchLink">নাম মনে রাখো - একই নাম+পাসওয়ার্ড দিয়ে আবার ফিরে আসতে পারবে।</p>
-    </div>
-  </div>
-
   <!-- MAIN SCREEN -->
-  <div id="mainScreen" style="display:none;">
+  <div id="mainScreen">
     <div id="topbar">
       <div class="loc">📍 <span id="userAreaDisplay">এলাকা</span></div>
       <div class="right">
@@ -693,48 +681,41 @@ function translateAuthError(code){
 
 function handleLogout(){
   if(timerInterval) clearInterval(timerInterval);
-  auth.signOut();
+  localStorage.removeItem('bm_username');
+  localStorage.removeItem('bm_userarea');
+  location.reload();
 }
 
 /* ---------------- AUTH STATE / STREAK ---------------- */
-auth.onAuthStateChanged(user => {
-  if(user){
-    currentUser = user;
-    const ref = db.collection('users').doc(user.uid);
-    ref.get().then(doc => {
-      currentUserData = doc.data() || { name:'User', area:'এলাকা', posts:0, likesReceived:0 };
 
-      document.getElementById('userAreaDisplay').textContent = currentUserData.area;
-      document.getElementById('myAvatarMini').textContent = currentUserData.name.substring(0,2).toUpperCase();
-      const mc = stringToColor(currentUserData.name);
-      document.getElementById('myAvatarMini').style.background = mc+'33';
-      document.getElementById('myAvatarMini').style.color = mc;
-      document.getElementById('authScreen').style.display = 'none';
-      document.getElementById('mainScreen').style.display = 'block';
-      document.getElementById('bottomnav').style.display = 'flex';
-      loadFeed();
-      loadStories();
-      setupPresence();
-      setupPullToRefresh();
+/* ---------- AUTO LOGIN (no auth required) ---------- */
+function initApp(){
+  const savedName = localStorage.getItem('bm_username') || 'Guest';
+  const savedArea = localStorage.getItem('bm_userarea') || 'এলাকা সেট করুন';
+  currentUser = { uid: 'guest_' + btoa(savedName).replace(/[^a-z0-9]/gi,'').substring(0,12) };
+  currentUserData = { name: savedName, area: savedArea, posts: 0, likesReceived: 0 };
 
-      if(currentUserData.area === 'এলাকা সেট করুন'){
-        setTimeout(()=>{
-          document.getElementById('editAreaInput').value = '';
-          openSheet('editAreaSheet');
-        }, 500);
-      }
-      renderNotifList();
-    });
-  } else {
-    currentUser = null;
-    document.getElementById('authScreen').style.display = 'flex';
-    document.getElementById('mainScreen').style.display = 'none';
-    document.getElementById('profileScreen').classList.remove('show');
-    document.getElementById('settingsScreen').classList.remove('show');
-    document.getElementById('studyScreen').classList.remove('show');
-    document.getElementById('bottomnav').style.display = 'none';
+  document.getElementById('userAreaDisplay').textContent = currentUserData.area;
+  document.getElementById('myAvatarMini').textContent = currentUserData.name.substring(0,2).toUpperCase();
+  const mc = stringToColor(currentUserData.name);
+  document.getElementById('myAvatarMini').style.background = mc+'33';
+  document.getElementById('myAvatarMini').style.color = mc;
+  document.getElementById('bottomnav').style.display = 'flex';
+
+  loadFeed();
+  loadStories();
+  setupPullToRefresh();
+  renderNotifList();
+
+  if(savedArea === 'এলাকা সেট করুন'){
+    setTimeout(()=>{
+      document.getElementById('editAreaInput').value = '';
+      openSheet('editAreaSheet');
+    }, 800);
   }
-});
+}
+
+window.addEventListener('DOMContentLoaded', initApp);
 
 /* XP system removed */
 
@@ -1120,8 +1101,9 @@ function goScreen(screen){
     document.getElementById('profileName').textContent = currentUserData.name;
     document.getElementById('profileArea').textContent = currentUserData.area;
     document.getElementById('profileAvatarInit').textContent = currentUserData.name.substring(0,2).toUpperCase();
-    document.getElementById('statPosts').textContent = currentUserData.posts || 0;
-    document.getElementById('statLikes').textContent = currentUserData.likesReceived || 0;
+    const myPosts = allPosts.filter(p => p.authorId === currentUser.uid);
+    document.getElementById('statPosts').textContent = myPosts.length;
+    document.getElementById('statLikes').textContent = myPosts.reduce((s,p)=>(s+(p.likedBy||[]).length),0);
     loadLeaderboard();
   }
   if(screen === 'chats'){
@@ -1360,25 +1342,25 @@ function sendChatMsg(){
 /* ---------- SETTINGS: PROFILE/AREA/PASSWORD/DELETE/DATA-SAVER/FONT ---------- */
 function saveName(){
   const val = document.getElementById('editNameInput').value.trim();
-  if(!val || !currentUser) return;
-  db.collection('users').doc(currentUser.uid).update({ name: val }).then(()=>{
-    currentUserData.name = val;
-    document.getElementById('settingNameDisplay').textContent = val;
-    closeSheet('editProfileSheet');
-    showToast('নাম পরিবর্তন হয়েছে ✅');
-  });
+  if(!val) return;
+  currentUserData.name = val;
+  localStorage.setItem('bm_username', val);
+  currentUser.uid = 'guest_' + btoa(val).replace(/[^a-z0-9]/gi,'').substring(0,12);
+  document.getElementById('settingNameDisplay').textContent = val;
+  document.getElementById('myAvatarMini').textContent = val.substring(0,2).toUpperCase();
+  closeSheet('editProfileSheet');
+  showToast('নাম পরিবর্তন হয়েছে ✅');
 }
 function saveArea(){
   const val = document.getElementById('editAreaInput').value.trim();
-  if(!val || !currentUser) return;
-  db.collection('users').doc(currentUser.uid).update({ area: val }).then(()=>{
-    currentUserData.area = val;
-    document.getElementById('userAreaDisplay').textContent = val;
-    document.getElementById('settingAreaDisplay').textContent = val;
-    closeSheet('editAreaSheet');
-    showToast('এলাকা পরিবর্তন হয়েছে ✅');
-    loadStories(); setupPresence();
-  });
+  if(!val) return;
+  currentUserData.area = val;
+  localStorage.setItem('bm_userarea', val);
+  document.getElementById('userAreaDisplay').textContent = val;
+  document.getElementById('settingAreaDisplay').textContent = val;
+  closeSheet('editAreaSheet');
+  showToast('এলাকা পরিবর্তন হয়েছে ✅');
+  loadStories();
 }
 function changePassword(){
   const val = document.getElementById('newPassInput').value.trim();
