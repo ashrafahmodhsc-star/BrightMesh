@@ -180,18 +180,15 @@
       </div>
     </div>
 
-    <div id="xpBarWrap">
-      <div class="xpRow"><span>Level <span id="levelNum">1</span></span><span id="xpText">0 / 100 XP</span></div>
-      <div class="xpBar"><div class="xpFill" id="xpFill" style="width:0%;"></div></div>
-    </div>
-
     <div class="onlineBar"><span class="onlineDot"></span> <span id="onlineCount">12</span> জন এখন তোমার এলাকায় Online</div>
 
     <div id="stories">
-      <div class="storyItem" onclick="alert('Story upload - পরের ভার্সনে আসবে')">
+      <div class="storyItem" onclick="document.getElementById('storyFileInput').click()">
         <div class="storyAvatar add">+</div>
         <p>তোমার Vibe</p>
       </div>
+      <input type="file" id="storyFileInput" accept="image/*" style="display:none;" onchange="uploadStory(event)">
+      <div id="storiesList" style="display:flex; gap:10px;"></div>
     </div>
 
     <div id="searchBarWrap" style="padding:0 16px 12px; display:none;">
@@ -223,7 +220,6 @@
     <div class="statRow">
       <div class="statBox"><div class="num" id="statPosts">0</div><div class="lbl">পোস্ট</div></div>
       <div class="statBox"><div class="num" id="statLikes">0</div><div class="lbl">লাইক</div></div>
-      <div class="statBox"><div class="num" id="statXP">0</div><div class="lbl">XP</div></div>
     </div>
 
     <div class="studySectionTitle">🏆 এলাকার Top Vibers (Leaderboard)</div>
@@ -317,10 +313,12 @@
         <div class="catChoice" data-cat="spill" onclick="selectCat(this,'spill')">👻 Spill (Anonymous)</div>
         <div class="catChoice" data-cat="market" onclick="selectCat(this,'market')">🛍️ Buy/Sell</div>
         <div class="catChoice" data-cat="alert" onclick="selectCat(this,'alert')">⚠️ Alert/Help</div>
+        <div class="catChoice" data-cat="video" onclick="selectCat(this,'video')">🎥 Video</div>
       </div>
       <textarea id="postText" placeholder="কী মনে হচ্ছে?"></textarea>
       <input type="number" id="priceInput" placeholder="দাম (টাকা)">
-      <button class="btn" onclick="submitPost()">পোস্ট করুন (+10 XP)</button>
+      <input type="text" id="videoInput" placeholder="ভিডিও লিংক (YouTube/Facebook ইউআরএল)" style="display:none;">
+      <button class="btn" onclick="submitPost()">পোস্ট করুন</button>
       <p class="closeSheet" onclick="closeSheet('composerSheet')">বাতিল করুন</p>
     </div>
   </div>
@@ -344,14 +342,14 @@
     </div>
   </div>
 
-  <!-- LEVEL UP SHEET -->
-  <div class="overlay center" id="levelUpSheet">
-    <div class="sheet modal">
-      <div style="font-size:48px; margin-bottom:8px;">🎉</div>
-      <h3>Level Up!</h3>
-      <p style="color:#9FE1CB; font-size:20px; font-weight:700; margin:8px 0;">Level <span id="newLevelNum">2</span></p>
-      <p style="color:#888780; font-size:13px; margin-bottom:16px;">অভিনন্দন! তুমি এক লেভেল এগিয়ে গেছো 🚀</p>
-      <button class="btn" onclick="closeSheet('levelUpSheet')">দারুণ!</button>
+  <!-- STORY VIEW SHEET -->
+  <div class="overlay center" id="storyViewSheet">
+    <div class="sheet modal" style="padding:0; overflow:hidden;">
+      <img id="storyViewImg" style="width:100%; max-height:70vh; object-fit:cover; display:block;">
+      <div style="padding:12px;">
+        <p id="storyViewName" style="font-weight:600; margin-bottom:8px;"></p>
+        <p class="closeSheet" onclick="closeSheet('storyViewSheet')">বন্ধ করুন</p>
+      </div>
     </div>
   </div>
 
@@ -494,12 +492,11 @@ auth.onAuthStateChanged(user => {
       document.getElementById('userAreaDisplay').textContent = currentUserData.area;
       document.getElementById('streakCount').textContent = currentUserData.streak || 1;
       document.getElementById('streakModalCount').textContent = currentUserData.streak || 1;
-      updateXPBar();
-
       document.getElementById('authScreen').style.display = 'none';
       document.getElementById('mainScreen').style.display = 'block';
       document.getElementById('bottomnav').style.display = 'flex';
       loadFeed();
+      loadStories();
       setupPresence();
       renderNotifList();
     });
@@ -514,35 +511,7 @@ auth.onAuthStateChanged(user => {
   }
 });
 
-function updateXPBar(){
-  const xp = currentUserData.xp || 0;
-  const level = currentUserData.level || 1;
-  const xpInLevel = xp % XP_PER_LEVEL;
-  document.getElementById('levelNum').textContent = level;
-  document.getElementById('xpText').textContent = `${xpInLevel} / ${XP_PER_LEVEL} XP`;
-  document.getElementById('xpFill').style.width = `${(xpInLevel/XP_PER_LEVEL)*100}%`;
-}
-
-function addXP(amount){
-  if(!currentUser) return;
-  const oldLevel = currentUserData.level || 1;
-  currentUserData.xp = (currentUserData.xp || 0) + amount;
-  const newLevel = Math.floor(currentUserData.xp / XP_PER_LEVEL) + 1;
-  currentUserData.level = newLevel;
-
-  db.collection('users').doc(currentUser.uid).update({
-    xp: firebase.firestore.FieldValue.increment(amount),
-    level: newLevel
-  });
-
-  updateXPBar();
-  if(newLevel > oldLevel){
-    document.getElementById('newLevelNum').textContent = newLevel;
-    openSheet('levelUpSheet');
-  } else {
-    showToast(`+${amount} XP পেয়েছো! ✨`);
-  }
-}
+/* XP system removed */
 
 /* ---------------- FEED ---------------- */
 function switchTab(cat){
@@ -644,7 +613,6 @@ function addComment(postId){
     })
   });
   input.value = '';
-  addXP(2);
 }
 
 function toggleLike(postId){
@@ -693,7 +661,6 @@ function submitPost(){
     selectedCategory = 'vibes';
     document.querySelectorAll('.catChoice').forEach(c => c.classList.remove('selected'));
     document.querySelector('.catChoice[data-cat="vibes"]').classList.add('selected');
-    addXP(10);
   });
 }
 
@@ -812,19 +779,18 @@ function goScreen(screen){
     document.getElementById('profileAvatarInit').textContent = currentUserData.name.substring(0,2).toUpperCase();
     document.getElementById('statPosts').textContent = currentUserData.posts || 0;
     document.getElementById('statLikes').textContent = currentUserData.likesReceived || 0;
-    document.getElementById('statXP').textContent = currentUserData.xp || 0;
     loadLeaderboard();
   }
 }
 
 function loadLeaderboard(){
-  db.collection('users').orderBy('xp','desc').limit(10).get().then(snap => {
+  db.collection('users').orderBy('posts','desc').limit(10).get().then(snap => {
     let i = 0;
     let html = '';
     snap.forEach(doc => {
       i++;
       const d = doc.data();
-      html += `<div class="leaderRow"><div class="leaderRank">#${i}</div><div class="leaderName">${escapeHtml(d.name)}</div><div class="leaderXP">${d.xp || 0} XP</div></div>`;
+      html += `<div class="leaderRow"><div class="leaderRank">#${i}</div><div class="leaderName">${escapeHtml(d.name)}</div><div class="leaderXP">${d.posts || 0} পোস্ট</div></div>`;
     });
     document.getElementById('leaderboardList').innerHTML = html || '<div class="empty">কোনো ডেটা নেই</div>';
   }).catch(()=> {
@@ -878,7 +844,6 @@ function toggleTimer(){
         timerRunning = false;
         btn.textContent = 'শুরু করো';
         document.getElementById('timerLabel').textContent = 'সময় শেষ! 🎉';
-        addXP(15);
       }
     }, 1000);
   }
@@ -892,7 +857,56 @@ function resetTimer(){
   document.getElementById('timerStartBtn').textContent = 'শুরু করো';
 }
 
-/* ---------------- HELPERS ---------------- */
+/* ---------- STORIES (24hr, base64 in Firestore) ---------- */
+function uploadStory(e){
+  const file = e.target.files[0];
+  if(!file || !currentUser) return;
+  if(file.size > 700000){ alert('ছবিটি বড় (max ~700KB)। ছোট ছবি দিন।'); return; }
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    db.collection('stories').add({
+      authorId: currentUser.uid,
+      authorName: currentUserData.name,
+      area: currentUserData.area,
+      image: ev.target.result,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(()=> showToast('Vibe পোস্ট হয়েছে! ✨'));
+  };
+  reader.readAsDataURL(file);
+}
+
+function loadStories(){
+  if(!currentUserData) return;
+  db.collection('stories')
+    .where('area','==', currentUserData.area)
+    .onSnapshot(snap => {
+      const now = Date.now();
+      let html = '';
+      snap.forEach(doc => {
+        const d = doc.data();
+        if(!d.createdAt) return;
+        const age = now - d.createdAt.toDate().getTime();
+        if(age > 24*3600*1000) return; // expired
+        html += `<div class="storyItem" onclick="viewStory('${escapeHtml(d.authorName)}','${doc.id}')">
+          <div class="storyAvatar" style="background:${stringToColor(d.authorName)}33; border-color:${stringToColor(d.authorName)}; padding:0; overflow:hidden;">
+            <img src="${d.image}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+          </div>
+          <p>${escapeHtml(d.authorName)}</p>
+        </div>`;
+      });
+      document.getElementById('storiesList').innerHTML = html;
+      window._storiesCache = {};
+      snap.forEach(doc => window._storiesCache[doc.id] = doc.data());
+    }, err => console.log('stories load error', err));
+}
+
+function viewStory(name, id){
+  const d = window._storiesCache && window._storiesCache[id];
+  if(!d) return;
+  document.getElementById('storyViewImg').src = d.image;
+  document.getElementById('storyViewName').textContent = name;
+  openSheet('storyViewSheet');
+}
 function escapeHtml(str){
   if(!str) return '';
   return str.replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
