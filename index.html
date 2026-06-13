@@ -187,6 +187,25 @@
 
     <div class="onlineBar"><span class="onlineDot"></span> <span id="onlineCount">12</span> জন এখন তোমার এলাকায় Online</div>
 
+    <div id="quickAccess" style="display:flex; gap:10px; overflow-x:auto; padding:0 16px 14px;">
+      <div style="text-align:center; flex-shrink:0; cursor:pointer;" onclick="switchTab('market')">
+        <div style="width:48px; height:48px; border-radius:14px; background:#1D9E7522; display:flex; align-items:center; justify-content:center; font-size:20px;">🛍️</div>
+        <p style="margin:4px 0 0; font-size:10px; color:#B4B2A9;">Marketplace</p>
+      </div>
+      <div style="text-align:center; flex-shrink:0; cursor:pointer;" onclick="switchTab('alert')">
+        <div style="width:48px; height:48px; border-radius:14px; background:#FAC77522; display:flex; align-items:center; justify-content:center; font-size:20px;">🛠️</div>
+        <p style="margin:4px 0 0; font-size:10px; color:#B4B2A9;">Service খুঁজুন</p>
+      </div>
+      <div style="text-align:center; flex-shrink:0; cursor:pointer;" onclick="switchTab('alert')">
+        <div style="width:48px; height:48px; border-radius:14px; background:#D4537E22; display:flex; align-items:center; justify-content:center; font-size:20px;">⚠️</div>
+        <p style="margin:4px 0 0; font-size:10px; color:#B4B2A9;">Alerts</p>
+      </div>
+      <div style="text-align:center; flex-shrink:0; cursor:pointer;" onclick="toggleFocusMode()">
+        <div style="width:48px; height:48px; border-radius:14px; background:#9FE1CB22; display:flex; align-items:center; justify-content:center; font-size:20px;">🎯</div>
+        <p style="margin:4px 0 0; font-size:10px; color:#B4B2A9;">Focus Mode</p>
+      </div>
+    </div>
+
     <div id="stories">
       <div class="storyItem" onclick="document.getElementById('storyFileInput').click()">
         <div class="storyAvatar add">+</div>
@@ -239,6 +258,21 @@
     <p class="closeSheet" style="text-align:left; margin-bottom:10px;" onclick="goScreen('profile')">← প্রোফাইলে ফিরে যাও</p>
     <h2 style="font-size:18px; margin-bottom:16px;">⚙️ সেটিংস</h2>
 
+    <div class="settingItem" onclick="openSheet('editProfileSheet')" style="cursor:pointer;">
+      <div><p>👤 নাম এডিট করুন</p><small id="settingNameDisplay">-</small></div>
+      <span style="color:#888780;">›</span>
+    </div>
+
+    <div class="settingItem" onclick="openSheet('editAreaSheet')" style="cursor:pointer;">
+      <div><p>📍 এলাকা পরিবর্তন</p><small id="settingAreaDisplay">-</small></div>
+      <span style="color:#888780;">›</span>
+    </div>
+
+    <div class="settingItem" onclick="openSheet('changePassSheet')" style="cursor:pointer;">
+      <div><p>🔒 পাসওয়ার্ড পরিবর্তন</p><small>Email login user-দের জন্য</small></div>
+      <span style="color:#888780;">›</span>
+    </div>
+
     <div class="settingItem">
       <div>
         <p>🎯 Focus / Study Mode</p>
@@ -257,13 +291,82 @@
 
     <div class="settingItem">
       <div>
+        <p>📶 Data Saver Mode</p>
+        <small>কম ডেটায় ছবি/ভিডিও লোড হবে</small>
+      </div>
+      <div class="toggle" id="dataSaverToggle" onclick="toggleDataSaver()"><div class="toggleKnob"></div></div>
+    </div>
+
+    <div class="settingItem">
+      <div>
+        <p>🔤 বড় ফন্ট</p>
+        <small>লেখা বড় করে দেখুন</small>
+      </div>
+      <div class="toggle" id="fontToggle" onclick="toggleFontSize()"><div class="toggleKnob"></div></div>
+    </div>
+
+    <div class="settingItem">
+      <div>
         <p>🌙 Dark Theme</p>
         <small>সবসময় ডার্ক মোড</small>
       </div>
       <div class="toggle on"><div class="toggleKnob"></div></div>
     </div>
 
+    <div class="settingItem" onclick="alert('Block করা ইউজার এখনো নেই')" style="cursor:pointer;">
+      <div><p>🚫 ব্লক লিস্ট</p><small>যাদের ব্লক করেছ তাদের তালিকা</small></div>
+      <span style="color:#888780;">›</span>
+    </div>
+
+    <div class="settingItem" onclick="alert('BrightMesh v1.0\\nMade in Sylhet, Bangladesh ❤️')" style="cursor:pointer;">
+      <div><p>ℹ️ অ্যাপ সম্পর্কে</p><small>Version 1.0</small></div>
+      <span style="color:#888780;">›</span>
+    </div>
+
+    <button class="logoutBtn" style="border-color:#E24B4A; color:#E24B4A; margin-top:10px;" onclick="openSheet('deleteAccountSheet')">🗑️ অ্যাকাউন্ট ডিলিট করুন</button>
     <button class="logoutBtn" onclick="handleLogout()">লগ আউট</button>
+  </div>
+
+  <!-- EDIT PROFILE SHEET -->
+  <div class="overlay center" id="editProfileSheet">
+    <div class="sheet modal">
+      <h3>নাম এডিট করুন</h3>
+      <input type="text" id="editNameInput" placeholder="তোমার নাম">
+      <button class="btn" onclick="saveName()">সেভ করুন</button>
+      <p class="closeSheet" onclick="closeSheet('editProfileSheet')">বাতিল করুন</p>
+    </div>
+  </div>
+
+  <!-- EDIT AREA SHEET -->
+  <div class="overlay center" id="editAreaSheet">
+    <div class="sheet modal">
+      <h3>এলাকা পরিবর্তন করুন</h3>
+      <input type="text" id="editAreaInput" placeholder="নতুন এলাকার নাম">
+      <button class="btn" onclick="saveArea()">সেভ করুন</button>
+      <p class="closeSheet" onclick="closeSheet('editAreaSheet')">বাতিল করুন</p>
+    </div>
+  </div>
+
+  <!-- CHANGE PASSWORD SHEET -->
+  <div class="overlay center" id="changePassSheet">
+    <div class="sheet modal">
+      <h3>পাসওয়ার্ড পরিবর্তন</h3>
+      <input type="password" id="newPassInput" placeholder="নতুন পাসওয়ার্ড (৬+ অক্ষর)">
+      <div class="err" id="passErr"></div>
+      <button class="btn" onclick="changePassword()">পরিবর্তন করুন</button>
+      <p class="closeSheet" onclick="closeSheet('changePassSheet')">বাতিল করুন</p>
+    </div>
+  </div>
+
+  <!-- DELETE ACCOUNT SHEET -->
+  <div class="overlay center" id="deleteAccountSheet">
+    <div class="sheet modal">
+      <div style="font-size:40px; margin-bottom:8px;">⚠️</div>
+      <h3>অ্যাকাউন্ট ডিলিট করবে?</h3>
+      <p style="color:#888780; font-size:13px; margin-bottom:16px;">এই কাজটি ফিরিয়ে আনা যাবে না। তোমার প্রোফাইল ডিলিট হয়ে যাবে।</p>
+      <button class="btn" style="background:#E24B4A; color:#fff;" onclick="deleteAccount()">হ্যাঁ, ডিলিট করো</button>
+      <p class="closeSheet" onclick="closeSheet('deleteAccountSheet')">বাতিল করুন</p>
+    </div>
   </div>
 
   <!-- STUDY MODE SCREEN -->
@@ -587,17 +690,29 @@ function renderPost(p){
   const msgBtn = (!isAnon && currentUser && p.authorId !== currentUser.uid)
     ? `<span onclick="startChat('${p.authorId}','${escapeHtml(p.authorName)}')">✉️ মেসেজ</span>` : '';
 
+  let imgHtml = '';
+  if(p.image){
+    imgHtml = `<img src="${p.image}" style="width:100%; border-radius:10px; margin-bottom:8px; display:block;">`;
+  }
+
+  const isMine = currentUser && p.authorId === currentUser.uid;
+  const menuHtml = isMine
+    ? `<span style="margin-left:auto; cursor:pointer;" onclick="deletePost('${p.id}')">🗑️</span>`
+    : (currentUser ? `<span style="margin-left:auto; cursor:pointer;" onclick="openReportMenu('${p.id}','${p.authorId}','${escapeHtml(p.authorName||'')}')">⋮</span>` : '');
+
   return `
-  <div class="post">
+  <div class="post" id="post-${p.id}">
     <div class="postHead">
       <div class="avatar" style="background:${avatarColor}33; color:${avatarColor};">${initials}</div>
       <div class="meta">
         <p>${escapeHtml(displayName)}</p>
         <small>${escapeHtml(p.authorArea || '')} · ${timeAgo}</small>
       </div>
+      ${menuHtml}
     </div>
     <span class="catTag ${catClass}">${catText}</span>${trending}
     <div class="postBody">${escapeHtml(p.text)}</div>
+    ${imgHtml}
     ${videoHtml}
     ${marketHtml}
     <div class="postActions">
@@ -808,6 +923,12 @@ function goScreen(screen){
   if(screen === 'chats'){
     loadChatList();
   }
+  if(screen === 'settings'){
+    document.getElementById('settingNameDisplay').textContent = currentUserData.name;
+    document.getElementById('settingAreaDisplay').textContent = currentUserData.area;
+    document.getElementById('editNameInput').value = currentUserData.name;
+    document.getElementById('editAreaInput').value = currentUserData.area;
+  }
 }
 
 function loadLeaderboard(){
@@ -1017,6 +1138,65 @@ function sendChatMsg(){
     lastMsg: text, lastAt: firebase.firestore.FieldValue.serverTimestamp()
   });
   input.value = '';
+}
+
+/* ---------- SETTINGS: PROFILE/AREA/PASSWORD/DELETE/DATA-SAVER/FONT ---------- */
+function saveName(){
+  const val = document.getElementById('editNameInput').value.trim();
+  if(!val || !currentUser) return;
+  db.collection('users').doc(currentUser.uid).update({ name: val }).then(()=>{
+    currentUserData.name = val;
+    document.getElementById('settingNameDisplay').textContent = val;
+    closeSheet('editProfileSheet');
+    showToast('নাম পরিবর্তন হয়েছে ✅');
+  });
+}
+function saveArea(){
+  const val = document.getElementById('editAreaInput').value.trim();
+  if(!val || !currentUser) return;
+  db.collection('users').doc(currentUser.uid).update({ area: val }).then(()=>{
+    currentUserData.area = val;
+    document.getElementById('userAreaDisplay').textContent = val;
+    document.getElementById('settingAreaDisplay').textContent = val;
+    closeSheet('editAreaSheet');
+    showToast('এলাকা পরিবর্তন হয়েছে ✅');
+    loadStories(); setupPresence();
+  });
+}
+function changePassword(){
+  const val = document.getElementById('newPassInput').value.trim();
+  const errEl = document.getElementById('passErr');
+  errEl.textContent = '';
+  if(val.length < 6){ errEl.textContent = 'কমপক্ষে ৬ অক্ষর দিন'; return; }
+  currentUser.updatePassword(val).then(()=>{
+    closeSheet('changePassSheet');
+    document.getElementById('newPassInput').value = '';
+    showToast('পাসওয়ার্ড পরিবর্তন হয়েছে ✅');
+  }).catch(err => errEl.textContent = 'সমস্যা হয়েছে: আবার লগইন করে চেষ্টা করো');
+}
+function deleteAccount(){
+  if(!currentUser) return;
+  db.collection('users').doc(currentUser.uid).delete().then(()=>{
+    return currentUser.delete();
+  }).then(()=>{
+    closeSheet('deleteAccountSheet');
+  }).catch(err => {
+    alert('ডিলিট করতে সমস্যা হয়েছে: আবার লগইন করে চেষ্টা করো');
+  });
+}
+function toggleDataSaver(){
+  const t = document.getElementById('dataSaverToggle');
+  t.classList.toggle('on');
+  window._dataSaver = t.classList.contains('on');
+  document.querySelectorAll('#storiesList img').forEach(img => {
+    img.style.display = window._dataSaver ? 'none' : 'block';
+  });
+  showToast(window._dataSaver ? 'Data Saver চালু হয়েছে' : 'Data Saver বন্ধ হয়েছে');
+}
+function toggleFontSize(){
+  const t = document.getElementById('fontToggle');
+  t.classList.toggle('on');
+  document.body.style.fontSize = t.classList.contains('on') ? '17px' : '';
 }
 
 function escapeHtml(str){
