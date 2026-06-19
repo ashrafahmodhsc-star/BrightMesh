@@ -524,24 +524,12 @@ input:focus,textarea:focus{outline:none;}
 </div>
 
 <!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-/* ============ FIREBASE CONFIG ============ */
-const firebaseConfig = {
-  apiKey: "AIzaSyBahvYk6mX9OXsNUI7Hj2a06lcJZtFFy2c",
-  authDomain: "brightmesh-f93b3.firebaseapp.com",
-  projectId: "brightmesh-f93b3",
-  storageBucket: "brightmesh-f93b3.firebasestorage.app",
-  messagingSenderId: "458385343749",
-  appId: "1:458385343749:web:ba0d5d8613e61b3e23e36c"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const storage = firebase.storage();
+  const supabaseUrl = 'https://uecjbivinnobuejxdqyx.supabase.co';
+  const supabaseKey = 'sb_publishable_l0QUso7Sdb56Gi8RZkwJew_icxSEOLY';
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+</script>
 
 /* ============ STATE ============ */
 let me = { name:'Guest', area:'এলাকা সেট করুন', bio:'', uid:'', photoURL:'', coverURL:'' };
