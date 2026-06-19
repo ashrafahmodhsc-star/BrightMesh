@@ -729,14 +729,19 @@ function toggleComments(pid){
   sec.classList.toggle('show');
 }
 
-function addComment(pid){
+async function addComment(pid){
   const input = document.getElementById('cinput-'+pid);
   const text = input.value.trim();
   if(!text) return;
   const comment = { name:me.name, uid:me.uid, text, photoURL:me.photoURL||'', at:new Date().toISOString() };
-  db.collection('posts').doc(pid).update({
-    comments: firebase.firestore.FieldValue.arrayUnion(comment)
-  }).then(()=>{ input.value=''; });
+const { data, error } = await supabase
+  .from('posts')
+  .update({ comments: comment }) // সুপাবেসে কমেন্ট টেবিল বা কলামের স্ট্রাকচার অনুযায়ী পরে এটা আমরা অ্যাডজাস্ট করব
+  .eq('id', pid);
+
+if (!error) {
+  input.value = '';
+}
 }
 
 /* ============ LIKES / REACTS ============ */
