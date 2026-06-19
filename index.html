@@ -770,10 +770,10 @@ async function quickLike(pid){
     addNotif(post.uid, `${me.name} তোমার পোস্টে like করেছে`);
   }
 }
-function addReact(emoji){
+async function addReact(emoji){
   if(!reactingPostId) return;
   const pid = reactingPostId;
-  db.collection('posts').doc(pid).update({ [`reacts.${me.uid}`]: emoji });
+await supabase.from('posts').update({ reacts: { [me.uid]: emoji } }).eq('id', pid);
   document.getElementById('reactPicker').classList.remove('show');
   reactingPostId = null;
 }
