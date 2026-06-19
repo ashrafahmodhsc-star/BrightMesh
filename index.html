@@ -758,15 +758,15 @@ function holdReact(pid){
     holdTimer = null;
   }, 500);
 }
-function quickLike(pid){
+async function quickLike(pid){
   if(holdTimer){ clearTimeout(holdTimer); holdTimer=null; }
   const post = allPosts.find(p=>p.id===pid);
   if(!post) return;
   const likes = post.likes||[];
   if(likes.includes(me.uid)){
-    db.collection('posts').doc(pid).update({ likes: firebase.firestore.FieldValue.arrayRemove(me.uid) });
+    await supabase.from('posts').update({ likes: likes.filter(id => id !== me.uid) }).eq('id', pid);
   } else {
-    db.collection('posts').doc(pid).update({ likes: firebase.firestore.FieldValue.arrayUnion(me.uid) });
+    await supabase.from('posts').update({ likes: [...likes, me.uid] }).eq('id', pid);
     addNotif(post.uid, `${me.name} তোমার পোস্টে like করেছে`);
   }
 }
