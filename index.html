@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="bn">
 <head>
@@ -323,6 +322,12 @@ textarea.sheetInput{min-height:100px;resize:none;font-family:inherit;}
 <!-- SEARCH -->
 <div class="screen" id="searchScreen">
   <div class="searchBar"><input type="text" id="searchInput" placeholder="পোস্ট, মানুষ খুঁজুন..." oninput="doSearch()"></div>
+  <div style="display:flex;gap:6px;padding:0 14px 10px;overflow-x:auto;">
+    <button class="mfBtn active" onclick="setSearchFilter('all',this)">সব</button>
+    <button class="mfBtn" onclick="setSearchFilter('local',this)">📍 আমার এলাকা</button>
+    <button class="mfBtn" onclick="setSearchFilter('market',this)">🛍️ Market</button>
+    <button class="mfBtn" onclick="setSearchFilter('spill',this)">👻 Spill</button>
+  </div>
   <div id="searchResults"><div class="empty">কিছু লিখো...</div></div>
 </div>
 
@@ -367,8 +372,20 @@ textarea.sheetInput{min-height:100px;resize:none;font-family:inherit;}
     <div class="settingRow" onclick="openSheet('editProfileSheet')"><div class="settingLabel"><p>👤 প্রোফাইল এডিট</p><small>নাম, এলাকা, বায়ো</small></div><span>›</span></div>
   </div>
   <div class="settingGroup">
+    <h4>Preferences</h4>
+    <div class="settingRow">
+      <div class="settingLabel"><p>📶 Data Saver</p><small>কম ডেটায় ছবি লোড হবে</small></div>
+      <div class="toggle" id="dataSaverToggle" onclick="toggleDataSaver()"><div class="toggleKnob"></div></div>
+    </div>
+    <div class="settingRow" onclick="openSheet('muteKeywordSheet')">
+      <div class="settingLabel"><p>🔇 Mute Keywords</p><small>অপছন্দের শব্দ feed থেকে hide করো</small></div><span>›</span>
+    </div>
+  </div>
+  <div class="settingGroup">
     <h4>Privacy</h4>
     <div class="settingRow" onclick="alert(blocked.length?'Blocked:\n'+blocked.join('\n'):'কেউ blocked নেই')"><div class="settingLabel"><p>🚫 Block List</p></div><span>›</span></div>
+    <div class="settingRow" onclick="showActivityLog()"><div class="settingLabel"><p>📊 Activity Log</p><small>তোমার পোস্ট/লাইক history</small></div><span>›</span></div>
+    <div class="settingRow" onclick="downloadMyData()"><div class="settingLabel"><p>💾 আমার ডেটা ডাউনলোড করো</p></div><span>›</span></div>
   </div>
   <div class="settingGroup">
     <h4>Info</h4>
@@ -397,8 +414,11 @@ textarea.sheetInput{min-height:100px;resize:none;font-family:inherit;}
     <div style="flex:1;"><div id="convName" style="font-size:15px;font-weight:700;"></div><div style="font-size:11px;color:var(--green);">Online</div></div>
   </div>
   <div id="convMessages"></div>
+  <div id="typingIndicator" style="display:none;padding:0 14px 6px;font-size:11px;color:var(--text3);font-style:italic;">টাইপ করছে...</div>
   <div id="convInputRow">
-    <input type="text" id="convInput" placeholder="মেসেজ লিখো..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <div class="compMediaBtn" style="padding:6px;" onclick="document.getElementById('chatImgInput').click()">📷</div>
+    <input type="file" id="chatImgInput" accept="image/*" style="display:none;" onchange="sendChatImage(event)">
+    <input type="text" id="convInput" placeholder="মেসেজ লিখো..." onkeydown="if(event.key==='Enter')sendMsg()" oninput="notifyTyping()">
     <button onclick="sendMsg()">➤</button>
   </div>
 </div>
@@ -412,7 +432,17 @@ textarea.sheetInput{min-height:100px;resize:none;font-family:inherit;}
     </div>
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
       <div class="myAvatar" id="compAvatar" style="width:40px;height:40px;font-size:15px;">?</div>
-      <div><div id="compName" style="font-size:14px;font-weight:600;"></div><div id="compArea" style="background:var(--bg3);border-radius:6px;padding:3px 10px;font-size:12px;color:var(--text3);display:inline-block;margin-top:2px;"></div></div>
+      <div style="flex:1;">
+        <div id="compName" style="font-size:14px;font-weight:600;"></div>
+        <div style="display:flex;gap:6px;margin-top:3px;">
+          <select id="audienceSelect" style="background:var(--bg3);border:none;border-radius:6px;padding:3px 8px;font-size:11px;color:var(--text3);">
+            <option value="public">🌍 Public</option>
+            <option value="friends">👥 Friends</option>
+            <option value="onlyme">🔒 Only Me</option>
+          </select>
+          <div id="compArea" style="background:var(--bg3);border-radius:6px;padding:3px 10px;font-size:12px;color:var(--text3);"></div>
+        </div>
+      </div>
     </div>
     <div class="mediaPreviewWrap" id="mediaPreviewWrap" style="display:none;">
       <img id="imgPreview" style="display:none;">
@@ -429,10 +459,17 @@ textarea.sheetInput{min-height:100px;resize:none;font-family:inherit;}
       <option value="food">🍔 খাবার</option>
       <option value="other">📦 অন্যান্য</option>
     </select>
+    <input type="text" class="sheetInput" id="locationInput" placeholder="📍 কোথা থেকে পোস্ট করছ? (ঐচ্ছিক)" style="display:none;">
+    <div id="pollBuilder" style="display:none;margin-bottom:10px;">
+      <input type="text" class="sheetInput" id="pollOpt1" placeholder="অপশন ১" style="margin-bottom:6px;">
+      <input type="text" class="sheetInput" id="pollOpt2" placeholder="অপশন ২" style="margin-bottom:6px;">
+    </div>
     <div class="compMediaBtns">
-      <div class="compMediaBtn" onclick="document.getElementById('imgFileInput').click()">📷 ছবি</div>
-      <div class="compMediaBtn" onclick="document.getElementById('vidFileInput').click()">🎥 ভিডিও</div>
+      <div class="compMediaBtn" onclick="document.getElementById('imgFileInput').click()">📷</div>
+      <div class="compMediaBtn" onclick="document.getElementById('vidFileInput').click()">🎥</div>
       <div class="compMediaBtn" onclick="toggleFeeling()">😊</div>
+      <div class="compMediaBtn" onclick="toggleLocation()">📍</div>
+      <div class="compMediaBtn" onclick="togglePoll()">📊</div>
       <button class="postBtn" id="postBtn" onclick="submitPost()">Post</button>
     </div>
     <input type="file" id="imgFileInput" accept="image/*" style="display:none;" onchange="previewMedia(event,'img')">
@@ -458,6 +495,16 @@ textarea.sheetInput{min-height:100px;resize:none;font-family:inherit;}
     <input type="text" class="sheetInput" id="epArea" placeholder="এলাকা">
     <input type="text" class="sheetInput" id="epBio" placeholder="বায়ো">
     <button class="sheetBtn" onclick="saveProfile()">সেভ করুন</button>
+  </div>
+</div>
+
+<!-- MUTE KEYWORD SHEET -->
+<div class="overlay center" id="muteKeywordSheet">
+  <div class="sheet modal">
+    <div class="sheetHead"><h3>Mute Keywords</h3><div class="sheetClose" onclick="closeSheet('muteKeywordSheet')">✕</div></div>
+    <input type="text" class="sheetInput" id="muteKeywordInput" placeholder="শব্দ লিখো (যেমন: রাজনীতি)">
+    <button class="sheetBtn" onclick="addMuteKeyword()">যোগ করো</button>
+    <div id="muteKeywordList" style="margin-top:14px;"></div>
   </div>
 </div>
 
@@ -581,7 +628,7 @@ function goTab(tab){
   const show=(id,nav)=>{ const el=document.getElementById(id); if(el){el.style.display='block';el.classList.add('show');} if(nav){const nel=document.getElementById('nav-'+nav);if(nel)nel.classList.add('active');} };
 
   if(tab==='home') show('homeScreen','home');
-  else if(tab==='search'){ show('searchScreen'); setTimeout(()=>document.getElementById('searchInput').focus(),100); }
+  else if(tab==='search'){ show('searchScreen'); showRecentSearches(); setTimeout(()=>document.getElementById('searchInput').focus(),100); }
   else if(tab==='notif'){ show('notifScreen'); document.getElementById('notifBadge').style.display='none'; renderNotifs(); }
   else if(tab==='chat'){ show('chatScreen','chat'); loadChatList(); }
   else if(tab==='profile'){ show('profileScreen','profile'); renderMyProfile(); }
@@ -612,6 +659,7 @@ async function loadFeed(){
 function renderFeed(){
   const feedEl=document.getElementById('feed');
   let posts=allPosts.filter(p=>!blocked.includes(p.uid));
+  if(muteKeywords.length) posts=posts.filter(p=>!muteKeywords.some(w=>(p.text||'').toLowerCase().includes(w)));
   if(feedTab==='friends') posts=posts.filter(p=>myFriends.includes(p.uid)||p.uid===me.uid);
   if(feedTab==='local') posts=posts.filter(p=>p.area===me.area);
   if(feedTab==='spill') posts=posts.filter(p=>p.is_spill);
@@ -652,6 +700,8 @@ function buildPost(p){
       ${menuBtn}
     </div>
     ${p.text?`<div class="postBody">${formatText(p.text)}</div>`:''}
+    ${p.location?`<div style="padding:0 14px 8px;font-size:12px;color:var(--text3);">📍 ${esc(p.location)}</div>`:''}
+    ${buildPoll(p)}
     ${media}
     <div class="postStats">
       <span>${reactSum} ${likes.length>0?likes.length+' react':''}</span>
@@ -762,7 +812,7 @@ function openComposer(mode=''){
   if(mode==='photo') document.getElementById('imgFileInput').click();
   if(mode==='video') document.getElementById('vidFileInput').click();
 }
-function closeComposer(){ document.getElementById('composerOverlay').classList.remove('show'); removeMedia(); document.getElementById('postText').value=''; }
+function closeComposer(){ document.getElementById('composerOverlay').classList.remove('show'); removeMedia(); document.getElementById('postText').value=''; document.getElementById('locationInput').value=''; document.getElementById('locationInput').style.display='none'; document.getElementById('pollBuilder').style.display='none'; document.getElementById('pollOpt1').value=''; document.getElementById('pollOpt2').value=''; }
 function previewMedia(e,type){
   const file=e.target.files[0]; if(!file) return;
   if(type==='vid'&&file.size>50*1024*1024){ showToast('Max 50MB'); return; }
@@ -775,22 +825,30 @@ function previewMedia(e,type){
 }
 function removeMedia(){ mediaFile=null; mediaType=null; document.getElementById('mediaPreviewWrap').style.display='none'; document.getElementById('imgFileInput').value=''; document.getElementById('vidFileInput').value=''; }
 function toggleFeeling(){ const el=document.getElementById('feelingInput'); el.style.display=el.style.display==='none'?'block':'none'; }
+function toggleLocation(){ const el=document.getElementById('locationInput'); el.style.display=el.style.display==='none'?'block':'none'; }
+function togglePoll(){ const el=document.getElementById('pollBuilder'); el.style.display=el.style.display==='none'?'block':'none'; }
 
 async function submitPost(){
   const text=document.getElementById('postText').value.trim();
   const feeling=document.getElementById('feelingInput').value.trim();
   const price=document.getElementById('priceInput').value.trim();
   const category=document.getElementById('categoryInput').value;
+  const audience=document.getElementById('audienceSelect').value;
+  const location=document.getElementById('locationInput').value.trim();
+  const pollOpt1=document.getElementById('pollOpt1').value.trim();
+  const pollOpt2=document.getElementById('pollOpt2').value.trim();
   const isSpill=compMode==='spill';
-  if(!text&&!mediaFile){ showToast('কিছু লিখো বা মিডিয়া যুক্ত করো'); return; }
+  if(!text&&!mediaFile&&!(pollOpt1&&pollOpt2)){ showToast('কিছু লিখো বা মিডিয়া যুক্ত করো'); return; }
   const btn=document.getElementById('postBtn'); btn.disabled=true;
 
   const postData={
     uid:me.uid, name:isSpill?'Anonymous':me.name, area:me.area,
     photo_url:isSpill?'':me.photo_url||'',
     text:text||'', feeling:feeling||'', likes:[], reacts:{}, views:0,
-    is_spill:isSpill, comments_count:0
+    is_spill:isSpill, comments_count:0, audience:audience||'public'
   };
+  if(location) postData.location=location;
+  if(pollOpt1&&pollOpt2){ postData.poll={options:[{text:pollOpt1,votes:[]},{text:pollOpt2,votes:[]}]}; }
   if(price){ postData.price=price; postData.category=category; postData.sold=false; }
 
   let imageUrl=null; let videoUrl=null;
@@ -852,12 +910,20 @@ function viewStory(id){
 }
 
 /* ===== SEARCH ===== */
+let searchFilter='all';
+function setSearchFilter(f,el){ searchFilter=f; document.querySelectorAll('#searchScreen .mfBtn').forEach(b=>b.classList.remove('active')); if(el) el.classList.add('active'); doSearch(); }
+
 async function doSearch(){
   const q=document.getElementById('searchInput').value.trim().toLowerCase();
   const el=document.getElementById('searchResults');
-  if(!q){ el.innerHTML='<div class="empty">কিছু লিখো...</div>'; return; }
-  const {data}=await sb.from('posts').select('*').ilike('text','%'+q+'%').limit(20);
+  if(!q){ showRecentSearches(); return; }
+  let query=sb.from('posts').select('*').ilike('text','%'+q+'%').limit(20);
+  if(searchFilter==='local') query=query.eq('area',me.area);
+  if(searchFilter==='market') query=query.not('price','is',null);
+  if(searchFilter==='spill') query=query.eq('is_spill',true);
+  const {data}=await query;
   if(!data||!data.length){ el.innerHTML='<div class="empty">কিছু পাওয়া যায়নি</div>'; return; }
+  saveRecentSearch(q);
   el.innerHTML=data.map(p=>{
     const color=strColor(p.name||'U');
     return `<div class="searchResult" onclick="goTab('home')">
@@ -865,6 +931,20 @@ async function doSearch(){
       <div><div style="font-size:14px;font-weight:600;">${esc(p.name||'')}</div><div style="font-size:12px;color:var(--text3);">${esc((p.text||'').substring(0,50))}</div></div>
     </div>`;
   }).join('');
+}
+function saveRecentSearch(q){
+  let recent=JSON.parse(localStorage.getItem('bm_recent_search')||'[]');
+  recent=recent.filter(r=>r!==q);
+  recent.unshift(q);
+  recent=recent.slice(0,8);
+  localStorage.setItem('bm_recent_search',JSON.stringify(recent));
+}
+function showRecentSearches(){
+  const recent=JSON.parse(localStorage.getItem('bm_recent_search')||'[]');
+  const el=document.getElementById('searchResults');
+  if(!recent.length){ el.innerHTML='<div class="empty">কিছু লিখো...</div>'; return; }
+  el.innerHTML='<div style="padding:10px 14px;font-size:12px;color:var(--text3);font-weight:600;">সাম্প্রতিক খোঁজ</div>'+
+    recent.map(r=>`<div class="searchResult" onclick="document.getElementById('searchInput').value='${esc(r)}';doSearch();">🕐 <span style="margin-left:8px;font-size:13px;">${esc(r)}</span></div>`).join('');
 }
 
 /* ===== CHAT ===== */
@@ -908,24 +988,77 @@ async function openConv(cid,name,photo){
   else { ca.textContent=name.substring(0,2).toUpperCase(); ca.style.background=color+'33'; ca.style.color=color; }
   const {data}=await sb.from('messages').select('*').eq('chat_id',cid).order('created_at',{ascending:true}).limit(100);
   renderMessages(data||[]);
-  msgChannel=sb.channel('msgs-'+cid).on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`chat_id=eq.${cid}`},payload=>{
-    renderMessages([...document.querySelectorAll('.msgBubble')].map((_,i)=>i).map(()=>null),payload.new);
-  }).subscribe();
+  // mark messages from other person as seen
+  await sb.from('messages').update({seen:true}).eq('chat_id',cid).neq('uid',me.uid);
+
+  msgChannel=sb.channel('msgs-'+cid)
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'messages',filter:`chat_id=eq.${cid}`},payload=>{
+      appendMessage(payload.new);
+      if(payload.new.uid!==me.uid) sb.from('messages').update({seen:true}).eq('id',payload.new.id);
+    })
+    .on('postgres_changes',{event:'DELETE',schema:'public',table:'messages'},payload=>{
+      const el=document.getElementById('msg-'+payload.old.id); if(el) el.remove();
+    })
+    .on('broadcast',{event:'typing'},payload=>{
+      if(payload.payload.uid!==me.uid){
+        const ind=document.getElementById('typingIndicator');
+        ind.style.display='block';
+        clearTimeout(window._typingTimeout);
+        window._typingTimeout=setTimeout(()=>ind.style.display='none',2000);
+      }
+    })
+    .subscribe();
 }
 
-function renderMessages(msgs,newMsg){
+function renderMessages(msgs){
   const box=document.getElementById('convMessages');
-  if(newMsg){ const mine=newMsg.uid===me.uid; box.innerHTML+=`<div class="msgBubble ${mine?'me':'them'}">${esc(newMsg.text)}</div>`; box.scrollTop=box.scrollHeight; return; }
-  box.innerHTML=msgs.map(m=>`<div class="msgBubble ${m.uid===me.uid?'me':'them'}">${esc(m.text)}</div>`).join('');
+  box.innerHTML=msgs.map(m=>msgBubbleHtml(m)).join('');
   box.scrollTop=box.scrollHeight;
+}
+function appendMessage(m){
+  const box=document.getElementById('convMessages');
+  box.insertAdjacentHTML('beforeend',msgBubbleHtml(m));
+  box.scrollTop=box.scrollHeight;
+}
+function msgBubbleHtml(m){
+  const mine=m.uid===me.uid;
+  const imgHtml=m.image_url?`<img src="${esc(m.image_url)}" style="max-width:180px;border-radius:10px;display:block;margin-bottom:${m.text?'4px':'0'};cursor:pointer;" onclick="viewImg('${esc(m.image_url)}')">`:'';
+  const seenHtml=mine&&m.seen?'<div style="font-size:10px;color:var(--text4);text-align:right;margin-top:2px;">দেখেছে ✓✓</div>':'';
+  return `<div id="msg-${m.id||''}" class="msgBubble ${mine?'me':'them'}" oncontextmenu="event.preventDefault();${mine?`deleteMsg('${m.id}')`:''}" ondblclick="${mine?`deleteMsg('${m.id}')`:''}">${imgHtml}${m.text?esc(m.text):''}${seenHtml}</div>`;
+}
+
+async function deleteMsg(id){
+  if(!id||!confirm('মেসেজ ডিলিট করবে?')) return;
+  await sb.from('messages').delete().eq('id',id);
+  const el=document.getElementById('msg-'+id); if(el) el.remove();
 }
 
 async function sendMsg(){
   const inp=document.getElementById('convInput');
   const text=inp.value.trim(); if(!text||!currentChatId) return;
   inp.value='';
-  await sb.from('messages').insert({chat_id:currentChatId,uid:me.uid,name:me.name,text});
+  await sb.from('messages').insert({chat_id:currentChatId,uid:me.uid,name:me.name,text,seen:false});
   await sb.from('chats').update({last_msg:text,last_at:new Date().toISOString()}).eq('id',currentChatId);
+}
+
+async function sendChatImage(e){
+  const file=e.target.files[0]; if(!file||!currentChatId) return;
+  showToast('ছবি পাঠানো হচ্ছে...');
+  const path=`chat/${me.uid}_${Date.now()}.${file.name.split('.').pop()}`;
+  const {error}=await sb.storage.from('images').upload(path,file);
+  if(error){ showToast('Error: '+error.message); return; }
+  const {data}=sb.storage.from('images').getPublicUrl(path);
+  await sb.from('messages').insert({chat_id:currentChatId,uid:me.uid,name:me.name,text:'',image_url:data.publicUrl,seen:false});
+  await sb.from('chats').update({last_msg:'📷 ছবি',last_at:new Date().toISOString()}).eq('id',currentChatId);
+  e.target.value='';
+}
+
+let typingTimer=null;
+function notifyTyping(){
+  if(!msgChannel) return;
+  if(typingTimer) return;
+  msgChannel.send({type:'broadcast',event:'typing',payload:{uid:me.uid}});
+  typingTimer=setTimeout(()=>{typingTimer=null;},1500);
 }
 
 async function closeConv(){
@@ -934,6 +1067,7 @@ async function closeConv(){
   if(msgChannel){ await sb.removeChannel(msgChannel); msgChannel=null; }
   currentChatId=null;
 }
+
 
 /* ===== PROFILE ===== */
 function renderMyProfile(){
@@ -1161,11 +1295,87 @@ function setupPullRefresh(){
 }
 
 /* ===== MISC ===== */
-function openSheet(id){ document.getElementById(id).classList.add('show'); }
+/* ===== SETTINGS: DATA SAVER, MUTE, ACTIVITY, EXPORT ===== */
+let dataSaverOn = localStorage.getItem('bm_datasaver')==='1';
+let muteKeywords = JSON.parse(localStorage.getItem('bm_mutewords')||'[]');
+
+function toggleDataSaver(){
+  dataSaverOn=!dataSaverOn;
+  localStorage.setItem('bm_datasaver',dataSaverOn?'1':'0');
+  document.getElementById('dataSaverToggle').classList.toggle('on',dataSaverOn);
+  showToast(dataSaverOn?'Data Saver চালু হয়েছে':'Data Saver বন্ধ হয়েছে');
+  renderFeed();
+}
+
+function addMuteKeyword(){
+  const inp=document.getElementById('muteKeywordInput');
+  const word=inp.value.trim().toLowerCase();
+  if(!word) return;
+  if(!muteKeywords.includes(word)) muteKeywords.push(word);
+  localStorage.setItem('bm_mutewords',JSON.stringify(muteKeywords));
+  inp.value='';
+  renderMuteList();
+  renderFeed();
+}
+function removeMuteKeyword(word){
+  muteKeywords=muteKeywords.filter(w=>w!==word);
+  localStorage.setItem('bm_mutewords',JSON.stringify(muteKeywords));
+  renderMuteList();
+  renderFeed();
+}
+function renderMuteList(){
+  const el=document.getElementById('muteKeywordList');
+  if(!muteKeywords.length){ el.innerHTML='<div class="empty" style="padding:10px 0;">কোনো mute keyword নেই</div>'; return; }
+  el.innerHTML=muteKeywords.map(w=>`<div style="display:flex;justify-content:space-between;align-items:center;background:var(--bg2);padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:13px;"><span>${esc(w)}</span><span style="color:var(--red);cursor:pointer;" onclick="removeMuteKeyword('${esc(w)}')">✕</span></div>`).join('');
+}
+
+function showActivityLog(){
+  const myPosts=allPosts.filter(p=>p.uid===me.uid);
+  const totalLikes=myPosts.reduce((s,p)=>s+(p.likes||[]).length,0);
+  alert(`📊 তোমার Activity:\n\nমোট পোস্ট: ${myPosts.length}\nমোট লাইক পাওয়া: ${totalLikes}\nFriends: ${myFriends.length}\nSaved posts: ${bookmarks.length}\nBlocked users: ${blocked.length}`);
+}
+
+function downloadMyData(){
+  const myPosts=allPosts.filter(p=>p.uid===me.uid);
+  const exportData={profile:me,posts:myPosts,friends:myFriends,bookmarks:bookmarks};
+  const blob=new Blob([JSON.stringify(exportData,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url; a.download='brightmesh_my_data.json'; a.click();
+  showToast('ডাউনলোড হচ্ছে...');
+}
+
+function openSheet(id){ document.getElementById(id).classList.add('show'); if(id==='muteKeywordSheet') renderMuteList(); }
 function closeSheet(id){ document.getElementById(id).classList.remove('show'); }
 function viewImg(url){ document.getElementById('imgViewerImg').src=url; document.getElementById('imgViewer').classList.add('show'); }
 function logout(){ if(confirm('লগ আউট করবে?')){ localStorage.removeItem('bm_me'); location.reload(); } }
 function deleteAccount(){ if(confirm('সব data মুছে যাবে?')){ localStorage.clear(); location.reload(); } }
+function buildPoll(p){
+  if(!p.poll||!p.poll.options) return '';
+  const totalVotes=p.poll.options.reduce((s,o)=>s+(o.votes||[]).length,0);
+  const myVoted=p.poll.options.findIndex(o=>(o.votes||[]).includes(me.uid));
+  return `<div style="padding:0 14px 10px;">${p.poll.options.map((o,i)=>{
+    const count=(o.votes||[]).length;
+    const pct=totalVotes>0?Math.round((count/totalVotes)*100):0;
+    const voted=myVoted===i;
+    return `<div onclick="votePoll('${p.id}',${i})" style="position:relative;background:var(--bg3);border-radius:8px;padding:8px 12px;margin-bottom:6px;cursor:pointer;overflow:hidden;${voted?'border:1px solid var(--primary);':''}">
+      <div style="position:absolute;left:0;top:0;bottom:0;width:${pct}%;background:var(--primary)33;z-index:0;"></div>
+      <div style="position:relative;z-index:1;display:flex;justify-content:space-between;font-size:13px;color:var(--text2);">
+        <span>${voted?'✓ ':''}${esc(o.text)}</span><span>${pct}%</span>
+      </div>
+    </div>`;
+  }).join('')}<div style="font-size:11px;color:var(--text4);">${totalVotes} ভোট</div></div>`;
+}
+async function votePoll(pid,optIdx){
+  const post=allPosts.find(p=>p.id===pid); if(!post||!post.poll) return;
+  const poll=JSON.parse(JSON.stringify(post.poll));
+  poll.options.forEach(o=>{ o.votes=(o.votes||[]).filter(u=>u!==me.uid); });
+  poll.options[optIdx].votes=[...(poll.options[optIdx].votes||[]),me.uid];
+  await sb.from('posts').update({poll}).eq('id',pid);
+  post.poll=poll;
+  renderFeed();
+}
+
 function formatText(text){ return esc(text).replace(/#(\S+)/g,'<span style="color:var(--primary);cursor:pointer;" onclick="document.getElementById(\'searchInput\').value=\'#$1\';goTab(\'search\');doSearch()">#$1</span>').replace(/\n/g,'<br>'); }
 function catEmoji(cat){ return {book:'📚',electronics:'📱',clothes:'👗',food:'🍔',other:'📦'}[cat]||'📦'; }
 function esc(s){ if(!s) return ''; return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
