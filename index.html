@@ -1,790 +1,1365 @@
 bash
 
-cat > /home/claude/bm.html << 'EOF'
+cat > /home/claude/brightmesh_study.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BrightMesh</title>
+<title>BrightMesh — Study Mode</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
 :root{
-  --p:#6C63FF;--pd:#4B44CC;--pl:#EEEDFF;--pm:#B8B4FF;
-  --g:#10B981;--gl:#D1FAE5;--gd:#065F46;
+  --p:#534AB7;--pl:#EEEDFE;--pd:#3C3489;--pm:#B8B4FF;
+  --g:#0F6E56;--gl:#E1F5EE;--gd:#065F46;
   --a:#F59E0B;--al:#FEF3C7;--ad:#92400E;
-  --r:#EF4444;--rl:#FEE2E2;
-  --o:#F97316;--ol:#FFF7ED;
-  --bg:#F0F0F7;--card:#FFF;--border:#E5E5F0;
+  --r:#A32D2D;--rl:#FCEBEB;
+  --o:#F97316;
+  --bg:#F0F0F7;--card:#fff;--bdr:#E5E5F0;
   --txt:#111827;--sub:#6B7280;--hint:#9CA3AF;
-  --rad:14px;--rads:8px;--radl:20px;
+  --rad:14px;--rads:8px;
 }
+[data-focus="true"]{pointer-events:none;opacity:.38;user-select:none}
+[data-focus="true"] .focus-only{pointer-events:all;opacity:1}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-body{background:var(--bg);max-width:420px;margin:0 auto;min-height:100svh;overflow-x:hidden}
+body{background:var(--bg);max-width:430px;margin:0 auto;min-height:100svh}
 ::-webkit-scrollbar{display:none}*{scrollbar-width:none}
-.page{display:none;flex-direction:column;min-height:100svh;padding-bottom:68px}
-.page.on{display:flex}
-.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 4px;background:var(--card)}
-.sbar-t{font-size:13px;font-weight:700;color:var(--txt)}
-.sbar-r{display:flex;gap:5px;font-size:13px;color:var(--txt)}
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border)}
-.logo{font-size:20px;font-weight:800;color:var(--txt)}.logo em{color:var(--p);font-style:normal}
+
+/* LOADING */
+#ls{position:fixed;inset:0;background:var(--p);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:8px;transition:opacity .4s}
+#ls.out{opacity:0;pointer-events:none}
+.lb{font-size:36px;font-weight:700;color:#fff}.lb span{color:var(--pm)}
+.lt{font-size:13px;color:rgba(255,255,255,.7)}
+.ldots{display:flex;gap:6px;margin-top:14px}
+.ldots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);animation:lp 1.2s infinite}
+.ldots i:nth-child(2){animation-delay:.2s}.ldots i:nth-child(3){animation-delay:.4s}
+@keyframes lp{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+
+/* APP */
+.app{display:flex;flex-direction:column;min-height:100svh}
+
+/* STATUS */
+.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 4px;background:var(--card);font-size:12px;font-weight:600;color:var(--txt);flex-shrink:0}
+
+/* HEADER */
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;background:var(--card);border-bottom:1px solid var(--bdr);flex-shrink:0}
+.logo{font-size:19px;font-weight:700;color:var(--txt)}.logo em{color:var(--p);font-style:normal}
 .hdr-r{display:flex;gap:10px;align-items:center}
-.icon-btn{width:36px;height:36px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative}
-.nbadge{position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--r);border:2px solid var(--card)}
-.avt{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;cursor:pointer;flex-shrink:0}
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:420px;background:var(--card);border-top:1px solid var(--border);display:flex;z-index:100;padding:6px 0 10px}
-.nb2{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:transparent;cursor:pointer;padding:2px 0}
-.nb2 i{font-size:22px;color:var(--hint)}
-.nb2 span{font-size:9px;color:var(--hint);font-weight:600}
-.nb2.on i{color:var(--p)}.nb2.on span{color:var(--p)}
-.nbplus{width:48px;height:48px;border-radius:50%;background:var(--p);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:-16px;box-shadow:0 4px 16px rgba(108,99,255,.4)}
-.stabs{display:flex;background:var(--card);border-bottom:1px solid var(--border);overflow-x:auto;flex-shrink:0}
-.stab{flex-shrink:0;padding:11px 14px;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--hint);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap}
-.stab.on{color:var(--p);border-bottom-color:var(--p)}
-.sb{flex:1;overflow-y:auto;padding:12px 14px 8px}
-.card{background:var(--card);border-radius:var(--rad);padding:14px;margin-bottom:10px;border:1px solid var(--border)}
-.ctitle{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
-.mgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:10px}
-.mc{background:var(--card);border-radius:var(--rad);padding:12px;border:1px solid var(--border)}
-.mc .l{font-size:10px;color:var(--hint);font-weight:600;margin-bottom:2px}
-.mc .v{font-size:22px;font-weight:800;color:var(--txt)}
-.mc .s{font-size:10px;color:var(--hint);margin-top:2px}
+
+/* FOCUS BANNER */
+#focus-banner{display:none;background:var(--p);padding:8px 16px;align-items:center;justify-content:space-between;flex-shrink:0}
+#focus-banner.show{display:flex}
+.fb-timer{font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
+.fb-label{font-size:11px;color:rgba(255,255,255,.8)}
+.fb-exit{padding:6px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:100px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;pointer-events:all}
+
+/* TABS */
+.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--bdr);overflow-x:auto;flex-shrink:0}
+.tab{flex-shrink:0;padding:11px 16px;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--hint);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px}
+.tab.on{color:var(--p);border-bottom-color:var(--p)}
+.tab.disabled-tab{opacity:.35;cursor:not-allowed}
+
+/* CONTENT */
+.content{flex:1;overflow:hidden;display:flex;flex-direction:column}
+.tb{display:none;flex:1;overflow-y:auto;padding:12px 14px 80px;flex-direction:column}
+.tb.on{display:flex}
+
+/* BOTTOM NAV */
+.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-top:1px solid var(--bdr);display:flex;padding:6px 0 10px;z-index:100}
+.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:transparent;cursor:pointer;padding:2px 0}
+.nb i{font-size:22px;color:var(--hint)}
+.nb span{font-size:9px;color:var(--hint);font-weight:600}
+.nb.on i,.nb.on span{color:var(--p)}
+.nb.dis{opacity:.3;cursor:not-allowed;pointer-events:none}
+.nbplus{width:48px;height:48px;border-radius:50%;background:var(--p);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:-16px;box-shadow:0 4px 16px rgba(83,74,183,.45)}
+
+/* CARDS */
+.card{background:var(--card);border-radius:var(--rad);padding:14px;margin-bottom:10px;border:1px solid var(--bdr)}
+.ct{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .pb{background:var(--bg);border-radius:100px;height:5px;overflow:hidden;margin:5px 0}
 .pf{height:5px;border-radius:100px;transition:width .4s}
-.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
 .row:last-child{border-bottom:none}
+.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
+.mc{background:var(--card);border-radius:var(--rad);padding:12px;border:1px solid var(--bdr)}
+.mc .l{font-size:10px;color:var(--hint);font-weight:600;margin-bottom:2px}
+.mc .v{font-size:22px;font-weight:700;color:var(--txt)}
+.mc .s{font-size:10px;color:var(--hint);margin-top:2px}
+.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.shdr-t{font-size:14px;font-weight:700;color:var(--txt)}
+.warn{display:flex;align-items:center;gap:8px;background:var(--al);border-radius:var(--rads);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--ad);font-weight:600}
+.info{display:flex;align-items:center;gap:8px;background:var(--pl);border-radius:var(--rads);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--pd);font-weight:600}
+.btn-p{width:100%;padding:13px;background:var(--p);color:#fff;border:none;border-radius:var(--rad);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.btn-o{width:100%;padding:11px;background:transparent;color:var(--p);border:2px solid var(--p);border-radius:var(--rad);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px}
+.btn-r{width:100%;padding:11px;background:transparent;color:var(--r);border:2px solid var(--r);border-radius:var(--rad);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px}
 .chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600}
+.sel{width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;margin-bottom:10px;cursor:pointer}
+.inp{width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;margin-bottom:10px}
+.inp:focus,.sel:focus{border-color:var(--p)}
+.avt{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
 .prow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.pill{padding:5px 12px;border-radius:100px;border:1px solid var(--border);background:var(--card);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
+.pill{padding:5px 12px;border-radius:100px;border:1px solid var(--bdr);background:var(--card);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
 .pill.on{background:var(--p);color:#fff;border-color:var(--p)}
-.btn{width:100%;padding:13px;border:none;border-radius:var(--rad);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
-.btn-p{background:var(--p);color:#fff}
-.btn-o{background:transparent;color:var(--p);border:2px solid var(--p)}
-.btn-g{background:var(--g);color:#fff}
-.fhero{background:linear-gradient(135deg,var(--pd),var(--p));border-radius:var(--rad);padding:24px;text-align:center;margin-bottom:12px}
-.ftime{font-size:52px;font-weight:800;color:#fff;letter-spacing:4px;font-variant-numeric:tabular-nums}
+
+/* FOCUS LOCK */
+.fhero{border-radius:var(--rad);padding:24px;text-align:center;margin-bottom:12px}
+.ftime{font-size:52px;font-weight:700;color:#fff;letter-spacing:4px;font-variant-numeric:tabular-nums}
 .flbl{font-size:13px;color:rgba(255,255,255,.8);margin-top:6px;font-weight:500}
 .topts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
-.topt{padding:10px 4px;border:2px solid var(--border);border-radius:var(--rads);text-align:center;cursor:pointer;font-size:12px;font-weight:700;color:var(--sub);background:var(--card);transition:all .15s}
+.topt{padding:10px 4px;border:2px solid var(--bdr);border-radius:var(--rads);text-align:center;cursor:pointer;font-size:12px;font-weight:700;color:var(--sub);background:var(--card)}
 .topt.on{border-color:var(--p);color:var(--p);background:var(--pl)}
 .pwdots{display:flex;gap:12px;justify-content:center;margin:12px 0}
-.pwd{width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--border);transition:all .15s}
+.pwd{width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--bdr);transition:all .15s}
 .pwd.f{background:var(--p);border-color:var(--p)}
 .npad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
-.nk{padding:14px;border:1px solid var(--border);border-radius:var(--rad);font-size:18px;font-weight:600;background:var(--card);color:var(--txt);cursor:pointer;text-align:center;transition:background .1s}
-.nk:active{background:var(--bg)}
-.nk.emp{background:transparent;border-color:transparent;cursor:default}
-.sc2{display:flex;gap:10px;align-items:center;padding:10px;background:var(--bg);border-radius:var(--rad);margin-bottom:8px;cursor:pointer}
-.sthumb{width:60px;height:60px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.sdur{font-size:11px;font-weight:800;color:var(--p);background:var(--pl);padding:2px 7px;border-radius:100px}
-.pbtn{width:32px;height:32px;border-radius:50%;background:var(--p);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.plrow{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border)}
-.plrow:last-child{border-bottom:none}
-.plnum{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0}
-.lbrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.lbrow:last-child{border-bottom:none}
-.lbyou{background:var(--pl);border-radius:10px;padding:10px;border:none;margin:3px 0}
-.post{background:var(--card);border-radius:var(--rad);padding:13px;margin-bottom:10px;border:1px solid var(--border)}
-.pacts{display:flex;gap:16px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
-.pact{border:none;background:transparent;cursor:pointer;font-size:12px;color:var(--sub);display:flex;align-items:center;gap:5px;font-weight:600}
-.stroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px}
-.sitem{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;cursor:pointer}
-.sring{width:58px;height:58px;border-radius:50%;border:2.5px solid var(--p);padding:2px;display:flex;align-items:center;justify-content:center}
-.sring.add{border:2.5px dashed var(--g)}
-.sinn{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
-.sname2{font-size:9px;color:var(--sub);font-weight:600;max-width:56px;text-align:center;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dmrow{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border)}
-.udot{width:9px;height:9px;border-radius:50%;background:var(--p);flex-shrink:0}
-.gmsg{display:flex;gap:7px;margin-bottom:8px;align-items:flex-end}
-.gmsg.me{flex-direction:row-reverse}
-.bub{padding:9px 13px;border-radius:16px;font-size:13px;line-height:1.5;max-width:78%}
-.bin{background:var(--bg);color:var(--txt);border-radius:4px 16px 16px 16px}
-.bout{background:var(--p);color:#fff;border-radius:16px 4px 16px 16px}
-.cinprow{display:flex;gap:8px;padding:10px 14px;background:var(--card);border-top:1px solid var(--border);flex-shrink:0}
-.cinp{flex:1;padding:10px 14px;border:1.5px solid var(--border);border-radius:100px;font-size:13px;background:var(--bg);color:var(--txt);outline:none}
-.cinp:focus{border-color:var(--p)}
-.csend{width:40px;height:40px;border-radius:50%;background:var(--p);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.shopcard{display:flex;gap:10px;align-items:center;padding:10px;background:var(--bg);border-radius:var(--rad);margin-bottom:8px}
-.shopimg{width:54px;height:54px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.buybtn{padding:7px 14px;background:var(--gl);color:var(--gd);border:none;border-radius:var(--rads);font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
-.newscard{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer}
-.newscard:last-child{border-bottom:none}
-.newsimg{width:64px;height:52px;border-radius:8px;background:var(--bg);flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.bitem{border-radius:12px;padding:11px 6px;text-align:center}
-.bitem i{font-size:26px;display:block;margin-bottom:4px}
-.bname{font-size:10px;font-weight:700}
-.bearned{background:var(--al)}.bearned i{color:var(--a)}.bearned .bname{color:var(--ad)}
-.blocked{background:var(--bg)}.blocked i{color:var(--hint)}.blocked .bname{color:var(--hint)}
+.nk{padding:14px;border:1px solid var(--bdr);border-radius:var(--rad);font-size:18px;font-weight:600;background:var(--card);color:var(--txt);cursor:pointer;text-align:center;transition:background .1s;user-select:none}
+.nk:active{background:var(--bg)}.nk.emp{background:transparent;border-color:transparent;cursor:default}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.shake{animation:wrongShake .3s ease}
+
+/* TIMER */
 .wchart{display:flex;align-items:flex-end;gap:5px;height:80px}
 .wbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
 .wb{width:100%;border-radius:5px 5px 0 0}
 .wlbl{font-size:9px;color:var(--hint);font-weight:600}
+
+/* PDF */
+.pdfcard{display:flex;align-items:center;gap:10px;padding:11px;background:var(--bg);border-radius:var(--rad);margin-bottom:8px;cursor:pointer;transition:opacity .2s}
+.pdfcard:active{opacity:.7}
+.pdficon{width:48px;height:56px;border-radius:8px;background:var(--rl);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pdf-overlay{position:absolute;inset:0;background:rgba(255,255,255,.7);border-radius:var(--rad);display:flex;align-items:center;justify-content:center;z-index:10}
+
+/* QUIZ */
+.qopt{width:100%;padding:12px 14px;border:2px solid var(--bdr);border-radius:var(--rad);font-size:13px;font-weight:600;background:var(--card);color:var(--txt);cursor:pointer;text-align:left;margin-bottom:8px;transition:all .15s}
+.qopt:hover:not(:disabled){border-color:var(--p);background:var(--pl)}
+.qopt.correct{border-color:var(--g);background:var(--gl);color:var(--gd)}
+.qopt.wrong{border-color:var(--r);background:var(--rl);color:var(--r)}
+.qopt:disabled{cursor:not-allowed}
+.lbrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr)}
+.lbrow:last-child{border-bottom:none}
+.lbyou{background:var(--pl);border-radius:10px;padding:10px;border:none;margin:3px 0}
+
+/* GOAL */
+.goalrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bdr)}
+.goalrow:last-child{border-bottom:none}
+.gcheck{width:24px;height:24px;border-radius:50%;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
+.gcheck.done{background:var(--g);border-color:var(--g)}
+
+/* STREAK CAL */
 .scal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
 .cday{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
 .std{background:var(--p);color:#fff}.msd{background:var(--bg);color:var(--hint)}
-.warn{display:flex;align-items:center;gap:8px;background:var(--al);border-radius:var(--rads);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--ad);font-weight:600}
-.info{display:flex;align-items:center;gap:8px;background:var(--pl);border-radius:var(--rads);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--pd);font-weight:600}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px}
-.mbox{background:var(--card);border-radius:var(--radl);padding:22px;width:100%;max-width:320px;text-align:center}
-.msheet{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:flex-end}
-.mshin{background:var(--card);border-radius:var(--radl) var(--radl) 0 0;width:100%;max-height:80svh;display:flex;flex-direction:column}
-.compose{width:100%;padding:12px;border:1.5px solid var(--border);border-radius:var(--rad);font-size:13px;background:var(--bg);color:var(--txt);outline:none;resize:none;min-height:90px;font-family:inherit}
-.sel{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;margin-bottom:10px;cursor:pointer}
-.inp{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;margin-bottom:10px}
-.inp:focus,.sel:focus{border-color:var(--p)}
-.ancard{background:var(--bg);border-radius:var(--rad);padding:12px;margin-bottom:8px}
+
+/* BADGES */
+.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.bitem{border-radius:12px;padding:11px 6px;text-align:center}
+.bitem i{font-size:24px;display:block;margin-bottom:4px}
+.bnm{font-size:10px;font-weight:700}
+.bearned{background:var(--al)}.bearned i{color:var(--a)}.bearned .bnm{color:var(--ad)}
+.blocked{background:var(--bg)}.blocked i{color:var(--hint)}.blocked .bnm{color:var(--hint)}
+
+/* ANALYTICS */
 .anbar{display:flex;align-items:center;gap:10px;margin-bottom:4px}
 .anname{font-size:12px;font-weight:700;color:var(--txt);min-width:80px}
-.anpb{flex:1;background:var(--border);border-radius:100px;height:8px;overflow:hidden}
-.anfill{height:8px;border-radius:100px}
-.goalrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
-.goalrow:last-child{border-bottom:none}
-.goalcheck{width:24px;height:24px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
-.goalcheck.done{background:var(--g);border-color:var(--g)}
-.qopt{width:100%;padding:12px 14px;border:2px solid var(--border);border-radius:var(--rad);font-size:13px;font-weight:600;background:var(--card);color:var(--txt);cursor:pointer;text-align:left;margin-bottom:8px;transition:all .15s}
-.qopt:hover{border-color:var(--p);background:var(--pl)}
-.qopt.correct{border-color:var(--g);background:var(--gl);color:var(--gd)}
-.qopt.wrong{border-color:var(--r);background:var(--rl);color:var(--r)}
-.ai-chat{flex:1;overflow-y:auto;padding:12px;min-height:180px}
-.ai-icon{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--pd));display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.ai-bub{background:var(--pl);color:var(--pd);padding:10px 13px;border-radius:4px 16px 16px 16px;font-size:12px;line-height:1.6;max-width:85%}
-.ai-ubub{background:var(--p);color:#fff;padding:10px 13px;border-radius:16px 4px 16px 16px;font-size:12px;line-height:1.6;max-width:85%;margin-left:auto}
-.profhdr{background:linear-gradient(135deg,var(--p),var(--pd));padding:24px 16px 16px;text-align:center}
-.profavt{width:72px;height:72px;border-radius:50%;border:3px solid #fff;background:var(--pm);color:var(--pd);font-size:22px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}
-.profstats{display:flex;justify-content:center;gap:24px;margin-top:12px}
-.pst{text-align:center}.pstv{font-size:16px;font-weight:800;color:#fff}.pstl{font-size:10px;color:rgba(255,255,255,.8);font-weight:500}
-.odot{width:9px;height:9px;border-radius:50%;background:#22c55e;border:2px solid var(--card);position:absolute;bottom:1px;right:1px}
-.planrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.anpb{flex:1;background:var(--bdr);border-radius:100px;height:7px;overflow:hidden}
+.anfill{height:7px;border-radius:100px}
+
+/* PLANNER */
+.planrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
 .planrow:last-child{border-bottom:none}
 .plantag{padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700}
-.setrow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--border)}
+
+/* SETTINGS */
+.setrow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--bdr)}
 .setrow:last-child{border-bottom:none}
-.toggle{width:42px;height:24px;border-radius:100px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
+.toggle{width:42px;height:24px;border-radius:100px;background:var(--bdr);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
 .toggle.on{background:var(--p)}
 .toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .toggle.on::after{left:21px}
-.excnt-card{background:linear-gradient(135deg,var(--r),#dc2626);border-radius:var(--rad);padding:16px;margin-bottom:10px;text-align:center;color:#fff}
-.pdfcard{display:flex;gap:10px;padding:11px;background:var(--bg);border-radius:var(--rad);margin-bottom:8px;cursor:pointer;align-items:center}
-.pdficon{width:48px;height:56px;border-radius:8px;background:var(--rl);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.shdr-t{font-size:14px;font-weight:800;color:var(--txt)}
-.shdr-a{font-size:12px;font-weight:600;color:var(--p);cursor:pointer}
-#toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:10px 20px;border-radius:100px;font-size:12px;font-weight:600;opacity:0;transition:all .3s;z-index:999;white-space:nowrap;pointer-events:none;max-width:300px;text-align:center}
-#ls{position:fixed;inset:0;background:linear-gradient(135deg,var(--pd),var(--p));display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:1000;gap:8px}
-.lb2{font-size:38px;font-weight:900;color:#fff}.lb2 em{color:var(--pm);font-style:normal}
-.lt{font-size:13px;color:rgba(255,255,255,.7);font-weight:500}
-.ldots{display:flex;gap:6px;margin-top:16px}
-.ldots span{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);animation:lp 1.2s infinite}
-.ldots span:nth-child(2){animation-delay:.2s}.ldots span:nth-child(3){animation-delay:.4s}
-@keyframes lp{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
-@keyframes fo{to{opacity:0;pointer-events:none}}
-#ls.out{animation:fo .4s forwards}
-@keyframes rp{0%,100%{box-shadow:0 0 0 0 rgba(108,99,255,.3)}70%{box-shadow:0 0 0 14px rgba(108,99,255,0)}}
-.factive-ring{animation:rp 2s infinite}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
+.mbox{background:var(--card);border-radius:22px;padding:22px;width:100%;max-width:320px;text-align:center}
+.msheet{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-end}
+.mshin{background:var(--card);border-radius:22px 22px 0 0;width:100%;max-height:80svh;display:flex;flex-direction:column}
+
+/* SESSION COMPLETE */
+.session-card{background:linear-gradient(135deg,var(--p),var(--pd));border-radius:var(--rad);padding:22px;text-align:center;margin-bottom:12px;color:#fff}
+
+/* TOAST */
+#toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:10px 20px;border-radius:100px;font-size:12px;font-weight:600;opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none;max-width:300px;text-align:center}
+
+/* NOTES */
+.note-card{background:var(--card);border-radius:var(--rad);padding:12px;margin-bottom:8px;border:1px solid var(--bdr);cursor:pointer}
+.note-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
 </style>
 </head>
 <body>
+
+<!-- LOADING -->
 <div id="ls">
-  <div class="lb2">Bright<em>Mesh</em></div>
-  <div class="lt">"প্রতিটি স্ক্রল তোমাকে কিছু না কিছু শেখায়"</div>
-  <div class="ldots"><span></span><span></span><span></span></div>
+  <div class="lb">Bright<span>Mesh</span></div>
+  <div class="lt">Study Mode লোড হচ্ছে...</div>
+  <div class="ldots"><i></i><i></i><i></i></div>
 </div>
 
-<!-- HOME -->
-<div class="page on" id="pg-home">
-  <div class="sbar"><span class="sbar-t" id="ck0">9:41</span><div class="sbar-r"><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
+<div class="app" id="app">
+
+  <!-- STATUS BAR -->
+  <div class="sbar">
+    <span id="clk">9:41</span>
+    <div style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--txt)">
+      <i class="ti ti-wifi" aria-hidden="true"></i>
+      <i class="ti ti-battery-3" aria-hidden="true"></i>
+    </div>
+  </div>
+
+  <!-- HEADER -->
   <div class="hdr">
-    <div class="logo">Bright<em>Mesh</em></div>
+    <div class="logo">Bright<em>Mesh</em> <span style="font-size:11px;color:var(--hint);font-weight:400">Study</span></div>
     <div class="hdr-r">
-      <div class="chip" style="background:var(--al);color:var(--ad)"><i class="ti ti-flame" style="font-size:13px"></i> 12 দিন</div>
-      <button class="icon-btn" onclick="toast('🔔 3 notifications')"><i class="ti ti-bell" style="font-size:18px;color:var(--txt)"></i><div class="nbadge"></div></button>
-      <div class="avt" style="width:34px;height:34px;background:var(--pl);color:var(--pd)" onclick="showPage('pg-profile');setNav('bn-p')">তুমি</div>
-    </div>
-  </div>
-  <div class="sb">
-    <div style="padding:4px 2px 12px">
-      <div style="font-size:20px;font-weight:800;color:var(--txt)">আস্সালামু আলাইকুম! 👋</div>
-      <div style="font-size:13px;color:var(--sub);margin-top:3px">আজ কী পড়বে?</div>
-    </div>
-    <div class="card">
-      <div class="shdr"><div class="shdr-t">🎯 আজকের লক্ষ্য</div><div class="shdr-a" onclick="showFT('lock')">Focus করো</div></div>
-      <div class="goalrow">
-        <div class="goalcheck done" onclick="tGoal(this)"><i class="ti ti-check" style="font-size:13px;color:#fff"></i></div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)">2 ঘণ্টা পড়া</div><div style="font-size:10px;color:var(--hint)">1h 45m হয়েছে</div></div>
-        <div style="font-size:12px;font-weight:700;color:var(--p)">87%</div>
+      <div class="chip" style="background:var(--al);color:var(--ad)" id="streak-chip">
+        <i class="ti ti-flame" style="font-size:12px" aria-hidden="true"></i>
+        <span id="streak-count">12</span> দিন
       </div>
-      <div class="goalrow">
-        <div class="goalcheck done" onclick="tGoal(this)"><i class="ti ti-check" style="font-size:13px;color:#fff"></i></div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)">5টি Short Video</div><div style="font-size:10px;color:var(--hint)">5/5 দেখা হয়েছে ✓</div></div>
-        <div style="font-size:12px;font-weight:700;color:var(--g)">✓</div>
-      </div>
-      <div class="goalrow">
-        <div class="goalcheck" onclick="tGoal(this)"></div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)">1টি Quiz দাও</div><div style="font-size:10px;color:var(--hint)">এখনো হয়নি</div></div>
-        <div style="font-size:12px;font-weight:700;color:var(--hint)">—</div>
-      </div>
-      <div class="pb" style="margin-top:10px"><div class="pf" style="width:65%;background:var(--p)"></div></div>
-      <div style="font-size:11px;color:var(--hint);text-align:center;margin-top:4px">2/3 লক্ষ্য পূরণ</div>
+      <button style="width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative" onclick="showToast('🔔 কোনো নতুন notification নেই')" aria-label="Notifications">
+        <i class="ti ti-bell" style="font-size:18px;color:var(--txt)" aria-hidden="true"></i>
+        <div style="position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--r);border:2px solid var(--card)" id="notif-dot"></div>
+      </button>
+      <div class="avt" style="width:34px;height:34px;background:var(--pl);color:var(--pd);cursor:pointer" onclick="goTab('settings')" aria-label="Profile">তুমি</div>
     </div>
-    <div class="shdr" style="margin-bottom:8px"><div class="shdr-t">⚡ Quick Start</div></div>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px">
-      <div onclick="showFT('lock')" style="background:linear-gradient(135deg,var(--pd),var(--p));border-radius:var(--rad);padding:14px;cursor:pointer"><i class="ti ti-lock" style="font-size:26px;color:rgba(255,255,255,.9)"></i><div style="font-size:13px;font-weight:800;color:#fff;margin-top:8px">Focus Lock</div><div style="font-size:10px;color:rgba(255,255,255,.7)">মনোযোগ দিয়ে পড়ো</div></div>
-      <div onclick="showFT('shorts')" style="background:linear-gradient(135deg,#10B981,#065F46);border-radius:var(--rad);padding:14px;cursor:pointer"><i class="ti ti-player-play" style="font-size:26px;color:rgba(255,255,255,.9)"></i><div style="font-size:13px;font-weight:800;color:#fff;margin-top:8px">Shorts দেখো</div><div style="font-size:10px;color:rgba(255,255,255,.7)">৩ মিনিটের ভিডিও</div></div>
-      <div onclick="showFT('quiz')" style="background:linear-gradient(135deg,var(--o),#c2410c);border-radius:var(--rad);padding:14px;cursor:pointer"><i class="ti ti-pencil-check" style="font-size:26px;color:rgba(255,255,255,.9)"></i><div style="font-size:13px;font-weight:800;color:#fff;margin-top:8px">Quiz দাও</div><div style="font-size:10px;color:rgba(255,255,255,.7)">নিজেকে যাচাই করো</div></div>
-      <div onclick="showFT('ai')" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9);border-radius:var(--rad);padding:14px;cursor:pointer"><i class="ti ti-robot" style="font-size:26px;color:rgba(255,255,255,.9)"></i><div style="font-size:13px;font-weight:800;color:#fff;margin-top:8px">AI Tutor</div><div style="font-size:10px;color:rgba(255,255,255,.7)">প্রশ্ন জিজ্ঞেস করো</div></div>
-    </div>
-    <div class="shdr" style="margin-bottom:8px"><div class="shdr-t">📚 Continue করো</div><div class="shdr-a" onclick="showFT('playlist')">সব</div></div>
-    <div class="card" style="padding:12px">
-      <div style="display:flex;gap:10px;align-items:center">
-        <div style="width:50px;height:50px;border-radius:10px;background:var(--pl);display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-atom" style="font-size:24px;color:var(--p)"></i></div>
-        <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--txt)">তরঙ্গ ও শব্দ — পার্ট ৩</div><div style="font-size:11px;color:var(--sub)">Physics · ২/৪ পার্ট</div><div class="pb" style="margin-top:6px"><div class="pf" style="width:50%;background:var(--p)"></div></div></div>
-        <div class="pbtn" onclick="toast('▶ চালু হচ্ছে...')"><i class="ti ti-player-play-filled" style="font-size:14px;color:#fff"></i></div>
-      </div>
-    </div>
-    <div class="shdr" style="margin-bottom:8px"><div class="shdr-t">🏆 আজকের Top</div><div class="shdr-a" onclick="showFT('lb')">সব দেখো</div></div>
-    <div class="card" style="padding:10px 12px">
-      <div class="row"><div style="font-size:20px;width:26px">🥇</div><div class="avt" style="width:34px;height:34px;background:var(--al);color:var(--ad)">RM</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">রাফি মাহমুদ</div><div style="font-size:12px;font-weight:800;color:var(--p)">8h 10m</div></div>
-      <div class="row"><div style="font-size:20px;width:26px">🥈</div><div class="avt" style="width:34px;height:34px;background:var(--gl);color:var(--gd)">NK</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">নাহিদ করিম</div><div style="font-size:12px;font-weight:800;color:var(--p)">7h 30m</div></div>
-      <div class="row lbyou" style="padding:8px 10px"><div style="font-size:16px;font-weight:900;color:var(--p);width:26px">৩</div><div class="avt" style="width:34px;height:34px;background:var(--pm);color:var(--pd)">তুমি</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--p)">তুমি</div><div style="font-size:12px;font-weight:800;color:var(--p)">3h 20m</div></div>
-    </div>
-  </div>
-</div>
-
-<!-- FOCUS -->
-<div class="page" id="pg-focus">
-  <div class="sbar"><span class="sbar-t" id="ck1">9:41</span><div class="sbar-r"><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
-  <div class="hdr">
-    <div class="logo">🎓 Focus</div>
-    <div class="hdr-r"><div class="chip" style="background:var(--al);color:var(--ad)"><i class="ti ti-flame" style="font-size:13px"></i> 12</div></div>
-  </div>
-  <div class="stabs" id="ftabs">
-    <button class="stab on" onclick="showFT('lock',this)">🔒 Lock</button>
-    <button class="stab" onclick="showFT('timer',this)">⏱ Timer</button>
-    <button class="stab" onclick="showFT('shorts',this)">▶ Shorts</button>
-    <button class="stab" onclick="showFT('playlist',this)">📚 Course</button>
-    <button class="stab" onclick="showFT('pdf',this)">📄 PDF</button>
-    <button class="stab" onclick="showFT('quiz',this)">📝 Quiz</button>
-    <button class="stab" onclick="showFT('lb',this)">🏆 Rank</button>
-    <button class="stab" onclick="showFT('streak',this)">🔥 Streak</button>
-    <button class="stab" onclick="showFT('group',this)">👥 Group</button>
-    <button class="stab" onclick="showFT('planner',this)">📅 Planner</button>
-    <button class="stab" onclick="showFT('analytics',this)">📈 Analytics</button>
-    <button class="stab" onclick="showFT('ai',this)">🤖 AI</button>
-    <button class="stab" onclick="showFT('shop',this)">🛍 Shop</button>
   </div>
 
-  <!-- LOCK -->
-  <div class="sb" id="ft-lock">
-    <div id="fsetup">
-      <div class="fhero"><div class="ftime">--:--</div><div class="flbl">Focus Lock — পড়ার সময়</div></div>
-      <div class="card">
-        <div class="ctitle">সময় বেছে নাও</div>
-        <div class="topts">
-          <div class="topt on" onclick="selT(this,30)">30m</div>
-          <div class="topt" onclick="selT(this,60)">60m</div>
-          <div class="topt" onclick="selT(this,90)">90m</div>
-          <div class="topt" onclick="selT(this,0)">Custom</div>
+  <!-- FOCUS BANNER (always visible when focus is on) -->
+  <div id="focus-banner" role="status" aria-live="polite">
+    <div class="focus-only">
+      <div class="fb-label">Focus চলছে</div>
+      <div class="fb-timer" id="banner-timer">29:59</div>
+    </div>
+    <div class="focus-only" style="text-align:right">
+      <div class="fb-label" id="banner-subj">পদার্থবিজ্ঞান</div>
+      <button class="fb-exit" onclick="showExitModal()" aria-label="Focus Lock বন্ধ করো">Exit করো</button>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" id="main-tabs">
+    <button class="tab on" id="tab-focus" onclick="goTab('focus',this)">
+      <i class="ti ti-lock" style="font-size:13px" aria-hidden="true"></i> Focus
+    </button>
+    <button class="tab" id="tab-timer" onclick="goTab('timer',this)">
+      <i class="ti ti-clock" style="font-size:13px" aria-hidden="true"></i> Timer
+    </button>
+    <button class="tab" id="tab-pdf" onclick="goTab('pdf',this)">
+      <i class="ti ti-file-text" style="font-size:13px" aria-hidden="true"></i> PDF
+    </button>
+    <button class="tab" id="tab-notes" onclick="goTab('notes',this)">
+      <i class="ti ti-notebook" style="font-size:13px" aria-hidden="true"></i> Notes
+    </button>
+    <button class="tab" id="tab-quiz" onclick="goTab('quiz',this)">
+      <i class="ti ti-pencil-check" style="font-size:13px" aria-hidden="true"></i> Quiz
+    </button>
+    <button class="tab" id="tab-goal" onclick="goTab('goal',this)">
+      <i class="ti ti-target" style="font-size:13px" aria-hidden="true"></i> Goal
+    </button>
+    <button class="tab" id="tab-analytics" onclick="goTab('analytics',this)">
+      <i class="ti ti-chart-bar" style="font-size:13px" aria-hidden="true"></i> Analytics
+    </button>
+    <button class="tab" id="tab-settings" onclick="goTab('settings',this)">
+      <i class="ti ti-settings" style="font-size:13px" aria-hidden="true"></i> Settings
+    </button>
+  </div>
+
+  <div class="content">
+
+    <!-- ═══════════════ FOCUS LOCK ═══════════════ -->
+    <div class="tb on" id="tb-focus">
+
+      <!-- SETUP VIEW -->
+      <div id="focus-setup">
+        <div class="fhero" style="background:var(--p)">
+          <div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px">
+            <i class="ti ti-lock" aria-hidden="true"></i> FOCUS LOCK
+          </div>
+          <div class="ftime">--:--</div>
+          <div class="flbl">মনোযোগ দিয়ে পড়ো — Social বন্ধ থাকবে</div>
         </div>
-        <div id="custominp" style="display:none;margin-bottom:10px"><input class="inp" type="number" id="cmin" placeholder="মিনিট লিখো (যেমন: 45)" min="1" max="300"></div>
-        <div class="ctitle">বিষয়</div>
-        <select class="sel" id="fsubj"><option>পদার্থবিজ্ঞান</option><option>রসায়ন</option><option>গণিত</option><option>জীববিজ্ঞান</option><option>বাংলা</option><option>ইংরেজি</option><option>ICT</option><option>Programming</option></select>
-        <div class="ctitle">পাসওয়ার্ড (৪ সংখ্যা)</div>
-        <div class="pwdots" id="d1"><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div></div>
-        <div class="npad" id="np1"></div>
+
+        <div class="card">
+          <div class="ct">সেশনের সময়</div>
+          <div class="topts">
+            <div class="topt on" onclick="selTime(this,30)" role="radio" aria-checked="true">30m</div>
+            <div class="topt" onclick="selTime(this,60)" role="radio" aria-checked="false">60m</div>
+            <div class="topt" onclick="selTime(this,90)" role="radio" aria-checked="false">90m</div>
+            <div class="topt" onclick="selTime(this,0)" role="radio" aria-checked="false">Custom</div>
+          </div>
+          <div id="custom-time-row" style="display:none;margin-bottom:10px">
+            <input class="inp" type="number" id="custom-mins" placeholder="মিনিট লিখো (১–৩০০)" min="1" max="300" style="margin:0">
+          </div>
+
+          <div class="ct">বিষয় বেছে নাও</div>
+          <select class="sel" id="focus-subj" aria-label="বিষয়">
+            <option value="পদার্থবিজ্ঞান">পদার্থবিজ্ঞান</option>
+            <option value="রসায়ন">রসায়ন</option>
+            <option value="গণিত">গণিত</option>
+            <option value="জীববিজ্ঞান">জীববিজ্ঞান</option>
+            <option value="বাংলা">বাংলা</option>
+            <option value="ইংরেজি">ইংরেজি</option>
+            <option value="ICT">ICT</option>
+            <option value="Programming">Programming</option>
+            <option value="অন্যান্য">অন্যান্য</option>
+          </select>
+
+          <div class="ct">পাসওয়ার্ড সেট করো (৪ সংখ্যা)</div>
+          <div class="pwdots" id="setup-dots">
+            <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
+          </div>
+          <div class="npad" id="setup-numpad"></div>
+        </div>
+
+        <div class="warn">
+          <i class="ti ti-shield-lock" style="font-size:18px" aria-hidden="true"></i>
+          Focus চালু হলে PDF, Notes, Quiz ও Goal সব বন্ধ হবে। পাসওয়ার্ড ছাড়া বের হওয়া যাবে না।
+        </div>
+
+        <button class="btn-p" onclick="startFocus()">
+          <i class="ti ti-lock" aria-hidden="true"></i> Focus Lock শুরু করো
+        </button>
       </div>
-      <div class="warn"><i class="ti ti-shield-lock" style="font-size:18px"></i>Focus চলাকালীন Chat ও Feed সম্পূর্ণ বন্ধ থাকবে।</div>
-      <button class="btn btn-p" onclick="startFocus()">🔒 Focus Lock শুরু করো</button>
+
+      <!-- ACTIVE VIEW -->
+      <div id="focus-active" style="display:none">
+        <div class="fhero" style="background:var(--pd)" id="focus-active-hero">
+          <div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px">
+            <i class="ti ti-lock" aria-hidden="true"></i> FOCUS চলছে
+          </div>
+          <div class="ftime" id="focus-countdown">29:59</div>
+          <div id="focus-subj-label" style="font-size:13px;color:rgba(255,255,255,.8);margin-top:6px;font-weight:500">পদার্থবিজ্ঞান</div>
+          <div style="background:rgba(255,255,255,.2);border-radius:100px;height:4px;margin-top:14px;overflow:hidden">
+            <div id="focus-progress" style="height:4px;border-radius:100px;background:#fff;width:0%;transition:width .5s"></div>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:8px" id="focus-elapsed-lbl">0 মিনিট হয়েছে</div>
+        </div>
+
+        <div class="info focus-only">
+          <i class="ti ti-info-circle" style="font-size:18px" aria-hidden="true"></i>
+          সব features বন্ধ। পাসওয়ার্ড দিয়ে বের হও।
+        </div>
+
+        <div class="card focus-only">
+          <div style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:6px;font-weight:600">আনলক করতে পাসওয়ার্ড দাও</div>
+          <div class="pwdots" id="unlock-dots">
+            <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
+          </div>
+          <div class="npad" id="unlock-numpad"></div>
+          <div id="unlock-error" style="display:none;text-align:center;color:var(--r);font-size:12px;font-weight:600;margin-top:8px">ভুল পাসওয়ার্ড! আবার চেষ্টা করো।</div>
+        </div>
+
+        <button class="btn-r focus-only" onclick="showExitModal()">
+          <i class="ti ti-alert-triangle" aria-hidden="true"></i> জরুরি Exit (Penalty যোগ হবে)
+        </button>
+      </div>
+
+      <!-- SESSION COMPLETE -->
+      <div id="focus-complete" style="display:none">
+        <div class="session-card">
+          <div style="font-size:40px;margin-bottom:8px">🎉</div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:4px">সেশন সম্পন্ন!</div>
+          <div style="font-size:13px;color:rgba(255,255,255,.8)" id="session-summary">৩০ মিনিট পড়েছো</div>
+        </div>
+        <div class="card" id="session-stats">
+          <div class="ct">এই সেশনে</div>
+          <div class="row">
+            <i class="ti ti-clock" style="font-size:18px;color:var(--p)" aria-hidden="true"></i>
+            <div style="flex:1;font-size:13px;color:var(--txt)">মোট সময়</div>
+            <div style="font-size:13px;font-weight:700;color:var(--p)" id="sess-time">30 মিনিট</div>
+          </div>
+          <div class="row">
+            <i class="ti ti-book" style="font-size:18px;color:var(--p)" aria-hidden="true"></i>
+            <div style="flex:1;font-size:13px;color:var(--txt)">বিষয়</div>
+            <div style="font-size:13px;font-weight:700;color:var(--p)" id="sess-subj">পদার্থবিজ্ঞান</div>
+          </div>
+          <div class="row">
+            <i class="ti ti-flame" style="font-size:18px;color:var(--a)" aria-hidden="true"></i>
+            <div style="flex:1;font-size:13px;color:var(--txt)">Streak</div>
+            <div style="font-size:13px;font-weight:700;color:var(--a)" id="sess-streak">12 দিন</div>
+          </div>
+        </div>
+        <button class="btn-p" onclick="resetFocus()">নতুন Session শুরু করো</button>
+      </div>
     </div>
-    <div id="factive" style="display:none">
-      <div class="fhero factive-ring" id="fhero">
-        <div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px"><i class="ti ti-lock"></i> FOCUS চলছে</div>
-        <div class="ftime" id="fcdown">29:59</div>
-        <div class="flbl" id="fslbl">পদার্থবিজ্ঞান</div>
-        <div style="background:rgba(255,255,255,.2);border-radius:100px;height:4px;margin-top:14px;overflow:hidden"><div id="fprog" style="height:4px;border-radius:100px;background:#fff;width:0%;transition:width .5s"></div></div>
+
+    <!-- ═══════════════ STUDY TIMER ═══════════════ -->
+    <div class="tb" id="tb-timer">
+      <div class="mgrid">
+        <div class="mc"><div class="l">আজকের পড়া</div><div class="v" id="today-total">3h 20m</div><div class="s">লক্ষ্য: 5h</div></div>
+        <div class="mc"><div class="l">এই সপ্তাহ</div><div class="v">18h 45m</div><div class="s">গত সপ্তাহ: 14h</div></div>
+      </div>
+
+      <!-- Report Toggle -->
+      <div style="display:flex;gap:5px;margin-bottom:10px">
+        <button onclick="setReport('daily',this)" style="flex-shrink:0;padding:6px 14px;border:1px solid var(--p);border-radius:100px;background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">দৈনিক</button>
+        <button onclick="setReport('weekly',this)" style="flex-shrink:0;padding:6px 14px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">সাপ্তাহিক</button>
+        <button onclick="setReport('monthly',this)" style="flex-shrink:0;padding:6px 14px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">মাসিক</button>
+      </div>
+
+      <div class="card">
+        <div class="ct">বিষয় অনুযায়ী সময়</div>
+        <div id="subject-list">
+          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--p)"></div><div style="flex:1;font-size:13px;color:var(--txt)">পদার্থবিজ্ঞান</div><div style="width:65px"><div class="pb"><div class="pf" style="width:80%;background:var(--p)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">1h 45m</div></div>
+          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:#0F6E56"></div><div style="flex:1;font-size:13px;color:var(--txt)">রসায়ন</div><div style="width:65px"><div class="pb"><div class="pf" style="width:55%;background:#0F6E56"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">55m</div></div>
+          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--o)"></div><div style="flex:1;font-size:13px;color:var(--txt)">গণিত</div><div style="width:65px"><div class="pb"><div class="pf" style="width:35%;background:var(--o)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">40m</div></div>
+          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--r)"></div><div style="flex:1;font-size:13px;color:var(--txt)">জীববিজ্ঞান</div><div style="width:65px"><div class="pb"><div class="pf" style="width:20%;background:var(--r)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">20m</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ct">রিপোর্ট</div>
+        <div class="wchart" id="report-chart"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:5px" id="report-labels"></div>
+      </div>
+
+      <div class="mgrid">
+        <div class="mc"><div class="l">এই মাস</div><div class="v">62h</div><div class="s">↑ 15% বেশি</div></div>
+        <div class="mc"><div class="l">মোট Sessions</div><div class="v">48</div><div class="s">গড়: 77m</div></div>
+      </div>
+
+      <!-- Focus History from localStorage -->
+      <div class="card" id="session-history-card" style="display:none">
+        <div class="ct">আজকের Sessions</div>
+        <div id="session-history-list"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ PDF ═══════════════ -->
+    <div class="tb" id="tb-pdf">
+      <!-- Focus lock overlay -->
+      <div id="pdf-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
+        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
+        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে PDF পড়তে পারবে।</div>
+      </div>
+
+      <div id="pdf-content">
+        <div style="display:flex;gap:5px;margin-bottom:10px;overflow-x:auto">
+          <button onclick="setPdfFilter(this,'all')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--p);border-radius:100px;background:var(--p);color:#fff;font-size:11px;font-weight:600;cursor:pointer">সব</button>
+          <button onclick="setPdfFilter(this,'physics')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:600;cursor:pointer">Physics</button>
+          <button onclick="setPdfFilter(this,'chem')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:600;cursor:pointer">Chemistry</button>
+          <button onclick="setPdfFilter(this,'math')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:600;cursor:pointer">Math</button>
+        </div>
+
+        <div class="pdfcard" onclick="openPdf('Physics Ch.4 — তরঙ্গ নোট')">
+          <div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)" aria-hidden="true"></i></div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Physics Ch.4 — তরঙ্গ নোট</div>
+            <div style="font-size:11px;color:var(--sub)">রাফি স্যার · 2.4 MB</div>
+            <div style="display:flex;gap:5px;margin-top:5px">
+              <span style="font-size:9px;background:var(--pl);color:var(--pd);padding:2px 8px;border-radius:100px;font-weight:600">Physics</span>
+              <span style="font-size:9px;background:var(--al);color:var(--ad);padding:2px 8px;border-radius:100px;font-weight:600">HSC</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <button onclick="event.stopPropagation();downloadPdf('Physics Ch.4')" style="width:32px;height:32px;border-radius:50%;background:var(--pl);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Download">
+              <i class="ti ti-download" style="font-size:15px;color:var(--p)" aria-hidden="true"></i>
+            </button>
+            <button onclick="event.stopPropagation();bookmarkPdf(this,'Physics Ch.4')" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Bookmark">
+              <i class="ti ti-bookmark" style="font-size:15px;color:var(--hint)" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="pdfcard" onclick="openPdf('Organic Chemistry Summary')">
+          <div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)" aria-hidden="true"></i></div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Organic Chemistry Summary</div>
+            <div style="font-size:11px;color:var(--sub)">সানিয়া ম্যাম · 1.8 MB</div>
+            <div style="display:flex;gap:5px;margin-top:5px">
+              <span style="font-size:9px;background:var(--gl);color:var(--gd);padding:2px 8px;border-radius:100px;font-weight:600">Chemistry</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <button onclick="event.stopPropagation();downloadPdf('Organic Chemistry')" style="width:32px;height:32px;border-radius:50%;background:var(--pl);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Download">
+              <i class="ti ti-download" style="font-size:15px;color:var(--p)" aria-hidden="true"></i>
+            </button>
+            <button onclick="event.stopPropagation();bookmarkPdf(this,'Organic Chemistry')" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Bookmark">
+              <i class="ti ti-bookmark" style="font-size:15px;color:var(--hint)" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <div class="pdfcard" onclick="openPdf('Math Formula Collection')">
+          <div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)" aria-hidden="true"></i></div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Math Formula Collection</div>
+            <div style="font-size:11px;color:var(--sub)">করিম স্যার · 890 KB</div>
+            <div style="display:flex;gap:5px;margin-top:5px">
+              <span style="font-size:9px;background:var(--al);color:var(--ad);padding:2px 8px;border-radius:100px;font-weight:600">Math</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:5px">
+            <button onclick="event.stopPropagation();downloadPdf('Math Formula')" style="width:32px;height:32px;border-radius:50%;background:var(--pl);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Download">
+              <i class="ti ti-download" style="font-size:15px;color:var(--p)" aria-hidden="true"></i>
+            </button>
+            <button onclick="event.stopPropagation();bookmarkPdf(this,'Math Formula')" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Bookmark">
+              <i class="ti ti-bookmark" style="font-size:15px;color:var(--hint)" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <button class="btn-o" onclick="showToast('📁 PDF upload করতে Teacher Account লাগবে')">
+          <i class="ti ti-upload" aria-hidden="true"></i> PDF Upload করো
+        </button>
+      </div>
+    </div>
+
+    <!-- ═══════════════ NOTES ═══════════════ -->
+    <div class="tb" id="tb-notes">
+      <div id="notes-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
+        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
+        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে Notes পড়তে পারবে।</div>
+      </div>
+      <div id="notes-content">
+        <button class="btn-o" onclick="showAddNoteModal()" style="margin-bottom:10px">
+          <i class="ti ti-plus" aria-hidden="true"></i> নতুন Note যোগ করো
+        </button>
+        <div id="notes-list">
+          <div class="note-card" onclick="showToast('Note খুলছে...')">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <span class="note-tag" style="background:var(--pl);color:var(--pd)">পদার্থবিজ্ঞান</span>
+              <span style="font-size:10px;color:var(--hint)">আজ সকাল ১০টা</span>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">নিউটনের সূত্র — গুরুত্বপূর্ণ</div>
+            <div style="font-size:12px;color:var(--sub);line-height:1.5">F = ma, বল = ভর × ত্বরণ। পরীক্ষায় নিশ্চিত আসবে...</div>
+          </div>
+          <div class="note-card" onclick="showToast('Note খুলছে...')">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <span class="note-tag" style="background:var(--gl);color:var(--gd)">রসায়ন</span>
+              <span style="font-size:10px;color:var(--hint)">গতকাল</span>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Organic Chemistry — Key Points</div>
+            <div style="font-size:12px;color:var(--sub);line-height:1.5">Alkane, Alkene, Alkyne — functional group মনে রাখো...</div>
+          </div>
+          <div class="note-card" onclick="showToast('Note খুলছে...')">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+              <span class="note-tag" style="background:var(--al);color:var(--ad)">গণিত</span>
+              <span style="font-size:10px;color:var(--hint)">৩ দিন আগে</span>
+            </div>
+            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Integration Formulas</div>
+            <div style="font-size:12px;color:var(--sub);line-height:1.5">∫xⁿdx = xⁿ⁺¹/(n+1) + C, ∫eˣdx = eˣ + C...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ QUIZ ═══════════════ -->
+    <div class="tb" id="tb-quiz">
+      <div id="quiz-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
+        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
+        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে Quiz দিতে পারবে।</div>
+      </div>
+
+      <div id="quiz-content">
+        <!-- Quiz Type Selector -->
+        <div style="display:flex;gap:5px;margin-bottom:12px">
+          <button onclick="setQuizType(this,'mcq')" style="flex:1;padding:8px;border:1px solid var(--p);border-radius:var(--rads);background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">MCQ</button>
+          <button onclick="setQuizType(this,'cq')" style="flex:1;padding:8px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">CQ Practice</button>
+          <button onclick="setQuizType(this,'daily')" style="flex:1;padding:8px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">Daily Quiz</button>
+        </div>
+
+        <!-- MCQ View -->
+        <div id="quiz-mcq-view">
+          <div class="card">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div style="font-size:14px;font-weight:700;color:var(--txt)">Physics · Question <span id="q-num">3</span></div>
+              <span style="font-size:11px;background:var(--al);color:var(--ad);padding:3px 10px;border-radius:100px;font-weight:600" id="q-progress">3/10</span>
+            </div>
+            <div style="font-size:14px;font-weight:600;color:var(--txt);line-height:1.6;margin-bottom:14px" id="q-text">নিউটনের গতির দ্বিতীয় সূত্র অনুসারে F = ?</div>
+            <div id="q-options">
+              <button class="qopt" onclick="answerQ(this,'wrong','B')">A)  F = mv</button>
+              <button class="qopt" onclick="answerQ(this,'correct','B')">B)  F = ma</button>
+              <button class="qopt" onclick="answerQ(this,'wrong','B')">C)  F = m/a</button>
+              <button class="qopt" onclick="answerQ(this,'wrong','B')">D)  F = a/m</button>
+            </div>
+            <div id="q-result" style="display:none;margin-top:10px;padding:10px;border-radius:var(--rads);font-size:12px;font-weight:600"></div>
+          </div>
+          <button class="btn-o" onclick="nextQuestion()" id="next-q-btn" style="display:none">পরের প্রশ্ন →</button>
+        </div>
+
+        <!-- Score Card -->
+        <div class="card">
+          <div class="ct">আজকের Leaderboard</div>
+          <div class="lbrow"><div style="font-size:20px;width:26px">🥇</div><div class="avt" style="width:34px;height:34px;background:var(--al);color:var(--ad)">RM</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">রাফি মাহমুদ</div><div style="font-size:12px;font-weight:700;color:var(--p)">98/100</div></div>
+          <div class="lbrow"><div style="font-size:20px;width:26px">🥈</div><div class="avt" style="width:34px;height:34px;background:var(--gl);color:var(--gd)">NK</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">নাহিদ করিম</div><div style="font-size:12px;font-weight:700;color:var(--p)">92/100</div></div>
+          <div class="lbrow lbyou"><div style="font-size:16px;font-weight:700;color:var(--p);width:26px">৩</div><div class="avt" style="width:34px;height:34px;background:var(--pm);color:var(--pd)">তুমি</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--p)">তুমি</div><div style="font-size:12px;font-weight:700;color:var(--p)" id="my-quiz-score">—/100</div></div>
+          <div class="lbrow"><div style="font-size:20px;width:26px">🥉</div><div class="avt" style="width:34px;height:34px;background:var(--rl);color:var(--r)">SH</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">সানিয়া হক</div><div style="font-size:12px;font-weight:700;color:var(--p)">87/100</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ DAILY GOAL ═══════════════ -->
+    <div class="tb" id="tb-goal">
+      <div id="goal-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
+        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
+        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে Goal দেখতে পারবে।</div>
+      </div>
+
+      <div id="goal-content">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+            <div style="font-size:14px;font-weight:700;color:var(--txt)">আজকের লক্ষ্য</div>
+            <div style="font-size:11px;color:var(--g);font-weight:600;background:var(--gl);padding:3px 10px;border-radius:100px" id="goal-counter">2/5 সম্পন্ন</div>
+          </div>
+          <div class="pb" style="margin-bottom:12px"><div class="pf" id="goal-pbar" style="width:40%;background:var(--p)"></div></div>
+
+          <div class="goalrow">
+            <div class="gcheck done" id="goal-1" onclick="toggleGoal(this,1)" aria-label="লক্ষ্য toggle করো"><i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--sub)" id="goal-1-text">2 ঘণ্টা পড়া</div><div style="font-size:11px;color:var(--hint)">1h 45m সম্পন্ন</div></div>
+            <div style="font-size:12px;font-weight:700;color:var(--p)">87%</div>
+          </div>
+          <div class="goalrow">
+            <div class="gcheck done" id="goal-2" onclick="toggleGoal(this,2)" aria-label="লক্ষ্য toggle করো"><i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--sub)" id="goal-2-text">৫টি Video দেখা</div><div style="font-size:11px;color:var(--hint)">5/5 সম্পন্ন</div></div>
+            <div style="font-size:12px;font-weight:700;color:var(--g)"><i class="ti ti-check-circle" aria-hidden="true"></i></div>
+          </div>
+          <div class="goalrow">
+            <div class="gcheck" id="goal-3" onclick="toggleGoal(this,3)" aria-label="লক্ষ্য toggle করো"></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)" id="goal-3-text">১টি Quiz দাও</div><div style="font-size:11px;color:var(--hint)">এখনো হয়নি</div></div>
+            <div style="font-size:12px;color:var(--hint)">—</div>
+          </div>
+          <div class="goalrow">
+            <div class="gcheck" id="goal-4" onclick="toggleGoal(this,4)" aria-label="লক্ষ্য toggle করো"></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)" id="goal-4-text">১টি PDF পড়া</div><div style="font-size:11px;color:var(--hint)">এখনো হয়নি</div></div>
+            <div style="font-size:12px;color:var(--hint)">—</div>
+          </div>
+          <div class="goalrow">
+            <div class="gcheck" id="goal-5" onclick="toggleGoal(this,5)" aria-label="লক্ষ্য toggle করো"></div>
+            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)" id="goal-5-text">Focus Session শেষ</div><div style="font-size:11px;color:var(--hint)">এখনো হয়নি</div></div>
+            <div style="font-size:12px;color:var(--hint)">—</div>
+          </div>
+        </div>
+
+        <!-- Streak -->
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+            <div style="font-size:36px">🔥</div>
+            <div style="flex:1">
+              <div style="font-size:20px;font-weight:700;color:var(--txt)"><span id="streak-display">12</span> দিন</div>
+              <div style="font-size:11px;color:var(--hint)">পরের Badge: আরও <span id="streak-to-badge">9</span> দিন</div>
+              <div class="pb" style="margin-top:5px"><div class="pf" id="streak-pbar" style="width:57%;background:var(--a)"></div></div>
+            </div>
+          </div>
+          <div class="ct">এই মাসের Calendar</div>
+          <div class="scal" id="streak-cal"></div>
+          <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--sub)">
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:var(--p);display:inline-block"></span>পড়েছো</span>
+            <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:var(--bg);border:1px solid var(--bdr);display:inline-block"></span>মিস</span>
+          </div>
+        </div>
+
+        <!-- Badges -->
+        <div class="card">
+          <div class="ct">Badge সংগ্রহ</div>
+          <div class="bgrid">
+            <div class="bitem bearned"><i class="ti ti-flame" aria-hidden="true"></i><div class="bnm">৭ দিন</div></div>
+            <div class="bitem bearned"><i class="ti ti-star" aria-hidden="true"></i><div class="bnm">First Session</div></div>
+            <div class="bitem bearned"><i class="ti ti-trophy" aria-hidden="true"></i><div class="bnm">১০ দিন</div></div>
+            <div class="bitem blocked"><i class="ti ti-lock" aria-hidden="true"></i><div class="bnm">২১ দিন</div></div>
+            <div class="bitem blocked"><i class="ti ti-award" aria-hidden="true"></i><div class="bnm">৩০ দিন</div></div>
+            <div class="bitem blocked"><i class="ti ti-crown" aria-hidden="true"></i><div class="bnm">১০০ দিন</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════ ANALYTICS ═══════════════ -->
+    <div class="tb" id="tb-analytics">
+      <div class="card">
+        <div class="ct">📉 দুর্বল বিষয় (AI বিশ্লেষণ)</div>
+        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;margin-bottom:8px;border-left:4px solid var(--r)">
+          <div class="anbar"><span class="anname">গণিত</span><div class="anpb"><div class="anfill" style="width:42%;background:var(--r)"></div></div><span style="font-size:11px;font-weight:700;color:var(--r);min-width:34px;text-align:right">42%</span></div>
+          <div style="font-size:11px;color:var(--sub)">Integration ও Differentiation এ দুর্বল</div>
+        </div>
+        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;border-left:4px solid var(--o)">
+          <div class="anbar"><span class="anname">রসায়ন</span><div class="anpb"><div class="anfill" style="width:58%;background:var(--o)"></div></div><span style="font-size:11px;font-weight:700;color:var(--o);min-width:34px;text-align:right">58%</span></div>
+          <div style="font-size:11px;color:var(--sub)">Organic Chemistry কঠিন লাগছে</div>
+        </div>
       </div>
       <div class="card">
-        <div style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:4px;font-weight:600">আনলক করতে পাসওয়ার্ড দাও</div>
-        <div class="pwdots" id="d2"><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div></div>
-        <div class="npad" id="np2"></div>
+        <div class="ct">💪 শক্তিশালী বিষয়</div>
+        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;margin-bottom:8px;border-left:4px solid var(--g)">
+          <div class="anbar"><span class="anname">পদার্থ</span><div class="anpb"><div class="anfill" style="width:88%;background:var(--g)"></div></div><span style="font-size:11px;font-weight:700;color:var(--g);min-width:34px;text-align:right">88%</span></div>
+        </div>
+        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;margin-bottom:8px;border-left:4px solid var(--p)">
+          <div class="anbar"><span class="anname">জীববিজ্ঞান</span><div class="anpb"><div class="anfill" style="width:76%;background:var(--p)"></div></div><span style="font-size:11px;font-weight:700;color:var(--p);min-width:34px;text-align:right">76%</span></div>
+        </div>
+        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;border-left:4px solid var(--g)">
+          <div class="anbar"><span class="anname">ইংরেজি</span><div class="anpb"><div class="anfill" style="width:82%;background:var(--g)"></div></div><span style="font-size:11px;font-weight:700;color:var(--g);min-width:34px;text-align:right">82%</span></div>
+        </div>
       </div>
-      <button class="btn btn-o" style="border-color:var(--r);color:var(--r)" onclick="toast('Emergency exit — ৩ সেকেন্ড ধরে রাখো')">⚠️ জরুরি Exit</button>
-    </div>
-  </div>
-
-  <!-- TIMER -->
-  <div class="sb" id="ft-timer" style="display:none">
-    <div class="mgrid">
-      <div class="mc"><div class="l">আজকের পড়া</div><div class="v">3h 20m</div><div class="s">লক্ষ্য: 5h</div></div>
-      <div class="mc"><div class="l">এই সপ্তাহ</div><div class="v">18h 45m</div><div class="s">গত সপ্তাহ: 14h</div></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">বিষয় অনুযায়ী সময়</div>
-      <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--p)"></div><div style="flex:1;font-size:13px;font-weight:600">পদার্থবিজ্ঞান</div><div style="width:70px"><div class="pb"><div class="pf" style="width:80%;background:var(--p)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">1h 45m</div></div>
-      <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--g)"></div><div style="flex:1;font-size:13px;font-weight:600">রসায়ন</div><div style="width:70px"><div class="pb"><div class="pf" style="width:55%;background:var(--g)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">55m</div></div>
-      <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--o)"></div><div style="flex:1;font-size:13px;font-weight:600">গণিত</div><div style="width:70px"><div class="pb"><div class="pf" style="width:35%;background:var(--o)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">40m</div></div>
-      <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--r)"></div><div style="flex:1;font-size:13px;font-weight:600">জীববিজ্ঞান</div><div style="width:70px"><div class="pb"><div class="pf" style="width:20%;background:var(--r)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">20m</div></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">সাপ্তাহিক রিপোর্ট</div>
-      <div class="wchart" id="wc"></div>
-      <div style="display:flex;justify-content:space-between;margin-top:5px"><span class="wlbl">সোম</span><span class="wlbl">মঙ্গল</span><span class="wlbl">বুধ</span><span class="wlbl">বৃহ</span><span class="wlbl">শুক্র</span><span class="wlbl">শনি</span><span class="wlbl">রবি</span></div>
-    </div>
-    <div class="mgrid">
-      <div class="mc"><div class="l">এই মাস</div><div class="v">62h</div><div class="s">↑ 15% বেশি</div></div>
-      <div class="mc"><div class="l">মোট Sessions</div><div class="v">48</div><div class="s">গড়: 77 মিনিট</div></div>
-    </div>
-  </div>
-
-  <!-- SHORTS -->
-  <div class="sb" id="ft-shorts" style="display:none">
-    <div class="prow"><span class="pill on" onclick="fpill(this)">সব</span><span class="pill" onclick="fpill(this)">Math</span><span class="pill" onclick="fpill(this)">Physics</span><span class="pill" onclick="fpill(this)">Chemistry</span><span class="pill" onclick="fpill(this)">Biology</span><span class="pill" onclick="fpill(this)">ICT</span><span class="pill" onclick="fpill(this)">Programming</span></div>
-    <div class="ctitle" style="margin-bottom:8px">🤖 AI পছন্দ — তোমার জন্য</div>
-    <div class="sc2" onclick="toast('▶ Video চালু হচ্ছে...')"><div class="sthumb" style="background:var(--pl)"><i class="ti ti-atom" style="font-size:24px;color:var(--p)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:3px">নিউটনের ৩য় সূত্র সহজভাবে</div><div style="font-size:11px;color:var(--sub)">Physics · HSC · রাফি স্যার</div><div style="margin-top:5px"><span class="sdur">2:45</span></div></div><div class="pbtn"><i class="ti ti-player-play-filled" style="font-size:14px;color:#fff"></i></div></div>
-    <div class="sc2" onclick="toast('▶ Video চালু হচ্ছে...')"><div class="sthumb" style="background:var(--gl)"><i class="ti ti-flask" style="font-size:24px;color:var(--g)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:3px">অ্যাসিড-বেস বিক্রিয়া</div><div style="font-size:11px;color:var(--sub)">Chemistry · SSC · সানিয়া ম্যাম</div><div style="margin-top:5px"><span class="sdur">1:58</span></div></div><div class="pbtn"><i class="ti ti-player-play-filled" style="font-size:14px;color:#fff"></i></div></div>
-    <div class="sc2" onclick="toast('▶ Video চালু হচ্ছে...')"><div class="sthumb" style="background:var(--al)"><i class="ti ti-math-function" style="font-size:24px;color:var(--a)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:3px">ইন্টিগ্রেশন ট্রিক্স</div><div style="font-size:11px;color:var(--sub)">Math · HSC · করিম স্যার</div><div style="margin-top:5px"><span class="sdur">2:59</span></div></div><div class="pbtn"><i class="ti ti-player-play-filled" style="font-size:14px;color:#fff"></i></div></div>
-    <div class="sc2" onclick="toast('▶ Video চালু হচ্ছে...')"><div class="sthumb" style="background:var(--rl)"><i class="ti ti-dna" style="font-size:24px;color:var(--r)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:3px">DNA Replication সহজে</div><div style="font-size:11px;color:var(--sub)">Biology · HSC · মিলন স্যার</div><div style="margin-top:5px"><span class="sdur">2:32</span></div></div><div class="pbtn"><i class="ti ti-player-play-filled" style="font-size:14px;color:#fff"></i></div></div>
-    <div class="sc2" onclick="toast('▶ Video চালু হচ্ছে...')"><div class="sthumb" style="background:#EDE9FE"><i class="ti ti-code" style="font-size:24px;color:#7C3AED"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:3px">Python দিয়ে প্রথম প্রোগ্রাম</div><div style="font-size:11px;color:var(--sub)">Programming · Beginner</div><div style="margin-top:5px"><span class="sdur">3:00</span></div></div><div class="pbtn"><i class="ti ti-player-play-filled" style="font-size:14px;color:#fff"></i></div></div>
-  </div>
-
-  <!-- PLAYLIST -->
-  <div class="sb" id="ft-playlist" style="display:none">
-    <div class="prow"><span class="pill on" onclick="fpill(this)">সব</span><span class="pill" onclick="fpill(this)">Physics</span><span class="pill" onclick="fpill(this)">Math</span><span class="pill" onclick="fpill(this)">Chemistry</span></div>
-    <div class="card" style="padding:12px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-size:14px;font-weight:800">তরঙ্গ ও শব্দ</div><div style="font-size:11px;color:var(--sub);margin-top:2px">60 মিনিট → 4 পার্ট (সর্বোচ্চ 15m)</div></div><span style="font-size:11px;font-weight:700;color:var(--p);background:var(--pl);padding:3px 9px;border-radius:100px">২/৪</span></div>
-      <div class="pb"><div class="pf" style="width:50%;background:var(--p)"></div></div>
-      <div style="margin-top:10px">
-        <div class="plrow"><div class="plnum" style="background:var(--p);color:#fff">✓</div><div style="flex:1;font-size:12px;color:var(--sub)">তরঙ্গের সংজ্ঞা ও প্রকার</div><div style="font-size:11px;color:var(--hint)">14m</div></div>
-        <div class="plrow"><div class="plnum" style="background:var(--p);color:#fff">✓</div><div style="flex:1;font-size:12px;color:var(--sub)">অনুপ্রস্থ তরঙ্গ</div><div style="font-size:11px;color:var(--hint)">15m</div></div>
-        <div class="plrow" style="cursor:pointer" onclick="toast('▶ পার্ট ৩ চালু...')"><div class="plnum" style="background:var(--pl);color:var(--pd)">৩</div><div style="flex:1;font-size:12px;font-weight:700">শব্দ তরঙ্গ ও তীব্রতা</div><div class="pbtn" style="width:26px;height:26px"><i class="ti ti-player-play-filled" style="font-size:12px;color:#fff"></i></div><div style="font-size:11px;color:var(--hint);margin-left:6px">13m</div></div>
-        <div class="plrow"><div class="plnum" style="background:var(--bg);color:var(--hint)">৪</div><div style="flex:1;font-size:12px;color:var(--hint)">ডপলার ইফেক্ট</div><div style="font-size:11px;color:var(--hint)">12m</div></div>
+      <div class="mgrid">
+        <div class="mc"><div class="l">মোট পড়া</div><div class="v">62h</div><div class="s">এই মাসে</div></div>
+        <div class="mc"><div class="l">Completion</div><div class="v">74%</div><div class="s">লক্ষ্যের তুলনায়</div></div>
       </div>
     </div>
-    <div class="card" style="padding:12px">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><div style="font-size:14px;font-weight:800">ক্যালকুলাস Chapter 5</div><div style="font-size:11px;color:var(--sub);margin-top:2px">90 মিনিট → 6 পার্ট</div></div><span style="font-size:11px;font-weight:700;color:var(--o);background:var(--ol);padding:3px 9px;border-radius:100px">০/৬</span></div>
-      <div class="pb"><div class="pf" style="width:0%;background:var(--o)"></div></div>
-      <div style="font-size:12px;color:var(--hint);text-align:center;margin-top:8px">এখনো শুরু হয়নি</div>
+
+    <!-- ═══════════════ SETTINGS ═══════════════ -->
+    <div class="tb" id="tb-settings">
+      <div style="text-align:center;padding:20px 0 16px">
+        <div class="avt" style="width:72px;height:72px;font-size:22px;background:var(--pl);color:var(--pd);margin:0 auto 10px">তুমি</div>
+        <div style="font-size:18px;font-weight:700;color:var(--txt)">Ashraf Ahmed</div>
+        <div style="font-size:12px;color:var(--sub);margin-top:3px">HSC 2025 · সিলেট</div>
+        <div style="display:flex;justify-content:center;gap:24px;margin-top:12px">
+          <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--txt)">62h</div><div style="font-size:10px;color:var(--hint)">এই মাসে</div></div>
+          <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--txt)">48</div><div style="font-size:10px;color:var(--hint)">Sessions</div></div>
+          <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--txt)">12🔥</div><div style="font-size:10px;color:var(--hint)">Streak</div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="ct">App Settings</div>
+        <div class="setrow"><div><div style="font-size:13px;font-weight:700;color:var(--txt)">Notifications</div><div style="font-size:11px;color:var(--hint)">Study reminder চালু</div></div><button class="toggle on" id="toggle-notif" onclick="toggleSetting(this,'notif')" aria-label="Notifications toggle"></button></div>
+        <div class="setrow"><div><div style="font-size:13px;font-weight:700;color:var(--txt)">Daily Goal Reminder</div><div style="font-size:11px;color:var(--hint)">রাত ৯টায় reminder</div></div><button class="toggle on" id="toggle-goal-rem" onclick="toggleSetting(this,'goal_rem')" aria-label="Goal reminder toggle"></button></div>
+        <div class="setrow"><div><div style="font-size:13px;font-weight:700;color:var(--txt)">Focus Sound</div><div style="font-size:11px;color:var(--hint)">White noise চালু হবে</div></div><button class="toggle" id="toggle-sound" onclick="toggleSetting(this,'sound')" aria-label="Sound toggle"></button></div>
+      </div>
+
+      <div class="card">
+        <div class="ct">Focus Password</div>
+        <div class="setrow"><div style="font-size:13px;font-weight:700;color:var(--txt)">Password পরিবর্তন করো</div><button onclick="showChangePwModal()" style="padding:6px 14px;background:var(--pl);color:var(--pd);border:none;border-radius:var(--rads);font-size:12px;font-weight:700;cursor:pointer">পরিবর্তন করো</button></div>
+        <div class="setrow" style="border:none"><div style="font-size:13px;font-weight:700;color:var(--txt)">Emergency Exit Penalty</div><button class="toggle on" id="toggle-penalty" onclick="toggleSetting(this,'penalty')" aria-label="Penalty toggle"></button></div>
+      </div>
+
+      <div class="card">
+        <div class="setrow"><div style="font-size:13px;font-weight:700;color:var(--txt)">Privacy Settings</div><i class="ti ti-chevron-right" style="color:var(--hint)" aria-hidden="true"></i></div>
+        <div class="setrow" style="border:none"><div style="font-size:13px;font-weight:700;color:var(--r)">Logout</div><i class="ti ti-logout" style="color:var(--r)" aria-hidden="true"></i></div>
+      </div>
+
+      <div style="text-align:center;padding:10px;font-size:11px;color:var(--hint)">BrightMesh Study v1.0 · Made with ❤️ in Bangladesh</div>
     </div>
+
+  </div><!-- /content -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bnav">
+    <button class="nb on" id="bn-focus" onclick="goTab('focus');setBn('bn-focus')" aria-label="Focus Lock">
+      <i class="ti ti-lock" aria-hidden="true"></i><span>Focus</span>
+    </button>
+    <button class="nb" id="bn-timer" onclick="goTab('timer');setBn('bn-timer')" aria-label="Timer">
+      <i class="ti ti-clock" aria-hidden="true"></i><span>Timer</span>
+    </button>
+    <button class="nbplus" onclick="goTab('focus');setBn('bn-focus')" aria-label="Focus Lock শুরু করো">
+      <i class="ti ti-lock" style="font-size:20px;color:#fff" aria-hidden="true"></i>
+    </button>
+    <button class="nb" id="bn-quiz" onclick="goTab('quiz');setBn('bn-quiz')" aria-label="Quiz">
+      <i class="ti ti-pencil-check" aria-hidden="true"></i><span>Quiz</span>
+    </button>
+    <button class="nb" id="bn-goal" onclick="goTab('goal');setBn('bn-goal')" aria-label="Daily Goal">
+      <i class="ti ti-target" aria-hidden="true"></i><span>Goal</span>
+    </button>
   </div>
 
-  <!-- PDF -->
-  <div class="sb" id="ft-pdf" style="display:none">
-    <div class="ctitle" style="margin-bottom:8px">Teacher-এর PDF</div>
-    <div class="pdfcard" onclick="toast('PDF খুলছে...')"><div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700">Physics Ch.4 — Notes</div><div style="font-size:11px;color:var(--sub);margin-top:2px">রাফি স্যার · 2.4 MB</div></div><i class="ti ti-download" style="font-size:20px;color:var(--p);cursor:pointer"></i></div>
-    <div class="pdfcard" onclick="toast('PDF খুলছে...')"><div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700">Organic Chemistry Summary</div><div style="font-size:11px;color:var(--sub);margin-top:2px">সানিয়া ম্যাম · 1.8 MB</div></div><i class="ti ti-download" style="font-size:20px;color:var(--p);cursor:pointer"></i></div>
-    <div class="pdfcard" onclick="toast('PDF খুলছে...')"><div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700">Math Formula Collection</div><div style="font-size:11px;color:var(--sub);margin-top:2px">করিম স্যার · 890 KB</div></div><i class="ti ti-download" style="font-size:20px;color:var(--p);cursor:pointer"></i></div>
-    <div class="info">📌 Bookmark ও Highlight — শীঘ্রই আসছে!</div>
-  </div>
+</div><!-- /app -->
 
-  <!-- QUIZ -->
-  <div class="sb" id="ft-quiz" style="display:none">
-    <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="font-size:14px;font-weight:800">Daily Quiz</div><span class="chip" style="background:var(--al);color:var(--ad)">Physics · Q 3/10</span></div>
-      <div style="font-size:14px;font-weight:700;line-height:1.6;margin-bottom:14px">নিউটনের গতির দ্বিতীয় সূত্র অনুসারে F = ?</div>
-      <button class="qopt" onclick="aQ(this,'wrong')">A) F = mv</button>
-      <button class="qopt" onclick="aQ(this,'correct')">B) F = ma ✓</button>
-      <button class="qopt" onclick="aQ(this,'wrong')">C) F = m/a</button>
-      <button class="qopt" onclick="aQ(this,'wrong')">D) F = a/m</button>
-    </div>
-    <div class="card">
-      <div class="ctitle">Quiz Leaderboard</div>
-      <div class="row"><div style="font-size:20px;width:26px">🥇</div><div class="avt" style="width:32px;height:32px;background:var(--al);color:var(--ad)">RM</div><div style="flex:1;font-size:13px;font-weight:700">রাফি মাহমুদ</div><div style="font-size:12px;font-weight:800;color:var(--p)">98/100</div></div>
-      <div class="row"><div style="font-size:20px;width:26px">🥈</div><div class="avt" style="width:32px;height:32px;background:var(--gl);color:var(--gd)">NK</div><div style="flex:1;font-size:13px;font-weight:700">নাহিদ করিম</div><div style="font-size:12px;font-weight:800;color:var(--p)">92/100</div></div>
-      <div class="row lbyou" style="padding:8px 10px"><div style="font-size:16px;font-weight:900;color:var(--p);width:26px">৩</div><div class="avt" style="width:32px;height:32px;background:var(--pm);color:var(--pd)">তুমি</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--p)">তুমি</div><div style="font-size:12px;font-weight:800;color:var(--p)">—</div></div>
-    </div>
-  </div>
+<!-- ════════ MODALS ════════ -->
 
-  <!-- LEADERBOARD -->
-  <div class="sb" id="ft-lb" style="display:none">
-    <div style="display:flex;gap:5px;margin-bottom:12px;overflow-x:auto">
-      <button onclick="lbf(this)" style="flex-shrink:0;padding:7px 12px;border:2px solid var(--p);border-radius:var(--rads);background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">বন্ধু</button>
-      <button onclick="lbf(this)" style="flex-shrink:0;padding:7px 12px;border:2px solid var(--border);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">স্কুল</button>
-      <button onclick="lbf(this)" style="flex-shrink:0;padding:7px 12px;border:2px solid var(--border);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">জেলা</button>
-      <button onclick="lbf(this)" style="flex-shrink:0;padding:7px 12px;border:2px solid var(--border);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">দেশ</button>
-      <button onclick="lbf(this)" style="flex-shrink:0;padding:7px 12px;border:2px solid var(--border);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">Global</button>
-    </div>
-    <div style="background:linear-gradient(135deg,var(--pd),var(--p));border-radius:var(--rad);padding:16px;text-align:center;margin-bottom:12px"><div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:4px">তোমার অবস্থান</div><div style="font-size:44px;font-weight:900;color:#fff">৩য়</div><div style="font-size:12px;color:rgba(255,255,255,.8)">35h 20m · এই সপ্তাহ</div></div>
-    <div class="card" style="padding:12px">
-      <div class="lbrow"><div style="font-size:22px;width:28px">🥇</div><div class="avt" style="width:36px;height:36px;background:var(--al);color:var(--ad)">RM</div><div style="flex:1"><div style="font-size:13px;font-weight:700">রাফি মাহমুদ</div><div style="font-size:10px;color:var(--sub)">সিলেট</div></div><div style="font-size:12px;font-weight:800;color:var(--p)">42h 10m</div></div>
-      <div class="lbrow"><div style="font-size:22px;width:28px">🥈</div><div class="avt" style="width:36px;height:36px;background:var(--gl);color:var(--gd)">NK</div><div style="flex:1"><div style="font-size:13px;font-weight:700">নাহিদ করিম</div><div style="font-size:10px;color:var(--sub)">ঢাকা</div></div><div style="font-size:12px;font-weight:800;color:var(--p)">38h 30m</div></div>
-      <div class="lbrow lbyou"><div style="font-size:16px;font-weight:900;color:var(--p);width:28px">৩</div><div class="avt" style="width:36px;height:36px;background:var(--pm);color:var(--pd)">তুমি</div><div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--p)">তুমি</div><div style="font-size:10px;color:var(--p)">সিলেট</div></div><div style="font-size:12px;font-weight:800;color:var(--p)">35h 20m</div></div>
-      <div class="lbrow"><div style="font-size:22px;width:28px">🥉</div><div class="avt" style="width:36px;height:36px;background:var(--rl);color:var(--r)">SH</div><div style="flex:1"><div style="font-size:13px;font-weight:700">সানিয়া হক</div><div style="font-size:10px;color:var(--sub)">চট্টগ্রাম</div></div><div style="font-size:12px;font-weight:800;color:var(--p)">31h 05m</div></div>
-      <div class="lbrow"><div style="font-size:12px;font-weight:700;color:var(--hint);width:28px;text-align:center">৫</div><div class="avt" style="width:36px;height:36px;background:var(--bg);color:var(--sub)">MR</div><div style="flex:1"><div style="font-size:13px;font-weight:700">মিলন রহমান</div><div style="font-size:10px;color:var(--sub)">সিলেট</div></div><div style="font-size:12px;font-weight:800;color:var(--p)">28h 40m</div></div>
-    </div>
-  </div>
-
-  <!-- STREAK -->
-  <div class="sb" id="ft-streak" style="display:none">
-    <div style="background:linear-gradient(135deg,var(--a),#d97706);border-radius:var(--rad);padding:22px;text-align:center;margin-bottom:12px"><div style="font-size:42px;margin-bottom:4px">🔥</div><div style="font-size:52px;font-weight:900;color:#fff">12</div><div style="font-size:13px;color:rgba(255,255,255,.9);font-weight:600">টানা ১২ দিন পড়েছো!</div><div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">সেরা: ২১ দিন</div><div style="background:rgba(255,255,255,.2);border-radius:100px;height:4px;margin-top:14px;overflow:hidden"><div style="height:4px;border-radius:100px;background:#fff;width:57%"></div></div><div style="font-size:11px;color:rgba(255,255,255,.8);margin-top:6px">পরের Badge পেতে আরও ৯ দিন</div></div>
-    <div class="card"><div class="ctitle">এই মাসের Calendar</div><div class="scal" id="scal"></div><div style="display:flex;gap:12px;margin-top:10px;font-size:11px;color:var(--sub)"><span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--p);display:inline-block"></span>পড়েছো</span><span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:50%;background:var(--bg);border:1px solid var(--border);display:inline-block"></span>মিস</span></div></div>
-    <div class="card"><div class="ctitle">Badge সংগ্রহ</div><div class="bgrid"><div class="bitem bearned"><i class="ti ti-flame"></i><div class="bname">৭ দিন</div></div><div class="bitem bearned"><i class="ti ti-star"></i><div class="bname">First Session</div></div><div class="bitem bearned"><i class="ti ti-trophy"></i><div class="bname">১০ দিন</div></div><div class="bitem blocked"><i class="ti ti-lock"></i><div class="bname">২১ দিন</div></div><div class="bitem blocked"><i class="ti ti-award"></i><div class="bname">৩০ দিন</div></div><div class="bitem blocked"><i class="ti ti-crown"></i><div class="bname">১০০ দিন</div></div></div></div>
-  </div>
-
-  <!-- GROUP -->
-  <div class="sb" id="ft-group" style="display:none;padding-bottom:0">
-    <div class="info"><i class="ti ti-info-circle" style="font-size:16px"></i>Group Chat শুধু Focus Mode এ · সর্বোচ্চ ৩০ জন · ৩ Admin</div>
-    <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:12px">
-      <div onclick="selG(this)" style="flex-shrink:0;padding:7px 14px;background:var(--p);color:#fff;border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--p)">Physics HSC</div>
-      <div onclick="selG(this)" style="flex-shrink:0;padding:7px 14px;background:transparent;color:var(--sub);border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border)">Math Masters</div>
-      <div onclick="selG(this)" style="flex-shrink:0;padding:7px 14px;background:transparent;color:var(--sub);border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--border)">Science Squad</div>
-      <div onclick="toast('গ্রুপ তৈরির form আসছে...')" style="flex-shrink:0;padding:7px 14px;background:transparent;color:var(--g);border-radius:100px;font-size:12px;font-weight:700;cursor:pointer;border:2px solid var(--g)">+ নতুন</div>
-    </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding:0 2px"><div><div style="font-size:14px;font-weight:800">Physics HSC Batch</div><div style="font-size:11px;color:var(--sub)">২৮/৩০ সদস্য · তুমি Admin</div></div><span class="chip" style="background:var(--pl);color:var(--pd)">Admin</span></div>
-    <div style="background:var(--bg);border-radius:var(--rad);padding:10px;min-height:220px;overflow-y:auto" id="gchat">
-      <div class="gmsg"><div class="avt" style="width:26px;height:26px;font-size:9px;background:var(--gl);color:var(--gd);flex-shrink:0">NK</div><div><div style="font-size:9px;color:var(--hint);margin-bottom:2px">নাহিদ করিম</div><div class="bub bin">আজকের অ্যাসাইনমেন্ট হলো? 📚</div></div></div>
-      <div class="gmsg me"><div><div class="bub bout">৩টা শেষ, ১টা বাকি 😅</div></div></div>
-      <div class="gmsg"><div class="avt" style="width:26px;height:26px;font-size:9px;background:var(--rl);color:var(--r);flex-shrink:0">SH</div><div><div style="font-size:9px;color:var(--hint);margin-bottom:2px">সানিয়া হক</div><div class="bub bin">Physics 5 নম্বর কঠিন 😭</div></div></div>
-      <div class="gmsg"><div class="avt" style="width:26px;height:26px;font-size:9px;background:var(--al);color:var(--ad);flex-shrink:0">RM</div><div><div style="font-size:9px;color:var(--hint);margin-bottom:2px">রাফি মাহমুদ</div><div class="bub bin">আমিও আটকে আছি 😂</div></div></div>
-      <div class="gmsg me"><div><div class="bub bout">কাল স্যারকে জিজ্ঞেস করবো 💪</div></div></div>
-    </div>
-  </div>
-  <div id="gcinp" class="cinprow" style="display:none">
-    <input class="cinp" id="ginp" type="text" placeholder="মেসেজ লিখুন...">
-    <button class="csend" onclick="sendG()"><i class="ti ti-send" style="font-size:16px;color:#fff"></i></button>
-  </div>
-
-  <!-- PLANNER -->
-  <div class="sb" id="ft-planner" style="display:none">
-    <div class="excnt-card"><div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:4px">⏰ পরবর্তী পরীক্ষা</div><div style="font-size:48px;font-weight:900;color:#fff">14</div><div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600">দিন বাকি · HSC 2025</div></div>
-    <div class="card">
-      <div class="ctitle">এই সপ্তাহের Routine</div>
-      <div class="planrow"><div style="font-size:12px;font-weight:700;color:var(--sub);min-width:60px">সোমবার</div><div style="flex:1;font-size:13px;font-weight:600">Physics Chapter 5</div><span class="plantag" style="background:var(--pl);color:var(--pd)">সকাল ৯টা</span></div>
-      <div class="planrow"><div style="font-size:12px;font-weight:700;color:var(--sub);min-width:60px">মঙ্গলবার</div><div style="flex:1;font-size:13px;font-weight:600">Math Integration</div><span class="plantag" style="background:var(--al);color:var(--ad)">বিকাল ৪টা</span></div>
-      <div class="planrow"><div style="font-size:12px;font-weight:700;color:var(--sub);min-width:60px">বুধবার</div><div style="flex:1;font-size:13px;font-weight:600">Chemistry Organic</div><span class="plantag" style="background:var(--gl);color:var(--gd)">সকাল ১০টা</span></div>
-      <div class="planrow" style="border:none"><div style="font-size:12px;font-weight:700;color:var(--sub);min-width:60px">বৃহস্পতিবার</div><div style="flex:1;font-size:13px;font-weight:600">Biology Cell Division</div><span class="plantag" style="background:var(--rl);color:var(--r)">রাত ৮টা</span></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">Task List</div>
-      <div class="goalrow"><div class="goalcheck done" onclick="tGoal(this)"><i class="ti ti-check" style="font-size:13px;color:#fff"></i></div><div style="flex:1;font-size:13px;font-weight:600;color:var(--sub)">Physics Chapter 4 শেষ</div></div>
-      <div class="goalrow"><div class="goalcheck" onclick="tGoal(this)"></div><div style="flex:1;font-size:13px;font-weight:600">Math Practice Set 5</div></div>
-      <div class="goalrow" style="border:none"><div class="goalcheck" onclick="tGoal(this)"></div><div style="flex:1;font-size:13px;font-weight:600">Daily Quiz দেওয়া</div></div>
-    </div>
-  </div>
-
-  <!-- ANALYTICS -->
-  <div class="sb" id="ft-analytics" style="display:none">
-    <div class="card">
-      <div class="ctitle">📉 দুর্বল বিষয় (AI Analysis)</div>
-      <div class="ancard" style="border-left:4px solid var(--r)"><div class="anbar"><span class="anname">গণিত</span><div class="anpb"><div class="anfill" style="width:42%;background:var(--r)"></div></div><span style="font-size:11px;font-weight:700;color:var(--r);min-width:34px;text-align:right">42%</span></div><div style="font-size:11px;color:var(--sub)">Integration ও Differentiation এ দুর্বল</div></div>
-      <div class="ancard" style="border-left:4px solid var(--o)"><div class="anbar"><span class="anname">রসায়ন</span><div class="anpb"><div class="anfill" style="width:58%;background:var(--o)"></div></div><span style="font-size:11px;font-weight:700;color:var(--o);min-width:34px;text-align:right">58%</span></div><div style="font-size:11px;color:var(--sub)">Organic Chemistry কঠিন</div></div>
-    </div>
-    <div class="card">
-      <div class="ctitle">💪 শক্তিশালী বিষয়</div>
-      <div class="ancard" style="border-left:4px solid var(--g)"><div class="anbar"><span class="anname">পদার্থ</span><div class="anpb"><div class="anfill" style="width:88%;background:var(--g)"></div></div><span style="font-size:11px;font-weight:700;color:var(--g);min-width:34px;text-align:right">88%</span></div></div>
-      <div class="ancard" style="border-left:4px solid var(--p)"><div class="anbar"><span class="anname">জীববিজ্ঞান</span><div class="anpb"><div class="anfill" style="width:76%;background:var(--p)"></div></div><span style="font-size:11px;font-weight:700;color:var(--p);min-width:34px;text-align:right">76%</span></div></div>
-      <div class="ancard" style="border-left:4px solid var(--g)"><div class="anbar"><span class="anname">ইংরেজি</span><div class="anpb"><div class="anfill" style="width:82%;background:var(--g)"></div></div><span style="font-size:11px;font-weight:700;color:var(--g);min-width:34px;text-align:right">82%</span></div></div>
-    </div>
-    <div class="mgrid">
-      <div class="mc"><div class="l">মোট পড়া</div><div class="v">62h</div><div class="s">এই মাসে</div></div>
-      <div class="mc"><div class="l">Completion</div><div class="v">74%</div><div class="s">লক্ষ্যের তুলনায়</div></div>
-    </div>
-  </div>
-
-  <!-- AI -->
-  <div class="sb" id="ft-ai" style="display:none;padding:0;flex-direction:column">
-    <div style="padding:10px 14px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:8px">
-      <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--pd));display:flex;align-items:center;justify-content:center"><i class="ti ti-robot" style="font-size:18px;color:#fff"></i></div>
-      <div><div style="font-size:13px;font-weight:800">BrightMesh AI Tutor</div><div style="font-size:10px;color:var(--g)">● Online</div></div>
-    </div>
-    <div class="ai-chat" id="aichat">
-      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-start"><div class="ai-icon"><i class="ti ti-robot" style="font-size:16px;color:#fff"></i></div><div class="ai-bub">আস্সালামু আলাইকুম! আমি তোমার AI Tutor। Physics, Math, Chemistry — যেকোনো প্রশ্ন করো! 🎓</div></div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-start"><div class="ai-icon"><i class="ti ti-robot" style="font-size:16px;color:#fff"></i></div><div class="ai-bub">তোমার Analytics দেখলাম — গণিতে সাহায্য লাগবে মনে হচ্ছে। Integration শুরু করবো? 📚</div></div>
-      <div style="display:flex;flex-direction:row-reverse;margin-bottom:8px"><div class="ai-ubub">নিউটনের ২য় সূত্র কী?</div></div>
-      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:flex-start"><div class="ai-icon"><i class="ti ti-robot" style="font-size:16px;color:#fff"></i></div><div class="ai-bub">নিউটনের ২য় সূত্র: <strong>F = ma</strong><br><br>মানে — বল = ভর × ত্বরণ।<br><br>উদাহরণ: ১০ kg বস্তুতে ২ m/s² ত্বরণ → F = 20 N ✅</div></div>
-    </div>
-    <div style="display:flex;gap:6px;padding:8px 14px;overflow-x:auto;border-top:1px solid var(--border);flex-shrink:0">
-      <button onclick="toast('AI Flashcard তৈরি হচ্ছে...')" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:100px;background:var(--card);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Flashcard বানাও</button>
-      <button onclick="toast('Summary তৈরি হচ্ছে...')" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:100px;background:var(--card);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Summary দাও</button>
-      <button onclick="toast('AI Quiz তৈরি হচ্ছে...')" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:100px;background:var(--card);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">Quiz বানাও</button>
-      <button onclick="toast('দুর্বল বিষয় বিশ্লেষণ...')" style="flex-shrink:0;padding:6px 12px;border:1px solid var(--border);border-radius:100px;background:var(--card);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap">দুর্বল বিষয়</button>
-    </div>
-  </div>
-  <div id="aiinprow" class="cinprow" style="display:none">
-    <input class="cinp" id="aiinp" type="text" placeholder="যেকোনো প্রশ্ন করো...">
-    <button class="csend" onclick="sendAI()"><i class="ti ti-send" style="font-size:16px;color:#fff"></i></button>
-  </div>
-
-  <!-- SHOP -->
-  <div class="sb" id="ft-shop" style="display:none">
-    <div class="prow"><span class="pill on" onclick="fpill(this)">সব</span><span class="pill" onclick="fpill(this)">বই</span><span class="pill" onclick="fpill(this)">নোট</span><span class="pill" onclick="fpill(this)">Course</span><span class="pill" onclick="fpill(this)">Calculator</span><span class="pill" onclick="fpill(this)">Stationery</span></div>
-    <div class="shopcard"><div class="shopimg" style="background:var(--pl)"><i class="ti ti-book" style="font-size:24px;color:var(--p)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:2px">HSC Physics Guide 2025</div><div style="font-size:11px;color:var(--sub)">রাফি মাহমুদ · সিলেট</div><div style="font-size:14px;font-weight:800;color:var(--g);margin-top:2px">৳ ২৫০</div></div><button class="buybtn" onclick="toast('কেনার process...')">কিনুন</button></div>
-    <div class="shopcard"><div class="shopimg" style="background:var(--al)"><i class="ti ti-pencil" style="font-size:24px;color:var(--a)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Organic Chemistry হ্যান্ডনোট</div><div style="font-size:11px;color:var(--sub)">সানিয়া হক · ঢাকা</div><div style="font-size:14px;font-weight:800;color:var(--g);margin-top:2px">৳ ১৫০</div></div><button class="buybtn" onclick="toast('কেনার process...')">কিনুন</button></div>
-    <div class="shopcard"><div class="shopimg" style="background:var(--gl)"><i class="ti ti-calculator" style="font-size:24px;color:var(--g)"></i></div><div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Casio FX-991EX (2nd Hand)</div><div style="font-size:11px;color:var(--sub)">নাহিদ করিম · সিলেট</div><div style="font-size:14px;font-weight:800;color:var(--g);margin-top:2px">৳ ৮০০</div></div><button class="buybtn" onclick="toast('কেনার process...')">কিনুন</button></div>
-    <button class="btn btn-o" onclick="toast('বিক্রির form আসছে...')">+ আমার জিনিস বিক্রি করো</button>
-  </div>
-</div>
-
-<!-- CHAT -->
-<div class="page" id="pg-chat">
-  <div class="sbar"><span class="sbar-t" id="ck2">9:41</span><div class="sbar-r"><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
-  <div class="hdr"><div class="logo">💬 Chat</div><button class="icon-btn" onclick="toast('নতুন message')"><i class="ti ti-edit" style="font-size:18px;color:var(--txt)"></i></button></div>
-  <div style="padding:10px 14px;border-bottom:1px solid var(--border)"><input class="inp" style="margin:0;background:var(--bg)" type="text" placeholder="🔍 Search করো..."></div>
-  <div style="flex:1;overflow-y:auto">
-    <div class="dmrow" onclick="openDM('রাফি মাহমুদ','RM','pl','pd')"><div style="position:relative"><div class="avt" style="width:44px;height:44px;background:var(--pl);color:var(--pd)">RM</div><div class="odot"></div></div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:700">রাফি মাহমুদ</span><span style="font-size:10px;color:var(--hint)">2m</span></div><div style="font-size:12px;color:var(--p);font-weight:600">ভালো আছো? আজকে কী পড়লে?</div></div><div class="udot"></div></div>
-    <div class="dmrow" onclick="openDM('সানিয়া হক','SH','rl','r')"><div class="avt" style="width:44px;height:44px;background:var(--rl);color:var(--r)">SH</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:700">সানিয়া হক</span><span style="font-size:10px;color:var(--hint)">1h</span></div><div style="font-size:12px;color:var(--sub)">নতুন স্কেচটা দেখলে?</div></div></div>
-    <div class="dmrow" onclick="openDM('নাহিদ করিম','NK','gl','gd')"><div style="position:relative"><div class="avt" style="width:44px;height:44px;background:var(--gl);color:var(--gd)">NK</div><div class="odot"></div></div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:700">নাহিদ করিম</span><span style="font-size:10px;color:var(--hint)">3h</span></div><div style="font-size:12px;color:var(--sub)">কাল meetup করবো?</div></div></div>
-    <div class="dmrow" style="border:none" onclick="openDM('মিলন রহমান','MR','bg','sub')"><div class="avt" style="width:44px;height:44px;background:var(--bg);color:var(--sub)">MR</div><div style="flex:1"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:13px;font-weight:700">মিলন রহমান</span><span style="font-size:10px;color:var(--hint)">5h</span></div><div style="font-size:12px;color:var(--sub)">নোটস পাঠিয়ে দিয়েছি</div></div></div>
-    <div style="padding:14px;text-align:center;font-size:11px;color:var(--hint)">🔒 Group Chat শুধু Focus Mode এ</div>
-  </div>
-</div>
-
-<!-- FEED -->
-<div class="page" id="pg-feed">
-  <div class="sbar"><span class="sbar-t" id="ck3">9:41</span><div class="sbar-r"><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
-  <div class="hdr"><div class="logo">Bright<em>Mesh</em></div><div class="hdr-r"><button class="icon-btn" onclick="toast('Search')"><i class="ti ti-search" style="font-size:18px;color:var(--txt)"></i></button><button class="icon-btn" onclick="toast('Notifications')"><i class="ti ti-bell" style="font-size:18px;color:var(--txt)"></i><div class="nbadge"></div></button></div></div>
-  <div class="stabs">
-    <button class="stab on" onclick="feedT('main',this)">📱 Feed</button>
-    <button class="stab" onclick="feedT('news',this)">🌍 News</button>
-  </div>
-  <div class="sb" id="feedmain">
-    <div class="ctitle" style="margin-bottom:8px">Stories</div>
-    <div class="stroll">
-      <div class="sitem" onclick="toast('Story add করো')"><div class="sring add"><div class="sinn" style="background:var(--gl);color:var(--g);font-size:20px">+</div></div><span class="sname2">তোমার</span></div>
-      <div class="sitem" onclick="toast('রাফির story')"><div class="sring"><div class="sinn" style="background:var(--pl);color:var(--pd)">RM</div></div><span class="sname2">রাফি</span></div>
-      <div class="sitem" onclick="toast('সানিয়ার story')"><div class="sring"><div class="sinn" style="background:var(--rl);color:var(--r)">SH</div></div><span class="sname2">সানিয়া</span></div>
-      <div class="sitem" onclick="toast('নাহিদের story')"><div class="sring"><div class="sinn" style="background:var(--gl);color:var(--gd)">NK</div></div><span class="sname2">নাহিদ</span></div>
-      <div class="sitem" onclick="toast('মিলনের story')"><div class="sring" style="border-color:var(--border)"><div class="sinn" style="background:var(--bg);color:var(--sub)">MR</div></div><span class="sname2">মিলন</span></div>
-    </div>
-    <button onclick="showCompose()" style="width:100%;padding:11px 14px;background:var(--bg);border:1.5px dashed var(--border);border-radius:var(--rad);color:var(--sub);font-size:13px;cursor:pointer;margin-bottom:12px;text-align:left;font-weight:500"><i class="ti ti-pencil" style="font-size:16px;margin-right:6px"></i>কী ভাবছো? Post করো...</button>
-    <div class="post">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div style="position:relative"><div class="avt" style="width:38px;height:38px;background:var(--pl);color:var(--pd)">RM</div><div class="odot"></div></div><div style="flex:1"><div style="font-size:13px;font-weight:700">রাফি মাহমুদ</div><div style="font-size:10px;color:var(--hint)">২ ঘণ্টা আগে · সিলেট</div></div><i class="ti ti-dots" style="font-size:18px;color:var(--hint);cursor:pointer"></i></div>
-      <div style="font-size:13px;line-height:1.7;margin-bottom:4px">আজকের HSC পরীক্ষা দিয়ে আসলাম! অনেক ভালো হয়েছে আলহামদুলিল্লাহ 🤲 সবাই দোয়া করো!</div>
-      <div class="pacts"><button class="pact" onclick="likeP(this)"><i class="ti ti-heart" style="font-size:17px"></i> <span>৪৭</span></button><button class="pact"><i class="ti ti-message-circle" style="font-size:17px"></i> ১২</button><button class="pact"><i class="ti ti-share" style="font-size:17px"></i> শেয়ার</button></div>
-    </div>
-    <div class="post">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="avt" style="width:38px;height:38px;background:var(--rl);color:var(--r)">SH</div><div style="flex:1"><div style="font-size:13px;font-weight:700">সানিয়া হক</div><div style="font-size:10px;color:var(--hint)">৫ ঘণ্টা আগে</div></div><i class="ti ti-dots" style="font-size:18px;color:var(--hint);cursor:pointer"></i></div>
-      <div style="background:var(--bg);border-radius:10px;height:120px;display:flex;align-items:center;justify-content:center;margin-bottom:9px;cursor:pointer" onclick="toast('Photo দেখছো...')"><i class="ti ti-photo" style="font-size:38px;color:var(--hint)"></i></div>
-      <div style="font-size:13px;line-height:1.7;margin-bottom:4px">নতুন একটা স্কেচ করলাম ✏️ আর্ট করতে ভালো লাগে!</div>
-      <div class="pacts"><button class="pact" onclick="likeP(this)"><i class="ti ti-heart" style="font-size:17px"></i> <span>৩২</span></button><button class="pact"><i class="ti ti-message-circle" style="font-size:17px"></i> ৮</button><button class="pact"><i class="ti ti-share" style="font-size:17px"></i> শেয়ার</button></div>
-    </div>
-    <div class="post">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px"><div class="avt" style="width:38px;height:38px;background:var(--gl);color:var(--gd)">NK</div><div style="flex:1"><div style="font-size:13px;font-weight:700">নাহিদ করিম</div><div style="font-size:10px;color:var(--hint)">৮ ঘণ্টা আগে</div></div><i class="ti ti-dots" style="font-size:18px;color:var(--hint);cursor:pointer"></i></div>
-      <div style="background:var(--pl);border-radius:10px;padding:14px;margin-bottom:9px;display:flex;align-items:center;gap:10px"><i class="ti ti-trophy" style="font-size:28px;color:var(--p)"></i><div><div style="font-size:13px;font-weight:800;color:var(--pd)">🏆 Achievement Unlocked!</div><div style="font-size:11px;color:var(--sub)">৭ দিনের Streak Badge অর্জন!</div></div></div>
-      <div style="font-size:13px;line-height:1.7;margin-bottom:4px">Gym + Library = Perfect Day 💪 Discipline is the key!</div>
-      <div class="pacts"><button class="pact" onclick="likeP(this)"><i class="ti ti-heart" style="font-size:17px"></i> <span>৮৯</span></button><button class="pact"><i class="ti ti-message-circle" style="font-size:17px"></i> ২৩</button><button class="pact"><i class="ti ti-share" style="font-size:17px"></i> শেয়ার</button></div>
-    </div>
-  </div>
-  <div class="sb" id="feednews" style="display:none">
-    <div class="prow"><span class="pill on" onclick="fpill(this)">সব</span><span class="pill" onclick="fpill(this)">Science</span><span class="pill" onclick="fpill(this)">Tech</span><span class="pill" onclick="fpill(this)">AI</span><span class="pill" onclick="fpill(this)">World</span><span class="pill" onclick="fpill(this)">Sports</span></div>
-    <div class="card" style="padding:12px">
-      <div class="newscard" onclick="toast('সংবাদ পড়ছো...')"><div class="newsimg"><i class="ti ti-school" style="font-size:20px;color:var(--sub)"></i></div><div><div style="font-size:13px;font-weight:700;line-height:1.4">বাংলাদেশে নতুন শিক্ষানীতি ঘোষণা</div><div style="font-size:10px;color:var(--hint);margin-top:3px">Prothom Alo · ২ ঘণ্টা আগে</div></div></div>
-      <div class="newscard" onclick="toast('সংবাদ পড়ছো...')"><div class="newsimg"><i class="ti ti-rocket" style="font-size:20px;color:var(--sub)"></i></div><div><div style="font-size:13px;font-weight:700;line-height:1.4">SpaceX নতুন মিশন সফলভাবে উৎক্ষেপণ</div><div style="font-size:10px;color:var(--hint);margin-top:3px">BBC · ৪ ঘণ্টা আগে</div></div></div>
-      <div class="newscard" onclick="toast('সংবাদ পড়ছো...')"><div class="newsimg"><i class="ti ti-cpu" style="font-size:20px;color:var(--sub)"></i></div><div><div style="font-size:13px;font-weight:700;line-height:1.4">AI এর নতুন যুগ — ২০২৫ এ কী পরিবর্তন</div><div style="font-size:10px;color:var(--hint);margin-top:3px">TechCrunch · ৬ ঘণ্টা আগে</div></div></div>
-      <div class="newscard" onclick="toast('সংবাদ পড়ছো...')" style="border:none"><div class="newsimg"><i class="ti ti-ball-football" style="font-size:20px;color:var(--sub)"></i></div><div><div style="font-size:13px;font-weight:700;line-height:1.4">বাংলাদেশ ক্রিকেটের নতুন সাফল্য</div><div style="font-size:10px;color:var(--hint);margin-top:3px">Daily Star · ১ দিন আগে</div></div></div>
-    </div>
-  </div>
-</div>
-
-<!-- PROFILE -->
-<div class="page" id="pg-profile">
-  <div class="sbar"><span class="sbar-t" id="ck4">9:41</span><div class="sbar-r"><i class="ti ti-wifi"></i><i class="ti ti-battery-3"></i></div></div>
-  <div class="profhdr">
-    <div class="profavt">তুমি</div>
-    <div style="font-size:18px;font-weight:800;color:#fff">Ashraf Ahmed</div>
-    <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">HSC 2025 · সিলেট</div>
-    <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:4px">"প্রতিদিন একটু একটু ভালো হচ্ছি 🚀"</div>
-    <div class="profstats">
-      <div class="pst"><div class="pstv">১৮৪</div><div class="pstl">Followers</div></div>
-      <div class="pst"><div class="pstv">92</div><div class="pstl">Following</div></div>
-      <div class="pst"><div class="pstv">62h</div><div class="pstl">এই মাসে</div></div>
-      <div class="pst"><div class="pstv">12🔥</div><div class="pstl">Streak</div></div>
-    </div>
-  </div>
-  <div class="stabs">
-    <button class="stab on" onclick="profT('posts',this)">Posts</button>
-    <button class="stab" onclick="profT('badges',this)">Badges</button>
-    <button class="stab" onclick="profT('settings',this)">⚙ Settings</button>
-  </div>
-  <div class="sb" id="pt-posts">
-    <div class="mgrid">
-      <div class="mc"><div class="l">মোট পড়া</div><div class="v">62h</div><div class="s">এই মাসে</div></div>
-      <div class="mc"><div class="l">Quiz Score</div><div class="v">84%</div><div class="s">গড় স্কোর</div></div>
-    </div>
-    <div class="post"><div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="avt" style="width:34px;height:34px;background:var(--pm);color:var(--pd)">তুমি</div><div><div style="font-size:13px;font-weight:700">তুমি</div><div style="font-size:10px;color:var(--hint)">৩ ঘণ্টা আগে</div></div></div><div style="font-size:13px;line-height:1.7">আজকে ৩ ঘণ্টা Physics পড়লাম! 📚 কাল exam — সবাই দোয়া করো 🤲</div></div>
-  </div>
-  <div class="sb" id="pt-badges" style="display:none">
-    <div class="card"><div class="ctitle">অর্জিত Badges</div><div class="bgrid"><div class="bitem bearned"><i class="ti ti-flame"></i><div class="bname">৭ দিন</div></div><div class="bitem bearned"><i class="ti ti-star"></i><div class="bname">First Session</div></div><div class="bitem bearned"><i class="ti ti-trophy"></i><div class="bname">Top 3</div></div><div class="bitem blocked"><i class="ti ti-lock"></i><div class="bname">21 দিন</div></div><div class="bitem blocked"><i class="ti ti-certificate"></i><div class="bname">Certificate</div></div><div class="bitem blocked"><i class="ti ti-crown"></i><div class="bname">Legend</div></div></div></div>
-  </div>
-  <div class="sb" id="pt-settings" style="display:none">
-    <div class="card">
-      <div class="setrow"><div style="font-size:13px;font-weight:700">Dark Mode</div><button class="toggle" onclick="this.classList.toggle('on')"></button></div>
-      <div class="setrow"><div><div style="font-size:13px;font-weight:700">Language</div><div style="font-size:11px;color:var(--hint)">বাংলা</div></div><i class="ti ti-chevron-right" style="color:var(--hint)"></i></div>
-      <div class="setrow"><div style="font-size:13px;font-weight:700">Focus Password</div><i class="ti ti-chevron-right" style="color:var(--hint)"></i></div>
-      <div class="setrow"><div><div style="font-size:13px;font-weight:700">Notifications</div><div style="font-size:11px;color:var(--hint)">Study Reminder চালু</div></div><button class="toggle on" onclick="this.classList.toggle('on')"></button></div>
-      <div class="setrow"><div style="font-size:13px;font-weight:700">Privacy</div><i class="ti ti-chevron-right" style="color:var(--hint)"></i></div>
-      <div class="setrow" style="border:none"><div style="font-size:13px;font-weight:700;color:var(--r)">Logout</div><i class="ti ti-logout" style="color:var(--r)"></i></div>
-    </div>
-  </div>
-</div>
-
-<!-- BOTTOM NAV -->
-<div class="bnav">
-  <button class="nb2 on" id="bn-h" onclick="showPage('pg-home');setNav('bn-h')"><i class="ti ti-home"></i><span>Home</span></button>
-  <button class="nb2" id="bn-f" onclick="showPage('pg-focus');setNav('bn-f')"><i class="ti ti-book"></i><span>Focus</span></button>
-  <button class="nbplus" onclick="showCompose()"><i class="ti ti-plus" style="font-size:22px;color:#fff"></i></button>
-  <button class="nb2" id="bn-c" onclick="showPage('pg-chat');setNav('bn-c')"><i class="ti ti-message"></i><span>Chat</span></button>
-  <button class="nb2" id="bn-p" onclick="showPage('pg-profile');setNav('bn-p')"><i class="ti ti-user"></i><span>Profile</span></button>
-</div>
-
-<!-- LOCK MODAL -->
-<div class="modal" id="m-lock" style="display:none">
+<!-- EXIT MODAL -->
+<div class="overlay" id="exit-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="exit-title">
   <div class="mbox">
-    <div style="font-size:34px;margin-bottom:8px">🔒</div>
-    <div style="font-size:15px;font-weight:800;margin-bottom:4px">Social Mode বন্ধ</div>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:2px">Focus Lock চলছে।</div>
-    <div style="font-size:12px;font-weight:700;color:var(--p);margin-bottom:4px">পাসওয়ার্ড দিলে খুলবে।</div>
-    <div class="pwdots" id="ld"><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div></div>
-    <div class="npad" id="lnp"></div>
-    <button onclick="closeMod('m-lock')" style="width:100%;padding:10px;margin-top:10px;border:1px solid var(--border);border-radius:var(--rads);background:transparent;color:var(--sub);cursor:pointer;font-size:13px;font-weight:600">বাতিল</button>
+    <div style="font-size:32px;margin-bottom:8px">⚠️</div>
+    <div style="font-size:15px;font-weight:700;color:var(--txt);margin-bottom:6px" id="exit-title">Focus বন্ধ করবে?</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:14px">Emergency exit করলে আজকের streak এ penalty যোগ হবে।</div>
+    <div class="pwdots" id="exit-dots">
+      <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
+    </div>
+    <div class="npad" id="exit-numpad"></div>
+    <div id="exit-error" style="display:none;color:var(--r);font-size:12px;font-weight:600;margin-top:8px;text-align:center">ভুল পাসওয়ার্ড!</div>
+    <button onclick="document.getElementById('exit-modal').style.display='none'" style="width:100%;padding:10px;margin-top:10px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);cursor:pointer;font-size:13px;font-weight:600">বাতিল</button>
   </div>
 </div>
 
-<!-- COMPOSE -->
-<div class="msheet" id="m-compose" style="display:none">
+<!-- CHANGE PASSWORD MODAL -->
+<div class="overlay" id="changepw-modal" style="display:none" role="dialog" aria-modal="true">
+  <div class="mbox">
+    <div style="font-size:15px;font-weight:700;color:var(--txt);margin-bottom:4px">নতুন পাসওয়ার্ড সেট করো</div>
+    <div style="font-size:12px;color:var(--sub);margin-bottom:10px">৪ সংখ্যার নতুন পাসওয়ার্ড দাও</div>
+    <div class="pwdots" id="newpw-dots">
+      <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
+    </div>
+    <div class="npad" id="newpw-numpad"></div>
+    <button onclick="document.getElementById('changepw-modal').style.display='none'" style="width:100%;padding:10px;margin-top:10px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);cursor:pointer;font-size:13px;font-weight:600">বাতিল</button>
+  </div>
+</div>
+
+<!-- ADD NOTE MODAL -->
+<div class="msheet" id="note-modal" style="display:none" role="dialog" aria-modal="true">
   <div class="mshin">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--border)">
-      <div style="font-size:15px;font-weight:800">নতুন Post</div>
-      <button onclick="closeMod('m-compose')" style="border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--hint)">✕</button>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--bdr);flex-shrink:0">
+      <div style="font-size:15px;font-weight:700;color:var(--txt)">নতুন Note</div>
+      <button onclick="document.getElementById('note-modal').style.display='none'" style="border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--hint)" aria-label="বন্ধ করো">✕</button>
     </div>
-    <div style="padding:14px;flex:1;overflow-y:auto">
-      <div style="display:flex;gap:10px;align-items:flex-start;margin-bottom:12px"><div class="avt" style="width:36px;height:36px;background:var(--pm);color:var(--pd);flex-shrink:0">তুমি</div><textarea class="compose" id="ctxt" placeholder="কী ভাবছো? Share করো..."></textarea></div>
-      <div style="display:flex;gap:8px;margin-bottom:12px">
-        <button onclick="toast('Photo যুক্ত হচ্ছে')" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px"><i class="ti ti-photo"></i> Photo</button>
-        <button onclick="toast('Story হিসেবে যাবে')" style="flex:1;padding:9px;border:1px solid var(--border);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px"><i class="ti ti-circle-dot"></i> Story</button>
-      </div>
-      <button class="btn btn-g" onclick="subPost()">Post করো</button>
+    <div style="padding:14px;overflow-y:auto">
+      <select class="sel" id="note-subject" aria-label="বিষয়">
+        <option>পদার্থবিজ্ঞান</option><option>রসায়ন</option><option>গণিত</option><option>জীববিজ্ঞান</option><option>বাংলা</option><option>ইংরেজি</option>
+      </select>
+      <input class="inp" type="text" id="note-title" placeholder="Title...">
+      <textarea style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;resize:none;min-height:100px;font-family:inherit;margin-bottom:10px" id="note-body" placeholder="Note লিখো..."></textarea>
+      <button class="btn-p" onclick="saveNote()">Note সেভ করো</button>
     </div>
   </div>
 </div>
 
-<!-- DM -->
-<div class="msheet" id="m-dm" style="display:none">
-  <div class="mshin" style="max-height:72svh">
-    <div style="display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid var(--border)">
-      <div class="avt" style="width:38px;height:38px;background:var(--pl);color:var(--pd)" id="dma">RM</div>
-      <div style="flex:1"><div style="font-size:14px;font-weight:800" id="dmn">রাফি মাহমুদ</div><div style="font-size:10px;color:var(--g)">● Online</div></div>
-      <button onclick="closeMod('m-dm')" style="border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--hint)">✕</button>
-    </div>
-    <div style="flex:1;overflow-y:auto;padding:12px;min-height:160px" id="dmmsgs">
-      <div class="gmsg"><div class="avt" style="width:26px;height:26px;font-size:9px;background:var(--pl);color:var(--pd);flex-shrink:0">RM</div><div><div class="bub bin">ভালো আছো?</div></div></div>
-      <div class="gmsg me"><div><div class="bub bout">হ্যাঁ! তুমি?</div></div></div>
-      <div class="gmsg"><div class="avt" style="width:26px;height:26px;font-size:9px;background:var(--pl);color:var(--pd);flex-shrink:0">RM</div><div><div class="bub bin">আজকে কী পড়লে?</div></div></div>
-    </div>
-    <div class="cinprow"><input class="cinp" id="dminp" type="text" placeholder="Message..."><button class="csend" onclick="sendDM()"><i class="ti ti-send" style="font-size:16px;color:#fff"></i></button></div>
-  </div>
-</div>
-
-<div id="toast"></div>
+<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-let focOn=false,spw='',pw1='',pw2='',pw3='',fmin=30,fint=null,tot=0,elapsed=0,pendPg=null;
+// ════════ STATE ════════
+const STATE = {
+  focusOn: false,
+  savedPw: '',
+  setupPw: '',
+  unlockPw: '',
+  exitPw: '',
+  newPw: '',
+  focusMin: 30,
+  focusSubj: 'পদার্থবিজ্ঞান',
+  focusInt: null,
+  totalSec: 0,
+  elapsedSec: 0,
+  streak: 12,
+  goalDone: [true, true, false, false, false],
+  quizScore: 0,
+  quizTotal: 0,
+  settings: { notif: true, goal_rem: true, sound: false, penalty: true },
+  sessions: JSON.parse(localStorage.getItem('bm_sessions') || '[]'),
+  bookmarks: JSON.parse(localStorage.getItem('bm_bookmarks') || '[]'),
+};
 
-function tick(){const n=new Date();const t=String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');['ck0','ck1','ck2','ck3','ck4'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=t;});}
-tick();setInterval(tick,1000);
-
-window.addEventListener('load',()=>{setTimeout(()=>{const l=document.getElementById('ls');l.classList.add('out');setTimeout(()=>l.remove(),500);},1500);});
-
-// Week chart
-const wd=[2,4,3,5,3.5,1,4],wm=Math.max(...wd);
-const wce=document.getElementById('wc');
-wd.forEach((h,i)=>{const w=document.createElement('div');w.className='wbw';const b=document.createElement('div');b.className='wb';b.style.cssText='height:'+Math.round((h/wm)*72+4)+'px;background:'+(i===0?'var(--p)':'var(--bg)')+';border:1px solid var(--border)';w.appendChild(b);wce.appendChild(w);});
-
-// Streak cal
-const stdd=[1,2,3,4,5,7,8,9,10,11,12,14,15,17,18,19,20,22];
-const sce=document.getElementById('scal');
-for(let d=1;d<=23;d++){const c=document.createElement('div');c.className='cday '+(stdd.includes(d)?'std':'msd');c.textContent=d;sce.appendChild(c);}
-
-function showPage(id){
-  if(focOn&&(id==='pg-feed'||id==='pg-chat')){pendPg=id;pw3='';updD('ld','');document.getElementById('m-lock').style.display='flex';return;}
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
-  document.getElementById(id).classList.add('on');
-  document.getElementById('gcinp').style.display='none';
-  document.getElementById('aiinprow').style.display='none';
+// ════════ CLOCK ════════
+function tick() {
+  const n = new Date();
+  const t = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+  const el = document.getElementById('clk');
+  if (el) el.textContent = t;
 }
-function setNav(id){document.querySelectorAll('.nb2').forEach(b=>b.classList.remove('on'));const e=document.getElementById(id);if(e)e.classList.add('on');}
+tick(); setInterval(tick, 1000);
 
-const ftabIds=['lock','timer','shorts','playlist','pdf','quiz','lb','streak','group','planner','analytics','ai','shop'];
-function showFT(id,btn){
-  ftabIds.forEach(t=>{const e=document.getElementById('ft-'+t);if(e)e.style.display='none';});
-  const target=document.getElementById('ft-'+id);
-  if(target)target.style.display=(id==='ai'?'flex':'block');
-  document.querySelectorAll('#ftabs .stab').forEach(s=>s.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  else{const all=document.querySelectorAll('#ftabs .stab');const idx=ftabIds.indexOf(id);if(all[idx])all[idx].classList.add('on');}
-  showPage('pg-focus');setNav('bn-f');
-  document.getElementById('gcinp').style.display=(id==='group'?'flex':'none');
-  document.getElementById('aiinprow').style.display=(id==='ai'?'flex':'none');
+// ════════ LOADING ════════
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    const l = document.getElementById('ls');
+    l.classList.add('out');
+    setTimeout(() => l.remove(), 400);
+  }, 1200);
+  buildWeekChart([2,4,3,5,3.5,1,4], ['সোম','মঙ্গল','বুধ','বৃহ','শুক্র','শনি','রবি']);
+  buildStreakCal();
+  loadGoalState();
+  renderSessionHistory();
+});
+
+// ════════ TABS ════════
+const ALL_TABS = ['focus','timer','pdf','notes','quiz','goal','analytics','settings'];
+function goTab(id, btn) {
+  // Focus lock — disabled tabs
+  const LOCKED = ['pdf','notes','quiz','goal','analytics'];
+  if (STATE.focusOn && LOCKED.includes(id)) {
+    showToast('🔒 Focus চলছে! আনলক করো।');
+    return;
+  }
+  ALL_TABS.forEach(t => {
+    const e = document.getElementById('tb-' + t);
+    if (e) { e.style.display = 'none'; e.classList.remove('on'); }
+  });
+  const tgt = document.getElementById('tb-' + id);
+  if (tgt) { tgt.style.display = 'flex'; tgt.classList.add('on'); }
+  document.querySelectorAll('#main-tabs .tab').forEach(t => t.classList.remove('on'));
+  if (btn) btn.classList.add('on');
+  else {
+    const all = document.querySelectorAll('#main-tabs .tab');
+    const idx = ALL_TABS.indexOf(id);
+    if (all[idx]) all[idx].classList.add('on');
+  }
+  updateFocusLockUI();
+}
+function setBn(id) {
+  document.querySelectorAll('.bnav .nb').forEach(b => b.classList.remove('on'));
+  const e = document.getElementById(id);
+  if (e) e.classList.add('on');
 }
 
-function feedT(id,btn){['feedmain','feednews'].forEach(t=>document.getElementById('feed'+t).style.display='none');document.getElementById('feed'+id).style.display='block';document.querySelectorAll('#pg-feed .stab').forEach(s=>s.classList.remove('on'));if(btn)btn.classList.add('on');}
-function profT(id,btn){['posts','badges','settings'].forEach(t=>document.getElementById('pt-'+t).style.display='none');document.getElementById('pt-'+id).style.display='block';document.querySelectorAll('#pg-profile .stab').forEach(s=>s.classList.remove('on'));if(btn)btn.classList.add('on');}
+// ════════ FOCUS LOCK UI ════════
+function updateFocusLockUI() {
+  const LOCKED = ['pdf','notes','quiz','goal','analytics'];
+  const tabs = document.querySelectorAll('#main-tabs .tab');
+  tabs.forEach((tab, i) => {
+    const tabId = ALL_TABS[i];
+    if (STATE.focusOn && LOCKED.includes(tabId)) {
+      tab.classList.add('disabled-tab');
+    } else {
+      tab.classList.remove('disabled-tab');
+    }
+  });
+  // Bottom nav
+  const lockableBtns = ['bn-quiz','bn-goal'];
+  lockableBtns.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) btn.classList.toggle('dis', STATE.focusOn);
+  });
+  // Overlays
+  LOCKED.forEach(id => {
+    const overlay = document.getElementById(id + '-lock-overlay');
+    const content = document.getElementById(id + '-content');
+    if (overlay) overlay.style.display = STATE.focusOn ? 'block' : 'none';
+    if (content) content.style.display = STATE.focusOn ? 'none' : 'block';
+  });
+  // Banner
+  const banner = document.getElementById('focus-banner');
+  if (STATE.focusOn) {
+    banner.classList.add('show');
+  } else {
+    banner.classList.remove('show');
+  }
+}
 
-function mkNP(id,cb){
-  const el=document.getElementById(id);
-  if(!el||el.dataset.b)return;
-  el.dataset.b='1';
-  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(n=>{
-    const b=document.createElement('div');
-    b.className='nk'+(n===''?' emp':'');b.textContent=n;
-    if(n!=='')b.onclick=()=>cb(String(n));
+// ════════ NUMPAD BUILDER ════════
+function buildNumpad(containerId, pwVar, dotsId, onComplete, onError) {
+  const el = document.getElementById(containerId);
+  if (!el || el.dataset.built) return;
+  el.dataset.built = '1';
+  STATE[pwVar] = '';
+  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(n => {
+    const b = document.createElement('div');
+    b.className = 'nk' + (n === '' ? ' emp' : '');
+    b.textContent = n;
+    if (n !== '') b.onclick = () => {
+      if (n === '⌫') {
+        STATE[pwVar] = STATE[pwVar].slice(0, -1);
+      } else if (STATE[pwVar].length < 4) {
+        STATE[pwVar] += n;
+      }
+      updateDots(dotsId, STATE[pwVar]);
+      if (STATE[pwVar].length === 4 && onComplete) onComplete();
+    };
     el.appendChild(b);
   });
 }
-function updD(id,pw){document.querySelectorAll('#'+id+' .pwd').forEach((d,i)=>d.classList.toggle('f',i<pw.length));}
-
-mkNP('np1',n=>{if(n==='⌫')pw1=pw1.slice(0,-1);else if(pw1.length<4)pw1+=n;updD('d1',pw1);});
-mkNP('np2',n=>{if(n==='⌫')pw2=pw2.slice(0,-1);else if(pw2.length<4){pw2+=n;updD('d2',pw2);if(pw2.length===4){if(pw2===spw)stopFocus();else{pw2='';updD('d2','');toast('ভুল পাসওয়ার্ড! 🚫');}}}});
-mkNP('lnp',n=>{if(n==='⌫')pw3=pw3.slice(0,-1);else if(pw3.length<4){pw3+=n;updD('ld',pw3);if(pw3.length===4){if(pw3===spw){closeMod('m-lock');if(pendPg){showPage(pendPg);const nm=pendPg==='pg-feed'?'bn-f':pendPg==='pg-chat'?'bn-c':'bn-h';setNav(nm);pendPg=null;}}else{pw3='';updD('ld','');toast('ভুল পাসওয়ার্ড! 🚫');}}}});
-
-function selT(el,m){document.querySelectorAll('.topt').forEach(o=>o.classList.remove('on'));el.classList.add('on');fmin=m;document.getElementById('custominp').style.display=m===0?'block':'none';}
-function startFocus(){
-  if(pw1.length<4){toast('৪ সংখ্যার পাসওয়ার্ড দাও!');return;}
-  let mins=fmin;if(fmin===0){mins=parseInt(document.getElementById('cmin').value)||30;}
-  spw=pw1;focOn=true;
-  document.getElementById('fslbl').textContent=document.getElementById('fsubj').value;
-  document.getElementById('fsetup').style.display='none';
-  document.getElementById('factive').style.display='block';
-  tot=mins*60;elapsed=0;
-  fint=setInterval(()=>{
-    elapsed++;const rem=tot-elapsed;
-    if(rem<=0){stopFocus();toast('সেশন শেষ! 🎉 দারুণ!');return;}
-    document.getElementById('fcdown').textContent=String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0');
-    document.getElementById('fprog').style.width=Math.round((elapsed/tot)*100)+'%';
-  },1000);
+function updateDots(id, pw) {
+  document.querySelectorAll('#' + id + ' .pwd').forEach((d, i) => {
+    d.classList.toggle('f', i < pw.length);
+  });
 }
-function stopFocus(){
-  clearInterval(fint);focOn=false;spw='';pw1='';pw2='';
-  updD('d1','');updD('d2','');
-  document.getElementById('fsetup').style.display='block';
-  document.getElementById('factive').style.display='none';
-  document.getElementById('fcdown').textContent='--:--';
-  document.getElementById('fprog').style.width='0%';
+function resetNumpad(pwVar, dotsId) {
+  STATE[pwVar] = '';
+  updateDots(dotsId, '');
 }
 
-function tGoal(el){el.classList.toggle('done');el.innerHTML=el.classList.contains('done')?'<i class="ti ti-check" style="font-size:13px;color:#fff"></i>':'';}
-function aQ(el,type){document.querySelectorAll('.qopt').forEach(b=>{b.disabled=true;b.style.opacity='.6';});el.classList.add(type);el.style.opacity='1';toast(type==='correct'?'✅ সঠিক উত্তর!':'❌ ভুল! সঠিক: F = ma');setTimeout(()=>{document.querySelectorAll('.qopt').forEach(b=>{b.disabled=false;b.style.opacity='1';b.classList.remove('correct','wrong');});},2500);}
-function lbf(el){el.parentElement.querySelectorAll('button').forEach(b=>{b.style.background='transparent';b.style.color='var(--sub)';b.style.borderColor='var(--border)';});el.style.background='var(--p)';el.style.color='#fff';el.style.borderColor='var(--p)';}
-function fpill(el){el.closest('.prow').querySelectorAll('.pill').forEach(p=>p.classList.remove('on'));el.classList.add('on');}
-function selG(el){el.parentElement.querySelectorAll('div').forEach(d=>{d.style.background='transparent';d.style.color='var(--sub)';d.style.borderColor='var(--border)';});el.style.background='var(--p)';el.style.color='#fff';el.style.borderColor='var(--p)';}
-function sendG(){const inp=document.getElementById('ginp');const t=inp.value.trim();if(!t)return;const box=document.getElementById('gchat');const m=document.createElement('div');m.className='gmsg me';m.innerHTML='<div><div class="bub bout">'+t+'</div></div>';box.appendChild(m);box.scrollTop=box.scrollHeight;inp.value='';}
-document.getElementById('ginp').addEventListener('keydown',e=>{if(e.key==='Enter')sendG();});
-function sendAI(){const inp=document.getElementById('aiinp');const t=inp.value.trim();if(!t)return;const box=document.getElementById('aichat');const um=document.createElement('div');um.style.cssText='display:flex;flex-direction:row-reverse;margin-bottom:8px';um.innerHTML='<div class="ai-ubub">'+t+'</div>';box.appendChild(um);const am=document.createElement('div');am.style.cssText='display:flex;gap:8px;margin-bottom:10px;align-items:flex-start';am.innerHTML='<div class="ai-icon"><i class="ti ti-robot" style="font-size:16px;color:#fff"></i></div><div class="ai-bub">উত্তর লোড হচ্ছে... 🤔</div>';box.appendChild(am);box.scrollTop=box.scrollHeight;inp.value='';}
-document.getElementById('aiinp').addEventListener('keydown',e=>{if(e.key==='Enter')sendAI();});
-function likeP(btn){const sp=btn.querySelector('span');let c=parseInt(sp.textContent)||0;const ic=btn.querySelector('i');if(ic.style.color==='var(--r)'){ic.style.color='';sp.textContent=c-1;}else{ic.style.color='var(--r)';sp.textContent=c+1;}}
-function showCompose(){document.getElementById('m-compose').style.display='flex';}
-function subPost(){const t=document.getElementById('ctxt').value.trim();if(!t){toast('কিছু লিখো!');return;}closeMod('m-compose');document.getElementById('ctxt').value='';toast('🎉 Post হয়ে গেছে!');}
-function openDM(name,init){document.getElementById('dmn').textContent=name;document.getElementById('dma').textContent=init;document.getElementById('m-dm').style.display='flex';}
-function sendDM(){const inp=document.getElementById('dminp');const t=inp.value.trim();if(!t)return;const box=document.getElementById('dmmsgs');const m=document.createElement('div');m.className='gmsg me';m.innerHTML='<div><div class="bub bout">'+t+'</div></div>';box.appendChild(m);box.scrollTop=box.scrollHeight;inp.value='';}
-document.getElementById('dminp').addEventListener('keydown',e=>{if(e.key==='Enter')sendDM();});
-function closeMod(id){document.getElementById(id).style.display='none';}
-document.querySelectorAll('.modal,.msheet').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeMod(m.id);}));
-function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.opacity='1';t.style.transform='translateX(-50%) translateY(0)';clearTimeout(window._t);window._t=setTimeout(()=>{t.style.opacity='0';t.style.transform='translateX(-50%) translateY(20px)';},2500);}
+// Build all numpads
+buildNumpad('setup-numpad', 'setupPw', 'setup-dots', null, null);
+buildNumpad('unlock-numpad', 'unlockPw', 'unlock-dots', () => {
+  if (STATE.unlockPw === STATE.savedPw) {
+    stopFocus(false);
+  } else {
+    const errEl = document.getElementById('unlock-error');
+    const dotsEl = document.getElementById('unlock-dots');
+    dotsEl.classList.add('shake');
+    setTimeout(() => dotsEl.classList.remove('shake'), 300);
+    if (errEl) errEl.style.display = 'block';
+    setTimeout(() => { if (errEl) errEl.style.display = 'none'; }, 2000);
+    resetNumpad('unlockPw', 'unlock-dots');
+  }
+}, null);
+buildNumpad('exit-numpad', 'exitPw', 'exit-dots', () => {
+  if (STATE.exitPw === STATE.savedPw) {
+    document.getElementById('exit-modal').style.display = 'none';
+    stopFocus(true);
+  } else {
+    const errEl = document.getElementById('exit-error');
+    const dotsEl = document.getElementById('exit-dots');
+    dotsEl.classList.add('shake');
+    setTimeout(() => dotsEl.classList.remove('shake'), 300);
+    if (errEl) errEl.style.display = 'block';
+    setTimeout(() => { if (errEl) errEl.style.display = 'none'; }, 2000);
+    resetNumpad('exitPw', 'exit-dots');
+  }
+}, null);
+buildNumpad('newpw-numpad', 'newPw', 'newpw-dots', () => {
+  STATE.savedPw = STATE.newPw;
+  localStorage.setItem('bm_pw', STATE.savedPw);
+  document.getElementById('changepw-modal').style.display = 'none';
+  showToast('✅ পাসওয়ার্ড পরিবর্তন হয়েছে!');
+  resetNumpad('newPw', 'newpw-dots');
+}, null);
+
+// Restore saved PW
+const savedPw = localStorage.getItem('bm_pw');
+if (savedPw) STATE.savedPw = savedPw;
+
+// ════════ TIME SELECTION ════════
+function selTime(el, m) {
+  document.querySelectorAll('.topt').forEach(o => { o.classList.remove('on'); o.setAttribute('aria-checked','false'); });
+  el.classList.add('on'); el.setAttribute('aria-checked','true');
+  STATE.focusMin = m;
+  document.getElementById('custom-time-row').style.display = m === 0 ? 'block' : 'none';
+}
+
+// ════════ START FOCUS ════════
+function startFocus() {
+  if (STATE.setupPw.length < 4) { showToast('৪ সংখ্যার পাসওয়ার্ড দাও!'); return; }
+  let mins = STATE.focusMin;
+  if (mins === 0) {
+    mins = parseInt(document.getElementById('custom-mins').value) || 30;
+    if (mins < 1 || mins > 300) { showToast('১–৩০০ মিনিটের মধ্যে দাও।'); return; }
+  }
+  STATE.savedPw = STATE.setupPw;
+  localStorage.setItem('bm_pw', STATE.savedPw);
+  STATE.focusSubj = document.getElementById('focus-subj').value;
+  STATE.focusOn = true;
+  STATE.totalSec = mins * 60;
+  STATE.elapsedSec = 0;
+
+  document.getElementById('focus-setup').style.display = 'none';
+  document.getElementById('focus-active').style.display = 'block';
+  document.getElementById('focus-complete').style.display = 'none';
+  document.getElementById('focus-subj-label').textContent = STATE.focusSubj;
+  document.getElementById('banner-subj').textContent = STATE.focusSubj;
+
+  updateFocusLockUI();
+  resetNumpad('unlockPw', 'unlock-dots');
+  if (document.getElementById('unlock-error')) document.getElementById('unlock-error').style.display = 'none';
+
+  STATE.focusInt = setInterval(focusTick, 1000);
+  showToast('🔒 Focus শুরু হয়েছে! মনোযোগ দিয়ে পড়ো।');
+}
+
+function focusTick() {
+  STATE.elapsedSec++;
+  const rem = STATE.totalSec - STATE.elapsedSec;
+  if (rem <= 0) { stopFocus(false); return; }
+  const m = String(Math.floor(rem / 60)).padStart(2, '0');
+  const s = String(rem % 60).padStart(2, '0');
+  const display = m + ':' + s;
+  const cdown = document.getElementById('focus-countdown');
+  const banner = document.getElementById('banner-timer');
+  const prog = document.getElementById('focus-progress');
+  const elbl = document.getElementById('focus-elapsed-lbl');
+  if (cdown) cdown.textContent = display;
+  if (banner) banner.textContent = display;
+  if (prog) prog.style.width = Math.round((STATE.elapsedSec / STATE.totalSec) * 100) + '%';
+  if (elbl) elbl.textContent = Math.floor(STATE.elapsedSec / 60) + ' মিনিট হয়েছে';
+}
+
+// ════════ STOP FOCUS ════════
+function stopFocus(isEmergency) {
+  clearInterval(STATE.focusInt);
+  STATE.focusOn = false;
+
+  const minsStudied = Math.round(STATE.elapsedSec / 60);
+  const sessData = {
+    subj: STATE.focusSubj,
+    mins: minsStudied,
+    time: new Date().toLocaleTimeString('bn-BD', {hour:'2-digit',minute:'2-digit'}),
+    emergency: isEmergency
+  };
+  STATE.sessions.unshift(sessData);
+  if (STATE.sessions.length > 20) STATE.sessions.pop();
+  localStorage.setItem('bm_sessions', JSON.stringify(STATE.sessions));
+
+  if (!isEmergency) {
+    STATE.streak++;
+    document.getElementById('streak-count').textContent = STATE.streak;
+    document.getElementById('streak-display').textContent = STATE.streak;
+    localStorage.setItem('bm_streak', STATE.streak);
+    toggleGoal(document.getElementById('goal-5'), 5, true);
+  } else {
+    showToast('⚠️ Emergency exit — Penalty যোগ হয়েছে!');
+  }
+
+  document.getElementById('focus-setup').style.display = 'none';
+  document.getElementById('focus-active').style.display = 'none';
+  document.getElementById('focus-complete').style.display = 'block';
+  document.getElementById('session-summary').textContent = minsStudied + ' মিনিট পড়েছো' + (isEmergency ? ' (Emergency Exit)' : ' — দারুণ!');
+  document.getElementById('sess-time').textContent = minsStudied + ' মিনিট';
+  document.getElementById('sess-subj').textContent = STATE.focusSubj;
+  document.getElementById('sess-streak').textContent = STATE.streak + ' দিন';
+
+  resetNumpad('setupPw', 'setup-dots');
+  resetNumpad('unlockPw', 'unlock-dots');
+  resetNumpad('exitPw', 'exit-dots');
+
+  updateFocusLockUI();
+  renderSessionHistory();
+  if (!isEmergency) showToast('🎉 Focus সম্পন্ন! ' + minsStudied + ' মিনিট পড়েছো।');
+}
+
+function resetFocus() {
+  document.getElementById('focus-setup').style.display = 'block';
+  document.getElementById('focus-active').style.display = 'none';
+  document.getElementById('focus-complete').style.display = 'none';
+}
+
+function showExitModal() {
+  resetNumpad('exitPw', 'exit-dots');
+  if (document.getElementById('exit-error')) document.getElementById('exit-error').style.display = 'none';
+  document.getElementById('exit-modal').style.display = 'flex';
+}
+
+// ════════ CHARTS ════════
+function buildWeekChart(data, labels) {
+  const wc = document.getElementById('report-chart');
+  const wl = document.getElementById('report-labels');
+  if (!wc) return;
+  wc.innerHTML = ''; wl.innerHTML = '';
+  const mx = Math.max(...data);
+  data.forEach((h, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'wbw';
+    const b = document.createElement('div');
+    b.className = 'wb';
+    b.style.cssText = 'height:' + Math.round((h / mx) * 68 + 4) + 'px;background:' + (i === 0 ? 'var(--p)' : 'var(--bg)') + ';border:1px solid var(--bdr)';
+    wrap.appendChild(b);
+    wc.appendChild(wrap);
+    const lbl = document.createElement('span');
+    lbl.style.cssText = 'font-size:9px;color:var(--hint);font-weight:600';
+    lbl.textContent = labels[i];
+    wl.appendChild(lbl);
+  });
+}
+const reportData = {
+  daily: { data: [1.5,0.5,2,0,1,0.5,1.5], labels: ['৬টা','৭টা','৮টা','৯টা','১০টা','১১টা','১২টা'] },
+  weekly: { data: [2,4,3,5,3.5,1,4], labels: ['সোম','মঙ্গল','বুধ','বৃহ','শুক্র','শনি','রবি'] },
+  monthly: { data: [18,22,16,28,24,20,26,18,30,24,20,16], labels: ['১','৫','৯','১৩','১৭','২১','২৫','২৯','৩৩'] }
+};
+function setReport(type, el) {
+  el.parentElement.querySelectorAll('button').forEach(b => {
+    b.style.background = 'transparent'; b.style.color = 'var(--sub)'; b.style.borderColor = 'var(--bdr)';
+  });
+  el.style.background = 'var(--p)'; el.style.color = '#fff'; el.style.borderColor = 'var(--p)';
+  const d = reportData[type];
+  buildWeekChart(d.data, d.labels);
+}
+
+// ════════ STREAK CALENDAR ════════
+function buildStreakCal() {
+  const studied = [1,2,3,4,5,7,8,9,10,11,12,14,15,17,18,19,20,22];
+  const sc = document.getElementById('streak-cal');
+  if (!sc) return;
+  for (let d = 1; d <= 23; d++) {
+    const c = document.createElement('div');
+    c.className = 'cday ' + (studied.includes(d) ? 'std' : 'msd');
+    c.textContent = d;
+    sc.appendChild(c);
+  }
+}
+
+// ════════ GOALS ════════
+function loadGoalState() {
+  const saved = JSON.parse(localStorage.getItem('bm_goals') || 'null');
+  if (saved) STATE.goalDone = saved;
+  STATE.goalDone.forEach((done, i) => {
+    const el = document.getElementById('goal-' + (i + 1));
+    if (!el) return;
+    if (done) {
+      el.classList.add('done');
+      el.innerHTML = '<i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i>';
+    } else {
+      el.classList.remove('done');
+      el.innerHTML = '';
+    }
+  });
+  updateGoalCounter();
+}
+function toggleGoal(el, idx, forceOn = false) {
+  if (!el) return;
+  const i = idx - 1;
+  if (forceOn) {
+    STATE.goalDone[i] = true;
+    el.classList.add('done');
+    el.innerHTML = '<i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i>';
+  } else {
+    STATE.goalDone[i] = !STATE.goalDone[i];
+    el.classList.toggle('done', STATE.goalDone[i]);
+    el.innerHTML = STATE.goalDone[i] ? '<i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i>' : '';
+  }
+  localStorage.setItem('bm_goals', JSON.stringify(STATE.goalDone));
+  updateGoalCounter();
+}
+function updateGoalCounter() {
+  const done = STATE.goalDone.filter(Boolean).length;
+  const total = STATE.goalDone.length;
+  const pct = Math.round((done / total) * 100);
+  const counter = document.getElementById('goal-counter');
+  const pbar = document.getElementById('goal-pbar');
+  if (counter) counter.textContent = done + '/' + total + ' সম্পন্ন';
+  if (pbar) pbar.style.width = pct + '%';
+  if (done === total) showToast('🎉 সব লক্ষ্য পূরণ হয়েছে! দারুণ!');
+}
+
+// ════════ QUIZ ════════
+let quizAnswered = false;
+function setQuizType(el) {
+  el.parentElement.querySelectorAll('button').forEach(b => {
+    b.style.background = 'transparent'; b.style.color = 'var(--sub)'; b.style.borderColor = 'var(--bdr)';
+  });
+  el.style.background = 'var(--p)'; el.style.color = '#fff'; el.style.borderColor = 'var(--p)';
+  resetQuiz();
+}
+function answerQ(el, type, correct) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  document.querySelectorAll('#q-options .qopt').forEach(b => { b.disabled = true; b.style.opacity = '.7'; });
+  el.style.opacity = '1';
+  el.classList.add(type);
+  const result = document.getElementById('q-result');
+  if (result) {
+    result.style.display = 'block';
+    result.style.background = type === 'correct' ? 'var(--gl)' : 'var(--rl)';
+    result.style.color = type === 'correct' ? 'var(--gd)' : 'var(--r)';
+    result.textContent = type === 'correct' ? '✅ সঠিক উত্তর! F = ma' : '❌ ভুল! সঠিক উত্তর: F = ma (Newton\'s 2nd Law)';
+  }
+  if (type === 'correct') STATE.quizScore++;
+  STATE.quizTotal++;
+  const scoreEl = document.getElementById('my-quiz-score');
+  if (scoreEl) scoreEl.textContent = Math.round((STATE.quizScore / Math.max(1, STATE.quizTotal)) * 100) + '/100';
+  const nextBtn = document.getElementById('next-q-btn');
+  if (nextBtn) nextBtn.style.display = 'block';
+}
+function nextQuestion() {
+  resetQuiz();
+  showToast('পরের প্রশ্ন লোড হচ্ছে...');
+}
+function resetQuiz() {
+  quizAnswered = false;
+  document.querySelectorAll('#q-options .qopt').forEach(b => {
+    b.disabled = false; b.style.opacity = '1'; b.classList.remove('correct','wrong');
+  });
+  const result = document.getElementById('q-result');
+  if (result) result.style.display = 'none';
+  const nextBtn = document.getElementById('next-q-btn');
+  if (nextBtn) nextBtn.style.display = 'none';
+}
+
+// ════════ PDF ════════
+function setPdfFilter(el) {
+  el.parentElement.querySelectorAll('button').forEach(b => {
+    b.style.background = 'transparent'; b.style.color = 'var(--sub)'; b.style.borderColor = 'var(--bdr)';
+  });
+  el.style.background = 'var(--p)'; el.style.color = '#fff'; el.style.borderColor = 'var(--p)';
+  showToast('Filter applied!');
+}
+function openPdf(name) {
+  showToast('📄 ' + name + ' খুলছে...');
+}
+function downloadPdf(name) {
+  showToast('⬇️ ' + name + ' ডাউনলোড শুরু হয়েছে...');
+}
+function bookmarkPdf(btn, name) {
+  const icon = btn.querySelector('i');
+  const idx = STATE.bookmarks.indexOf(name);
+  if (idx === -1) {
+    STATE.bookmarks.push(name);
+    icon.style.color = 'var(--p)';
+    icon.classList.remove('ti-bookmark'); icon.classList.add('ti-bookmark-filled');
+    showToast('🔖 ' + name + ' bookmarked!');
+  } else {
+    STATE.bookmarks.splice(idx, 1);
+    icon.style.color = 'var(--hint)';
+    icon.classList.remove('ti-bookmark-filled'); icon.classList.add('ti-bookmark');
+    showToast('Bookmark সরানো হয়েছে।');
+  }
+  localStorage.setItem('bm_bookmarks', JSON.stringify(STATE.bookmarks));
+}
+
+// ════════ NOTES ════════
+function showAddNoteModal() {
+  document.getElementById('note-modal').style.display = 'flex';
+}
+function saveNote() {
+  const subj = document.getElementById('note-subject').value;
+  const title = document.getElementById('note-title').value.trim();
+  const body = document.getElementById('note-body').value.trim();
+  if (!title) { showToast('Title দাও!'); return; }
+  const list = document.getElementById('notes-list');
+  const card = document.createElement('div');
+  card.className = 'note-card';
+  card.onclick = () => showToast('Note খুলছে...');
+  const colors = { 'পদার্থবিজ্ঞান': 'var(--pl),var(--pd)', 'রসায়ন': 'var(--gl),var(--gd)', 'গণিত': 'var(--al),var(--ad)', 'জীববিজ্ঞান': '#E1F5EE,#065F46', 'বাংলা': '#FCEBEB,#A32D2D', 'ইংরেজি': '#EEEDFE,#3C3489' };
+  const [bg, clr] = (colors[subj] || 'var(--pl),var(--pd)').split(',');
+  card.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="note-tag" style="background:${bg};color:${clr}">${subj}</span><span style="font-size:10px;color:var(--hint)">এইমাত্র</span></div><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">${title}</div><div style="font-size:12px;color:var(--sub);line-height:1.5">${body.substring(0,80)}${body.length > 80 ? '...' : ''}</div>`;
+  list.insertBefore(card, list.firstChild);
+  document.getElementById('note-modal').style.display = 'none';
+  document.getElementById('note-title').value = '';
+  document.getElementById('note-body').value = '';
+  showToast('✅ Note সেভ হয়েছে!');
+}
+
+// ════════ SESSION HISTORY ════════
+function renderSessionHistory() {
+  const card = document.getElementById('session-history-card');
+  const list = document.getElementById('session-history-list');
+  if (!card || !list) return;
+  const todaySessions = STATE.sessions.slice(0, 5);
+  if (todaySessions.length === 0) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  list.innerHTML = '';
+  todaySessions.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'row';
+    row.innerHTML = `<i class="ti ti-clock" style="font-size:16px;color:var(--p)" aria-hidden="true"></i><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--txt)">${s.subj}</div><div style="font-size:10px;color:var(--hint)">${s.time}${s.emergency ? ' — Emergency' : ''}</div></div><div style="font-size:12px;font-weight:700;color:var(--p)">${s.mins}m</div>`;
+    list.appendChild(row);
+  });
+}
+
+// ════════ SETTINGS ════════
+function toggleSetting(el, key) {
+  el.classList.toggle('on');
+  STATE.settings[key] = el.classList.contains('on');
+  localStorage.setItem('bm_settings', JSON.stringify(STATE.settings));
+  showToast(el.classList.contains('on') ? '✅ চালু হয়েছে' : 'বন্ধ হয়েছে');
+}
+function showChangePwModal() {
+  resetNumpad('newPw', 'newpw-dots');
+  document.getElementById('changepw-modal').style.display = 'flex';
+}
+
+// ════════ TOAST ════════
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(window._toastT);
+  window._toastT = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+  }, 2500);
+}
+
+// ════════ MODAL CLOSE ════════
+document.querySelectorAll('.overlay,.msheet').forEach(m => {
+  m.addEventListener('click', e => {
+    if (e.target === m) m.style.display = 'none';
+  });
+});
+
+// ════════ LOAD SAVED STATE ════════
+const savedStreak = localStorage.getItem('bm_streak');
+if (savedStreak) {
+  STATE.streak = parseInt(savedStreak);
+  document.getElementById('streak-count').textContent = STATE.streak;
+}
+const savedSettings = JSON.parse(localStorage.getItem('bm_settings') || 'null');
+if (savedSettings) {
+  STATE.settings = { ...STATE.settings, ...savedSettings };
+  Object.keys(STATE.settings).forEach(k => {
+    const el = document.getElementById('toggle-' + k.replace('_','-'));
+    if (el) el.classList.toggle('on', STATE.settings[k]);
+  });
+}
 </script>
 </body>
 </html>
-EOF
-echo "Done! $(wc -c < /home/claude/bm.html) bytes, $(wc -l < /home/claude/bm.html) lines"
+HTMLEOF
+echo "Done! $(wc -c < /home/claude/brightmesh_study.html) bytes, $(wc -l < /home/claude/brightmesh_study.html) lines"
 Output
 
-Done! 93342 bytes, 782 lines
+Done! 83360 bytes, 1357 lines
