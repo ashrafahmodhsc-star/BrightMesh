@@ -1,1365 +1,564 @@
-bash
-
-cat > /home/claude/brightmesh_study.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="bn">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>BrightMesh — Study Mode</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BrightMesh Study Tools</title>
 <style>
-:root{
-  --p:#534AB7;--pl:#EEEDFE;--pd:#3C3489;--pm:#B8B4FF;
-  --g:#0F6E56;--gl:#E1F5EE;--gd:#065F46;
-  --a:#F59E0B;--al:#FEF3C7;--ad:#92400E;
-  --r:#A32D2D;--rl:#FCEBEB;
-  --o:#F97316;
-  --bg:#F0F0F7;--card:#fff;--bdr:#E5E5F0;
-  --txt:#111827;--sub:#6B7280;--hint:#9CA3AF;
-  --rad:14px;--rads:8px;
-}
-[data-focus="true"]{pointer-events:none;opacity:.38;user-select:none}
-[data-focus="true"] .focus-only{pointer-events:all;opacity:1}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
-body{background:var(--bg);max-width:430px;margin:0 auto;min-height:100svh}
-::-webkit-scrollbar{display:none}*{scrollbar-width:none}
+  :root{
+    --bg:#0b0b10;
+    --card:#17151f;
+    --card2:#1e1b28;
+    --purple:#7F77DD;
+    --purple-dim:#5b54a8;
+    --teal:#4fd8b8;
+    --gold:#f0b84f;
+    --blue:#5fa8f2;
+    --pink:#f2789f;
+    --text:#f1eef7;
+    --sub:#9791ab;
+    --danger:#ef5d78;
+    --green:#5fd99a;
+    --border:#2b2836;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 15% -10%, rgba(127,119,221,0.20), transparent 45%),
+      radial-gradient(circle at 100% 10%, rgba(79,216,184,0.10), transparent 40%),
+      var(--bg);
+    color:var(--text);
+    font-family:'Segoe UI', 'Noto Sans Bengali', sans-serif;
+    min-height:100vh;
+    padding:16px;
+  }
+  .wrap{max-width:480px;margin:0 auto;}
+  h1{
+    font-size:22px;
+    font-weight:800;
+    margin-bottom:18px;
+    letter-spacing:0.5px;
+    background:linear-gradient(90deg, var(--purple), var(--pink));
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    display:inline-block;
+  }
+  .tabs{
+    display:flex;
+    gap:6px;
+    margin-bottom:16px;
+    overflow-x:auto;
+    padding-bottom:4px;
+  }
+  .tab{
+    flex:0 0 auto;
+    padding:8px 14px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:20px;
+    font-size:13px;
+    color:var(--sub);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:0.18s;
+  }
+  .tab.active{
+    color:#0b0b10;
+    font-weight:700;
+    border-color:transparent;
+  }
+  .tab[data-tab="timer"].active{background:var(--purple);}
+  .tab[data-tab="todo1"].active{background:var(--teal);}
+  .tab[data-tab="todo2"].active{background:var(--gold);}
+  .tab[data-tab="history"].active{background:var(--blue);}
+  .tab[data-tab="countdown"].active{background:var(--pink);}
 
-/* LOADING */
-#ls{position:fixed;inset:0;background:var(--p);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;gap:8px;transition:opacity .4s}
-#ls.out{opacity:0;pointer-events:none}
-.lb{font-size:36px;font-weight:700;color:#fff}.lb span{color:var(--pm)}
-.lt{font-size:13px;color:rgba(255,255,255,.7)}
-.ldots{display:flex;gap:6px;margin-top:14px}
-.ldots i{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.5);animation:lp 1.2s infinite}
-.ldots i:nth-child(2){animation-delay:.2s}.ldots i:nth-child(3){animation-delay:.4s}
-@keyframes lp{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1)}}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-top:3px solid var(--accent, var(--purple));
+    border-radius:14px;
+    padding:18px;
+    margin-bottom:14px;
+    box-shadow:0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+  #timer .card{--accent:var(--purple);}
+  #todo1 .card{--accent:var(--teal);}
+  #todo2 .card{--accent:var(--gold);}
+  #history .card{--accent:var(--blue);}
+  #countdown .card{--accent:var(--pink);}
 
-/* APP */
-.app{display:flex;flex-direction:column;min-height:100svh}
+  /* Timer */
+  .timer-display{
+    font-size:54px;
+    font-weight:800;
+    text-align:center;
+    letter-spacing:2px;
+    margin:14px 0;
+    font-variant-numeric:tabular-nums;
+    color:var(--purple);
+    text-shadow:0 0 24px rgba(127,119,221,0.35);
+  }
+  .timer-display.running{
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{
+    0%,100%{text-shadow:0 0 24px rgba(127,119,221,0.35);}
+    50%{text-shadow:0 0 36px rgba(127,119,221,0.6);}
+  }
+  .timer-btns{display:flex;gap:8px;justify-content:center;margin-top:10px;}
+  button{
+    font-family:inherit;
+    cursor:pointer;
+    border:none;
+    border-radius:10px;
+    padding:10px 18px;
+    font-size:14px;
+    font-weight:700;
+    transition:0.15s;
+  }
+  button:disabled{opacity:0.4;cursor:default;}
+  .btn-primary{background:var(--purple);color:#fff;box-shadow:0 4px 14px -4px rgba(127,119,221,0.6);}
+  .btn-primary:hover:not(:disabled){background:var(--purple-dim);transform:translateY(-1px);}
+  .btn-outline{background:transparent;border:1px solid var(--border);color:var(--text);}
+  .btn-outline:hover{border-color:var(--purple);}
+  .btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger);}
+  .btn-danger:hover{background:rgba(239,93,120,0.1);}
+  .subject-row{display:flex;gap:8px;margin-bottom:10px;}
+  input[type="text"], input[type="date"], input[type="time"]{
+    flex:1;
+    background:var(--card2);
+    border:1px solid var(--border);
+    color:var(--text);
+    padding:10px 12px;
+    border-radius:10px;
+    font-size:14px;
+    font-family:inherit;
+  }
+  input:focus{outline:none;border-color:var(--purple);}
+  input::placeholder{color:var(--sub);}
 
-/* STATUS */
-.sbar{display:flex;justify-content:space-between;align-items:center;padding:10px 18px 4px;background:var(--card);font-size:12px;font-weight:600;color:var(--txt);flex-shrink:0}
+  /* todo1 accent button */
+  #todo1 .btn-primary{background:var(--teal);color:#0b0b10;box-shadow:0 4px 14px -4px rgba(79,216,184,0.6);}
+  #todo1 .btn-primary:hover:not(:disabled){background:#3fc0a2;}
+  #todo1 input[type="checkbox"]{accent-color:var(--teal);}
 
-/* HEADER */
-.hdr{display:flex;align-items:center;justify-content:space-between;padding:10px 16px 8px;background:var(--card);border-bottom:1px solid var(--bdr);flex-shrink:0}
-.logo{font-size:19px;font-weight:700;color:var(--txt)}.logo em{color:var(--p);font-style:normal}
-.hdr-r{display:flex;gap:10px;align-items:center}
+  /* todo2 accent button */
+  #todo2 .btn-primary{background:var(--gold);color:#0b0b10;box-shadow:0 4px 14px -4px rgba(240,184,79,0.6);}
+  #todo2 .btn-primary:hover:not(:disabled){background:#d9a23e;}
+  #todo2 input[type="checkbox"]{accent-color:var(--gold);}
 
-/* FOCUS BANNER */
-#focus-banner{display:none;background:var(--p);padding:8px 16px;align-items:center;justify-content:space-between;flex-shrink:0}
-#focus-banner.show{display:flex}
-.fb-timer{font-size:18px;font-weight:700;color:#fff;font-variant-numeric:tabular-nums}
-.fb-label{font-size:11px;color:rgba(255,255,255,.8)}
-.fb-exit{padding:6px 14px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:100px;color:#fff;font-size:11px;font-weight:600;cursor:pointer;pointer-events:all}
+  /* Todo */
+  .todo-item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:10px 4px;
+    border-bottom:1px solid var(--border);
+  }
+  .todo-item:last-child{border-bottom:none;}
+  .todo-item input[type="checkbox"]{
+    width:18px;height:18px;flex:0 0 auto;
+  }
+  .todo-text{flex:1;font-size:14px;}
+  .todo-text.done{color:var(--sub);text-decoration:line-through;}
+  .del-btn{
+    background:none;border:none;color:var(--sub);font-size:16px;padding:2px 6px;
+  }
+  .del-btn:hover{color:var(--danger);}
+  .empty{color:var(--sub);font-size:13px;text-align:center;padding:16px 0;}
 
-/* TABS */
-.tabs{display:flex;background:var(--card);border-bottom:1px solid var(--bdr);overflow-x:auto;flex-shrink:0}
-.tab{flex-shrink:0;padding:11px 16px;border:none;background:transparent;font-size:12px;font-weight:600;color:var(--hint);cursor:pointer;border-bottom:2.5px solid transparent;white-space:nowrap;display:flex;align-items:center;gap:5px}
-.tab.on{color:var(--p);border-bottom-color:var(--p)}
-.tab.disabled-tab{opacity:.35;cursor:not-allowed}
+  /* History */
+  .history-item{
+    padding:10px 4px;
+    border-bottom:1px solid var(--border);
+    font-size:13px;
+  }
+  .history-item:last-child{border-bottom:none;}
+  .h-top{display:flex;justify-content:space-between;color:var(--text);font-weight:700;}
+  .h-top span:last-child{color:var(--blue);}
+  .h-sub{color:var(--sub);margin-top:2px;}
 
-/* CONTENT */
-.content{flex:1;overflow:hidden;display:flex;flex-direction:column}
-.tb{display:none;flex:1;overflow-y:auto;padding:12px 14px 80px;flex-direction:column}
-.tb.on{display:flex}
+  /* Countdown */
+  .countdown-num{
+    font-size:48px;
+    font-weight:800;
+    text-align:center;
+    margin:10px 0 2px;
+    transition:color 0.3s;
+  }
+  .countdown-label{text-align:center;color:var(--sub);font-size:13px;margin-bottom:10px;}
+  .exam-name{
+    text-align:center;
+    font-size:15px;
+    color:var(--text);
+    margin-bottom:4px;
+    font-weight:700;
+  }
+  .progress-track{
+    height:8px;
+    background:var(--card2);
+    border-radius:6px;
+    overflow:hidden;
+    margin:14px 0 18px;
+  }
+  .progress-fill{
+    height:100%;
+    background:linear-gradient(90deg, var(--pink), var(--purple));
+    border-radius:6px;
+    transition:width 0.4s;
+  }
+  #countdown .btn-primary{background:var(--pink);color:#fff;box-shadow:0 4px 14px -4px rgba(242,120,159,0.6);}
+  #countdown .btn-primary:hover:not(:disabled){background:#d8618a;}
 
-/* BOTTOM NAV */
-.bnav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:var(--card);border-top:1px solid var(--bdr);display:flex;padding:6px 0 10px;z-index:100}
-.nb{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:transparent;cursor:pointer;padding:2px 0}
-.nb i{font-size:22px;color:var(--hint)}
-.nb span{font-size:9px;color:var(--hint);font-weight:600}
-.nb.on i,.nb.on span{color:var(--p)}
-.nb.dis{opacity:.3;cursor:not-allowed;pointer-events:none}
-.nbplus{width:48px;height:48px;border-radius:50%;background:var(--p);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-top:-16px;box-shadow:0 4px 16px rgba(83,74,183,.45)}
-
-/* CARDS */
-.card{background:var(--card);border-radius:var(--rad);padding:14px;margin-bottom:10px;border:1px solid var(--bdr)}
-.ct{font-size:10px;font-weight:700;color:var(--hint);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
-.pb{background:var(--bg);border-radius:100px;height:5px;overflow:hidden;margin:5px 0}
-.pf{height:5px;border-radius:100px;transition:width .4s}
-.row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
-.row:last-child{border-bottom:none}
-.mgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:10px}
-.mc{background:var(--card);border-radius:var(--rad);padding:12px;border:1px solid var(--bdr)}
-.mc .l{font-size:10px;color:var(--hint);font-weight:600;margin-bottom:2px}
-.mc .v{font-size:22px;font-weight:700;color:var(--txt)}
-.mc .s{font-size:10px;color:var(--hint);margin-top:2px}
-.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
-.shdr-t{font-size:14px;font-weight:700;color:var(--txt)}
-.warn{display:flex;align-items:center;gap:8px;background:var(--al);border-radius:var(--rads);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--ad);font-weight:600}
-.info{display:flex;align-items:center;gap:8px;background:var(--pl);border-radius:var(--rads);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--pd);font-weight:600}
-.btn-p{width:100%;padding:13px;background:var(--p);color:#fff;border:none;border-radius:var(--rad);font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px}
-.btn-o{width:100%;padding:11px;background:transparent;color:var(--p);border:2px solid var(--p);border-radius:var(--rad);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px}
-.btn-r{width:100%;padding:11px;background:transparent;color:var(--r);border:2px solid var(--r);border-radius:var(--rad);font-size:13px;font-weight:700;cursor:pointer;margin-bottom:8px}
-.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:11px;font-weight:600}
-.sel{width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;margin-bottom:10px;cursor:pointer}
-.inp{width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;margin-bottom:10px}
-.inp:focus,.sel:focus{border-color:var(--p)}
-.avt{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
-.prow{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
-.pill{padding:5px 12px;border-radius:100px;border:1px solid var(--bdr);background:var(--card);color:var(--sub);font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap}
-.pill.on{background:var(--p);color:#fff;border-color:var(--p)}
-
-/* FOCUS LOCK */
-.fhero{border-radius:var(--rad);padding:24px;text-align:center;margin-bottom:12px}
-.ftime{font-size:52px;font-weight:700;color:#fff;letter-spacing:4px;font-variant-numeric:tabular-nums}
-.flbl{font-size:13px;color:rgba(255,255,255,.8);margin-top:6px;font-weight:500}
-.topts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
-.topt{padding:10px 4px;border:2px solid var(--bdr);border-radius:var(--rads);text-align:center;cursor:pointer;font-size:12px;font-weight:700;color:var(--sub);background:var(--card)}
-.topt.on{border-color:var(--p);color:var(--p);background:var(--pl)}
-.pwdots{display:flex;gap:12px;justify-content:center;margin:12px 0}
-.pwd{width:14px;height:14px;border-radius:50%;background:var(--bg);border:2px solid var(--bdr);transition:all .15s}
-.pwd.f{background:var(--p);border-color:var(--p)}
-.npad{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
-.nk{padding:14px;border:1px solid var(--bdr);border-radius:var(--rad);font-size:18px;font-weight:600;background:var(--card);color:var(--txt);cursor:pointer;text-align:center;transition:background .1s;user-select:none}
-.nk:active{background:var(--bg)}.nk.emp{background:transparent;border-color:transparent;cursor:default}
-@keyframes wrongShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
-.shake{animation:wrongShake .3s ease}
-
-/* TIMER */
-.wchart{display:flex;align-items:flex-end;gap:5px;height:80px}
-.wbw{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
-.wb{width:100%;border-radius:5px 5px 0 0}
-.wlbl{font-size:9px;color:var(--hint);font-weight:600}
-
-/* PDF */
-.pdfcard{display:flex;align-items:center;gap:10px;padding:11px;background:var(--bg);border-radius:var(--rad);margin-bottom:8px;cursor:pointer;transition:opacity .2s}
-.pdfcard:active{opacity:.7}
-.pdficon{width:48px;height:56px;border-radius:8px;background:var(--rl);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.pdf-overlay{position:absolute;inset:0;background:rgba(255,255,255,.7);border-radius:var(--rad);display:flex;align-items:center;justify-content:center;z-index:10}
-
-/* QUIZ */
-.qopt{width:100%;padding:12px 14px;border:2px solid var(--bdr);border-radius:var(--rad);font-size:13px;font-weight:600;background:var(--card);color:var(--txt);cursor:pointer;text-align:left;margin-bottom:8px;transition:all .15s}
-.qopt:hover:not(:disabled){border-color:var(--p);background:var(--pl)}
-.qopt.correct{border-color:var(--g);background:var(--gl);color:var(--gd)}
-.qopt.wrong{border-color:var(--r);background:var(--rl);color:var(--r)}
-.qopt:disabled{cursor:not-allowed}
-.lbrow{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bdr)}
-.lbrow:last-child{border-bottom:none}
-.lbyou{background:var(--pl);border-radius:10px;padding:10px;border:none;margin:3px 0}
-
-/* GOAL */
-.goalrow{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--bdr)}
-.goalrow:last-child{border-bottom:none}
-.gcheck{width:24px;height:24px;border-radius:50%;border:2px solid var(--bdr);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s}
-.gcheck.done{background:var(--g);border-color:var(--g)}
-
-/* STREAK CAL */
-.scal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
-.cday{aspect-ratio:1;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
-.std{background:var(--p);color:#fff}.msd{background:var(--bg);color:var(--hint)}
-
-/* BADGES */
-.bgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.bitem{border-radius:12px;padding:11px 6px;text-align:center}
-.bitem i{font-size:24px;display:block;margin-bottom:4px}
-.bnm{font-size:10px;font-weight:700}
-.bearned{background:var(--al)}.bearned i{color:var(--a)}.bearned .bnm{color:var(--ad)}
-.blocked{background:var(--bg)}.blocked i{color:var(--hint)}.blocked .bnm{color:var(--hint)}
-
-/* ANALYTICS */
-.anbar{display:flex;align-items:center;gap:10px;margin-bottom:4px}
-.anname{font-size:12px;font-weight:700;color:var(--txt);min-width:80px}
-.anpb{flex:1;background:var(--bdr);border-radius:100px;height:7px;overflow:hidden}
-.anfill{height:7px;border-radius:100px}
-
-/* PLANNER */
-.planrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
-.planrow:last-child{border-bottom:none}
-.plantag{padding:3px 9px;border-radius:100px;font-size:10px;font-weight:700}
-
-/* SETTINGS */
-.setrow{display:flex;align-items:center;justify-content:space-between;padding:13px 0;border-bottom:1px solid var(--bdr)}
-.setrow:last-child{border-bottom:none}
-.toggle{width:42px;height:24px;border-radius:100px;background:var(--bdr);border:none;cursor:pointer;position:relative;transition:background .2s;flex-shrink:0}
-.toggle.on{background:var(--p)}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
-.toggle.on::after{left:21px}
-
-/* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:20px}
-.mbox{background:var(--card);border-radius:22px;padding:22px;width:100%;max-width:320px;text-align:center}
-.msheet{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:flex-end}
-.mshin{background:var(--card);border-radius:22px 22px 0 0;width:100%;max-height:80svh;display:flex;flex-direction:column}
-
-/* SESSION COMPLETE */
-.session-card{background:linear-gradient(135deg,var(--p),var(--pd));border-radius:var(--rad);padding:22px;text-align:center;margin-bottom:12px;color:#fff}
-
-/* TOAST */
-#toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(20px);background:#111;color:#fff;padding:10px 20px;border-radius:100px;font-size:12px;font-weight:600;opacity:0;transition:all .3s;z-index:9999;white-space:nowrap;pointer-events:none;max-width:300px;text-align:center}
-
-/* NOTES */
-.note-card{background:var(--card);border-radius:var(--rad);padding:12px;margin-bottom:8px;border:1px solid var(--bdr);cursor:pointer}
-.note-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:100px}
+  label{font-size:12px;color:var(--sub);display:block;margin-bottom:4px;}
+  .field{margin-bottom:10px;}
 </style>
 </head>
 <body>
+<div class="wrap">
+  <h1>📚 BrightMesh Study Tools</h1>
 
-<!-- LOADING -->
-<div id="ls">
-  <div class="lb">Bright<span>Mesh</span></div>
-  <div class="lt">Study Mode লোড হচ্ছে...</div>
-  <div class="ldots"><i></i><i></i><i></i></div>
+  <div class="tabs">
+    <div class="tab active" data-tab="timer">⏱ টাইমার</div>
+    <div class="tab" data-tab="todo1">✅ ডেইলি টাস্ক</div>
+    <div class="tab" data-tab="todo2">🎯 এক্সাম চেকলিস্ট</div>
+    <div class="tab" data-tab="history">📜 হিস্টোরি</div>
+    <div class="tab" data-tab="countdown">📅 কাউন্টডাউন</div>
+  </div>
+
+  <!-- TIMER -->
+  <div class="panel active" id="timer">
+    <div class="card">
+      <div class="subject-row">
+        <input type="text" id="timerSubject" placeholder="কী পড়ছো? (যেমন: জৈব রসায়ন)">
+      </div>
+      <div class="timer-display" id="timerDisplay">00:00:00</div>
+      <div class="timer-btns">
+        <button class="btn-primary" id="startBtn">শুরু</button>
+        <button class="btn-outline" id="pauseBtn" disabled>থামাও</button>
+        <button class="btn-danger" id="resetBtn">রিসেট</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODO 1: Daily -->
+  <div class="panel" id="todo1">
+    <div class="card">
+      <div class="subject-row">
+        <input type="text" id="todo1Input" placeholder="নতুন ডেইলি টাস্ক লিখো...">
+        <button class="btn-primary" id="todo1Add">যোগ</button>
+      </div>
+      <div id="todo1List"></div>
+    </div>
+  </div>
+
+  <!-- TODO 2: Exam checklist -->
+  <div class="panel" id="todo2">
+    <div class="card">
+      <div class="subject-row">
+        <input type="text" id="todo2Input" placeholder="এক্সাম প্রিপ গোল লিখো...">
+        <button class="btn-primary" id="todo2Add">যোগ</button>
+      </div>
+      <div id="todo2List"></div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="panel" id="history">
+    <div class="card">
+      <div id="historyList"></div>
+    </div>
+  </div>
+
+  <!-- COUNTDOWN -->
+  <div class="panel" id="countdown">
+    <div class="card">
+      <div class="field">
+        <label>পরীক্ষার নাম</label>
+        <input type="text" id="examName" placeholder="যেমন: HSC কেমিস্ট্রি ২য় পত্র">
+      </div>
+      <div class="field">
+        <label>পরীক্ষার তারিখ</label>
+        <input type="date" id="examDate">
+      </div>
+      <button class="btn-primary" id="examSave" style="width:100%;margin-top:4px;">সেভ করো</button>
+    </div>
+    <div class="card" id="countdownResult" style="display:none;">
+      <div class="exam-name" id="cdName"></div>
+      <div class="countdown-num" id="cdDays">-</div>
+      <div class="countdown-label" id="cdLabel">দিন বাকি</div>
+      <div class="progress-track"><div class="progress-fill" id="cdProgress" style="width:0%;"></div></div>
+      <button class="btn-outline" id="examClear" style="width:100%;">মুছে ফেলো</button>
+    </div>
+  </div>
+
 </div>
-
-<div class="app" id="app">
-
-  <!-- STATUS BAR -->
-  <div class="sbar">
-    <span id="clk">9:41</span>
-    <div style="display:flex;gap:5px;align-items:center;font-size:12px;color:var(--txt)">
-      <i class="ti ti-wifi" aria-hidden="true"></i>
-      <i class="ti ti-battery-3" aria-hidden="true"></i>
-    </div>
-  </div>
-
-  <!-- HEADER -->
-  <div class="hdr">
-    <div class="logo">Bright<em>Mesh</em> <span style="font-size:11px;color:var(--hint);font-weight:400">Study</span></div>
-    <div class="hdr-r">
-      <div class="chip" style="background:var(--al);color:var(--ad)" id="streak-chip">
-        <i class="ti ti-flame" style="font-size:12px" aria-hidden="true"></i>
-        <span id="streak-count">12</span> দিন
-      </div>
-      <button style="width:34px;height:34px;border-radius:50%;border:none;background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative" onclick="showToast('🔔 কোনো নতুন notification নেই')" aria-label="Notifications">
-        <i class="ti ti-bell" style="font-size:18px;color:var(--txt)" aria-hidden="true"></i>
-        <div style="position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--r);border:2px solid var(--card)" id="notif-dot"></div>
-      </button>
-      <div class="avt" style="width:34px;height:34px;background:var(--pl);color:var(--pd);cursor:pointer" onclick="goTab('settings')" aria-label="Profile">তুমি</div>
-    </div>
-  </div>
-
-  <!-- FOCUS BANNER (always visible when focus is on) -->
-  <div id="focus-banner" role="status" aria-live="polite">
-    <div class="focus-only">
-      <div class="fb-label">Focus চলছে</div>
-      <div class="fb-timer" id="banner-timer">29:59</div>
-    </div>
-    <div class="focus-only" style="text-align:right">
-      <div class="fb-label" id="banner-subj">পদার্থবিজ্ঞান</div>
-      <button class="fb-exit" onclick="showExitModal()" aria-label="Focus Lock বন্ধ করো">Exit করো</button>
-    </div>
-  </div>
-
-  <!-- TABS -->
-  <div class="tabs" id="main-tabs">
-    <button class="tab on" id="tab-focus" onclick="goTab('focus',this)">
-      <i class="ti ti-lock" style="font-size:13px" aria-hidden="true"></i> Focus
-    </button>
-    <button class="tab" id="tab-timer" onclick="goTab('timer',this)">
-      <i class="ti ti-clock" style="font-size:13px" aria-hidden="true"></i> Timer
-    </button>
-    <button class="tab" id="tab-pdf" onclick="goTab('pdf',this)">
-      <i class="ti ti-file-text" style="font-size:13px" aria-hidden="true"></i> PDF
-    </button>
-    <button class="tab" id="tab-notes" onclick="goTab('notes',this)">
-      <i class="ti ti-notebook" style="font-size:13px" aria-hidden="true"></i> Notes
-    </button>
-    <button class="tab" id="tab-quiz" onclick="goTab('quiz',this)">
-      <i class="ti ti-pencil-check" style="font-size:13px" aria-hidden="true"></i> Quiz
-    </button>
-    <button class="tab" id="tab-goal" onclick="goTab('goal',this)">
-      <i class="ti ti-target" style="font-size:13px" aria-hidden="true"></i> Goal
-    </button>
-    <button class="tab" id="tab-analytics" onclick="goTab('analytics',this)">
-      <i class="ti ti-chart-bar" style="font-size:13px" aria-hidden="true"></i> Analytics
-    </button>
-    <button class="tab" id="tab-settings" onclick="goTab('settings',this)">
-      <i class="ti ti-settings" style="font-size:13px" aria-hidden="true"></i> Settings
-    </button>
-  </div>
-
-  <div class="content">
-
-    <!-- ═══════════════ FOCUS LOCK ═══════════════ -->
-    <div class="tb on" id="tb-focus">
-
-      <!-- SETUP VIEW -->
-      <div id="focus-setup">
-        <div class="fhero" style="background:var(--p)">
-          <div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px">
-            <i class="ti ti-lock" aria-hidden="true"></i> FOCUS LOCK
-          </div>
-          <div class="ftime">--:--</div>
-          <div class="flbl">মনোযোগ দিয়ে পড়ো — Social বন্ধ থাকবে</div>
-        </div>
-
-        <div class="card">
-          <div class="ct">সেশনের সময়</div>
-          <div class="topts">
-            <div class="topt on" onclick="selTime(this,30)" role="radio" aria-checked="true">30m</div>
-            <div class="topt" onclick="selTime(this,60)" role="radio" aria-checked="false">60m</div>
-            <div class="topt" onclick="selTime(this,90)" role="radio" aria-checked="false">90m</div>
-            <div class="topt" onclick="selTime(this,0)" role="radio" aria-checked="false">Custom</div>
-          </div>
-          <div id="custom-time-row" style="display:none;margin-bottom:10px">
-            <input class="inp" type="number" id="custom-mins" placeholder="মিনিট লিখো (১–৩০০)" min="1" max="300" style="margin:0">
-          </div>
-
-          <div class="ct">বিষয় বেছে নাও</div>
-          <select class="sel" id="focus-subj" aria-label="বিষয়">
-            <option value="পদার্থবিজ্ঞান">পদার্থবিজ্ঞান</option>
-            <option value="রসায়ন">রসায়ন</option>
-            <option value="গণিত">গণিত</option>
-            <option value="জীববিজ্ঞান">জীববিজ্ঞান</option>
-            <option value="বাংলা">বাংলা</option>
-            <option value="ইংরেজি">ইংরেজি</option>
-            <option value="ICT">ICT</option>
-            <option value="Programming">Programming</option>
-            <option value="অন্যান্য">অন্যান্য</option>
-          </select>
-
-          <div class="ct">পাসওয়ার্ড সেট করো (৪ সংখ্যা)</div>
-          <div class="pwdots" id="setup-dots">
-            <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
-          </div>
-          <div class="npad" id="setup-numpad"></div>
-        </div>
-
-        <div class="warn">
-          <i class="ti ti-shield-lock" style="font-size:18px" aria-hidden="true"></i>
-          Focus চালু হলে PDF, Notes, Quiz ও Goal সব বন্ধ হবে। পাসওয়ার্ড ছাড়া বের হওয়া যাবে না।
-        </div>
-
-        <button class="btn-p" onclick="startFocus()">
-          <i class="ti ti-lock" aria-hidden="true"></i> Focus Lock শুরু করো
-        </button>
-      </div>
-
-      <!-- ACTIVE VIEW -->
-      <div id="focus-active" style="display:none">
-        <div class="fhero" style="background:var(--pd)" id="focus-active-hero">
-          <div style="font-size:11px;color:rgba(255,255,255,.8);font-weight:600;margin-bottom:6px;display:flex;align-items:center;justify-content:center;gap:6px">
-            <i class="ti ti-lock" aria-hidden="true"></i> FOCUS চলছে
-          </div>
-          <div class="ftime" id="focus-countdown">29:59</div>
-          <div id="focus-subj-label" style="font-size:13px;color:rgba(255,255,255,.8);margin-top:6px;font-weight:500">পদার্থবিজ্ঞান</div>
-          <div style="background:rgba(255,255,255,.2);border-radius:100px;height:4px;margin-top:14px;overflow:hidden">
-            <div id="focus-progress" style="height:4px;border-radius:100px;background:#fff;width:0%;transition:width .5s"></div>
-          </div>
-          <div style="font-size:11px;color:rgba(255,255,255,.7);margin-top:8px" id="focus-elapsed-lbl">0 মিনিট হয়েছে</div>
-        </div>
-
-        <div class="info focus-only">
-          <i class="ti ti-info-circle" style="font-size:18px" aria-hidden="true"></i>
-          সব features বন্ধ। পাসওয়ার্ড দিয়ে বের হও।
-        </div>
-
-        <div class="card focus-only">
-          <div style="text-align:center;font-size:13px;color:var(--sub);margin-bottom:6px;font-weight:600">আনলক করতে পাসওয়ার্ড দাও</div>
-          <div class="pwdots" id="unlock-dots">
-            <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
-          </div>
-          <div class="npad" id="unlock-numpad"></div>
-          <div id="unlock-error" style="display:none;text-align:center;color:var(--r);font-size:12px;font-weight:600;margin-top:8px">ভুল পাসওয়ার্ড! আবার চেষ্টা করো।</div>
-        </div>
-
-        <button class="btn-r focus-only" onclick="showExitModal()">
-          <i class="ti ti-alert-triangle" aria-hidden="true"></i> জরুরি Exit (Penalty যোগ হবে)
-        </button>
-      </div>
-
-      <!-- SESSION COMPLETE -->
-      <div id="focus-complete" style="display:none">
-        <div class="session-card">
-          <div style="font-size:40px;margin-bottom:8px">🎉</div>
-          <div style="font-size:18px;font-weight:700;margin-bottom:4px">সেশন সম্পন্ন!</div>
-          <div style="font-size:13px;color:rgba(255,255,255,.8)" id="session-summary">৩০ মিনিট পড়েছো</div>
-        </div>
-        <div class="card" id="session-stats">
-          <div class="ct">এই সেশনে</div>
-          <div class="row">
-            <i class="ti ti-clock" style="font-size:18px;color:var(--p)" aria-hidden="true"></i>
-            <div style="flex:1;font-size:13px;color:var(--txt)">মোট সময়</div>
-            <div style="font-size:13px;font-weight:700;color:var(--p)" id="sess-time">30 মিনিট</div>
-          </div>
-          <div class="row">
-            <i class="ti ti-book" style="font-size:18px;color:var(--p)" aria-hidden="true"></i>
-            <div style="flex:1;font-size:13px;color:var(--txt)">বিষয়</div>
-            <div style="font-size:13px;font-weight:700;color:var(--p)" id="sess-subj">পদার্থবিজ্ঞান</div>
-          </div>
-          <div class="row">
-            <i class="ti ti-flame" style="font-size:18px;color:var(--a)" aria-hidden="true"></i>
-            <div style="flex:1;font-size:13px;color:var(--txt)">Streak</div>
-            <div style="font-size:13px;font-weight:700;color:var(--a)" id="sess-streak">12 দিন</div>
-          </div>
-        </div>
-        <button class="btn-p" onclick="resetFocus()">নতুন Session শুরু করো</button>
-      </div>
-    </div>
-
-    <!-- ═══════════════ STUDY TIMER ═══════════════ -->
-    <div class="tb" id="tb-timer">
-      <div class="mgrid">
-        <div class="mc"><div class="l">আজকের পড়া</div><div class="v" id="today-total">3h 20m</div><div class="s">লক্ষ্য: 5h</div></div>
-        <div class="mc"><div class="l">এই সপ্তাহ</div><div class="v">18h 45m</div><div class="s">গত সপ্তাহ: 14h</div></div>
-      </div>
-
-      <!-- Report Toggle -->
-      <div style="display:flex;gap:5px;margin-bottom:10px">
-        <button onclick="setReport('daily',this)" style="flex-shrink:0;padding:6px 14px;border:1px solid var(--p);border-radius:100px;background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">দৈনিক</button>
-        <button onclick="setReport('weekly',this)" style="flex-shrink:0;padding:6px 14px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">সাপ্তাহিক</button>
-        <button onclick="setReport('monthly',this)" style="flex-shrink:0;padding:6px 14px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">মাসিক</button>
-      </div>
-
-      <div class="card">
-        <div class="ct">বিষয় অনুযায়ী সময়</div>
-        <div id="subject-list">
-          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--p)"></div><div style="flex:1;font-size:13px;color:var(--txt)">পদার্থবিজ্ঞান</div><div style="width:65px"><div class="pb"><div class="pf" style="width:80%;background:var(--p)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">1h 45m</div></div>
-          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:#0F6E56"></div><div style="flex:1;font-size:13px;color:var(--txt)">রসায়ন</div><div style="width:65px"><div class="pb"><div class="pf" style="width:55%;background:#0F6E56"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">55m</div></div>
-          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--o)"></div><div style="flex:1;font-size:13px;color:var(--txt)">গণিত</div><div style="width:65px"><div class="pb"><div class="pf" style="width:35%;background:var(--o)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">40m</div></div>
-          <div class="row"><div style="width:9px;height:9px;border-radius:50%;background:var(--r)"></div><div style="flex:1;font-size:13px;color:var(--txt)">জীববিজ্ঞান</div><div style="width:65px"><div class="pb"><div class="pf" style="width:20%;background:var(--r)"></div></div></div><div style="font-size:12px;color:var(--sub);min-width:42px;text-align:right">20m</div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="ct">রিপোর্ট</div>
-        <div class="wchart" id="report-chart"></div>
-        <div style="display:flex;justify-content:space-between;margin-top:5px" id="report-labels"></div>
-      </div>
-
-      <div class="mgrid">
-        <div class="mc"><div class="l">এই মাস</div><div class="v">62h</div><div class="s">↑ 15% বেশি</div></div>
-        <div class="mc"><div class="l">মোট Sessions</div><div class="v">48</div><div class="s">গড়: 77m</div></div>
-      </div>
-
-      <!-- Focus History from localStorage -->
-      <div class="card" id="session-history-card" style="display:none">
-        <div class="ct">আজকের Sessions</div>
-        <div id="session-history-list"></div>
-      </div>
-    </div>
-
-    <!-- ═══════════════ PDF ═══════════════ -->
-    <div class="tb" id="tb-pdf">
-      <!-- Focus lock overlay -->
-      <div id="pdf-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
-        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
-        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
-        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে PDF পড়তে পারবে।</div>
-      </div>
-
-      <div id="pdf-content">
-        <div style="display:flex;gap:5px;margin-bottom:10px;overflow-x:auto">
-          <button onclick="setPdfFilter(this,'all')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--p);border-radius:100px;background:var(--p);color:#fff;font-size:11px;font-weight:600;cursor:pointer">সব</button>
-          <button onclick="setPdfFilter(this,'physics')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:600;cursor:pointer">Physics</button>
-          <button onclick="setPdfFilter(this,'chem')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:600;cursor:pointer">Chemistry</button>
-          <button onclick="setPdfFilter(this,'math')" style="flex-shrink:0;padding:5px 12px;border:1px solid var(--bdr);border-radius:100px;background:transparent;color:var(--sub);font-size:11px;font-weight:600;cursor:pointer">Math</button>
-        </div>
-
-        <div class="pdfcard" onclick="openPdf('Physics Ch.4 — তরঙ্গ নোট')">
-          <div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)" aria-hidden="true"></i></div>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Physics Ch.4 — তরঙ্গ নোট</div>
-            <div style="font-size:11px;color:var(--sub)">রাফি স্যার · 2.4 MB</div>
-            <div style="display:flex;gap:5px;margin-top:5px">
-              <span style="font-size:9px;background:var(--pl);color:var(--pd);padding:2px 8px;border-radius:100px;font-weight:600">Physics</span>
-              <span style="font-size:9px;background:var(--al);color:var(--ad);padding:2px 8px;border-radius:100px;font-weight:600">HSC</span>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:5px">
-            <button onclick="event.stopPropagation();downloadPdf('Physics Ch.4')" style="width:32px;height:32px;border-radius:50%;background:var(--pl);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Download">
-              <i class="ti ti-download" style="font-size:15px;color:var(--p)" aria-hidden="true"></i>
-            </button>
-            <button onclick="event.stopPropagation();bookmarkPdf(this,'Physics Ch.4')" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Bookmark">
-              <i class="ti ti-bookmark" style="font-size:15px;color:var(--hint)" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-
-        <div class="pdfcard" onclick="openPdf('Organic Chemistry Summary')">
-          <div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)" aria-hidden="true"></i></div>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Organic Chemistry Summary</div>
-            <div style="font-size:11px;color:var(--sub)">সানিয়া ম্যাম · 1.8 MB</div>
-            <div style="display:flex;gap:5px;margin-top:5px">
-              <span style="font-size:9px;background:var(--gl);color:var(--gd);padding:2px 8px;border-radius:100px;font-weight:600">Chemistry</span>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:5px">
-            <button onclick="event.stopPropagation();downloadPdf('Organic Chemistry')" style="width:32px;height:32px;border-radius:50%;background:var(--pl);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Download">
-              <i class="ti ti-download" style="font-size:15px;color:var(--p)" aria-hidden="true"></i>
-            </button>
-            <button onclick="event.stopPropagation();bookmarkPdf(this,'Organic Chemistry')" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Bookmark">
-              <i class="ti ti-bookmark" style="font-size:15px;color:var(--hint)" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-
-        <div class="pdfcard" onclick="openPdf('Math Formula Collection')">
-          <div class="pdficon"><i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--r)" aria-hidden="true"></i></div>
-          <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:2px">Math Formula Collection</div>
-            <div style="font-size:11px;color:var(--sub)">করিম স্যার · 890 KB</div>
-            <div style="display:flex;gap:5px;margin-top:5px">
-              <span style="font-size:9px;background:var(--al);color:var(--ad);padding:2px 8px;border-radius:100px;font-weight:600">Math</span>
-            </div>
-          </div>
-          <div style="display:flex;flex-direction:column;gap:5px">
-            <button onclick="event.stopPropagation();downloadPdf('Math Formula')" style="width:32px;height:32px;border-radius:50%;background:var(--pl);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Download">
-              <i class="ti ti-download" style="font-size:15px;color:var(--p)" aria-hidden="true"></i>
-            </button>
-            <button onclick="event.stopPropagation();bookmarkPdf(this,'Math Formula')" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center" aria-label="Bookmark">
-              <i class="ti ti-bookmark" style="font-size:15px;color:var(--hint)" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-
-        <button class="btn-o" onclick="showToast('📁 PDF upload করতে Teacher Account লাগবে')">
-          <i class="ti ti-upload" aria-hidden="true"></i> PDF Upload করো
-        </button>
-      </div>
-    </div>
-
-    <!-- ═══════════════ NOTES ═══════════════ -->
-    <div class="tb" id="tb-notes">
-      <div id="notes-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
-        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
-        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
-        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে Notes পড়তে পারবে।</div>
-      </div>
-      <div id="notes-content">
-        <button class="btn-o" onclick="showAddNoteModal()" style="margin-bottom:10px">
-          <i class="ti ti-plus" aria-hidden="true"></i> নতুন Note যোগ করো
-        </button>
-        <div id="notes-list">
-          <div class="note-card" onclick="showToast('Note খুলছে...')">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <span class="note-tag" style="background:var(--pl);color:var(--pd)">পদার্থবিজ্ঞান</span>
-              <span style="font-size:10px;color:var(--hint)">আজ সকাল ১০টা</span>
-            </div>
-            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">নিউটনের সূত্র — গুরুত্বপূর্ণ</div>
-            <div style="font-size:12px;color:var(--sub);line-height:1.5">F = ma, বল = ভর × ত্বরণ। পরীক্ষায় নিশ্চিত আসবে...</div>
-          </div>
-          <div class="note-card" onclick="showToast('Note খুলছে...')">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <span class="note-tag" style="background:var(--gl);color:var(--gd)">রসায়ন</span>
-              <span style="font-size:10px;color:var(--hint)">গতকাল</span>
-            </div>
-            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Organic Chemistry — Key Points</div>
-            <div style="font-size:12px;color:var(--sub);line-height:1.5">Alkane, Alkene, Alkyne — functional group মনে রাখো...</div>
-          </div>
-          <div class="note-card" onclick="showToast('Note খুলছে...')">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-              <span class="note-tag" style="background:var(--al);color:var(--ad)">গণিত</span>
-              <span style="font-size:10px;color:var(--hint)">৩ দিন আগে</span>
-            </div>
-            <div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">Integration Formulas</div>
-            <div style="font-size:12px;color:var(--sub);line-height:1.5">∫xⁿdx = xⁿ⁺¹/(n+1) + C, ∫eˣdx = eˣ + C...</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════ QUIZ ═══════════════ -->
-    <div class="tb" id="tb-quiz">
-      <div id="quiz-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
-        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
-        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
-        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে Quiz দিতে পারবে।</div>
-      </div>
-
-      <div id="quiz-content">
-        <!-- Quiz Type Selector -->
-        <div style="display:flex;gap:5px;margin-bottom:12px">
-          <button onclick="setQuizType(this,'mcq')" style="flex:1;padding:8px;border:1px solid var(--p);border-radius:var(--rads);background:var(--p);color:#fff;font-size:11px;font-weight:700;cursor:pointer">MCQ</button>
-          <button onclick="setQuizType(this,'cq')" style="flex:1;padding:8px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">CQ Practice</button>
-          <button onclick="setQuizType(this,'daily')" style="flex:1;padding:8px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);font-size:11px;font-weight:700;cursor:pointer">Daily Quiz</button>
-        </div>
-
-        <!-- MCQ View -->
-        <div id="quiz-mcq-view">
-          <div class="card">
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-              <div style="font-size:14px;font-weight:700;color:var(--txt)">Physics · Question <span id="q-num">3</span></div>
-              <span style="font-size:11px;background:var(--al);color:var(--ad);padding:3px 10px;border-radius:100px;font-weight:600" id="q-progress">3/10</span>
-            </div>
-            <div style="font-size:14px;font-weight:600;color:var(--txt);line-height:1.6;margin-bottom:14px" id="q-text">নিউটনের গতির দ্বিতীয় সূত্র অনুসারে F = ?</div>
-            <div id="q-options">
-              <button class="qopt" onclick="answerQ(this,'wrong','B')">A)  F = mv</button>
-              <button class="qopt" onclick="answerQ(this,'correct','B')">B)  F = ma</button>
-              <button class="qopt" onclick="answerQ(this,'wrong','B')">C)  F = m/a</button>
-              <button class="qopt" onclick="answerQ(this,'wrong','B')">D)  F = a/m</button>
-            </div>
-            <div id="q-result" style="display:none;margin-top:10px;padding:10px;border-radius:var(--rads);font-size:12px;font-weight:600"></div>
-          </div>
-          <button class="btn-o" onclick="nextQuestion()" id="next-q-btn" style="display:none">পরের প্রশ্ন →</button>
-        </div>
-
-        <!-- Score Card -->
-        <div class="card">
-          <div class="ct">আজকের Leaderboard</div>
-          <div class="lbrow"><div style="font-size:20px;width:26px">🥇</div><div class="avt" style="width:34px;height:34px;background:var(--al);color:var(--ad)">RM</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">রাফি মাহমুদ</div><div style="font-size:12px;font-weight:700;color:var(--p)">98/100</div></div>
-          <div class="lbrow"><div style="font-size:20px;width:26px">🥈</div><div class="avt" style="width:34px;height:34px;background:var(--gl);color:var(--gd)">NK</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">নাহিদ করিম</div><div style="font-size:12px;font-weight:700;color:var(--p)">92/100</div></div>
-          <div class="lbrow lbyou"><div style="font-size:16px;font-weight:700;color:var(--p);width:26px">৩</div><div class="avt" style="width:34px;height:34px;background:var(--pm);color:var(--pd)">তুমি</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--p)">তুমি</div><div style="font-size:12px;font-weight:700;color:var(--p)" id="my-quiz-score">—/100</div></div>
-          <div class="lbrow"><div style="font-size:20px;width:26px">🥉</div><div class="avt" style="width:34px;height:34px;background:var(--rl);color:var(--r)">SH</div><div style="flex:1;font-size:13px;font-weight:700;color:var(--txt)">সানিয়া হক</div><div style="font-size:12px;font-weight:700;color:var(--p)">87/100</div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════ DAILY GOAL ═══════════════ -->
-    <div class="tb" id="tb-goal">
-      <div id="goal-lock-overlay" style="display:none;background:var(--pl);border-radius:var(--rad);padding:20px;text-align:center;margin-bottom:10px;border:2px solid var(--p)">
-        <i class="ti ti-lock" style="font-size:32px;color:var(--p)" aria-hidden="true"></i>
-        <div style="font-size:14px;font-weight:700;color:var(--pd);margin-top:8px">Focus Lock চলছে</div>
-        <div style="font-size:12px;color:var(--sub);margin-top:4px">Focus শেষ হলে Goal দেখতে পারবে।</div>
-      </div>
-
-      <div id="goal-content">
-        <div class="card">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-            <div style="font-size:14px;font-weight:700;color:var(--txt)">আজকের লক্ষ্য</div>
-            <div style="font-size:11px;color:var(--g);font-weight:600;background:var(--gl);padding:3px 10px;border-radius:100px" id="goal-counter">2/5 সম্পন্ন</div>
-          </div>
-          <div class="pb" style="margin-bottom:12px"><div class="pf" id="goal-pbar" style="width:40%;background:var(--p)"></div></div>
-
-          <div class="goalrow">
-            <div class="gcheck done" id="goal-1" onclick="toggleGoal(this,1)" aria-label="লক্ষ্য toggle করো"><i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i></div>
-            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--sub)" id="goal-1-text">2 ঘণ্টা পড়া</div><div style="font-size:11px;color:var(--hint)">1h 45m সম্পন্ন</div></div>
-            <div style="font-size:12px;font-weight:700;color:var(--p)">87%</div>
-          </div>
-          <div class="goalrow">
-            <div class="gcheck done" id="goal-2" onclick="toggleGoal(this,2)" aria-label="লক্ষ্য toggle করো"><i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i></div>
-            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--sub)" id="goal-2-text">৫টি Video দেখা</div><div style="font-size:11px;color:var(--hint)">5/5 সম্পন্ন</div></div>
-            <div style="font-size:12px;font-weight:700;color:var(--g)"><i class="ti ti-check-circle" aria-hidden="true"></i></div>
-          </div>
-          <div class="goalrow">
-            <div class="gcheck" id="goal-3" onclick="toggleGoal(this,3)" aria-label="লক্ষ্য toggle করো"></div>
-            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)" id="goal-3-text">১টি Quiz দাও</div><div style="font-size:11px;color:var(--hint)">এখনো হয়নি</div></div>
-            <div style="font-size:12px;color:var(--hint)">—</div>
-          </div>
-          <div class="goalrow">
-            <div class="gcheck" id="goal-4" onclick="toggleGoal(this,4)" aria-label="লক্ষ্য toggle করো"></div>
-            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)" id="goal-4-text">১টি PDF পড়া</div><div style="font-size:11px;color:var(--hint)">এখনো হয়নি</div></div>
-            <div style="font-size:12px;color:var(--hint)">—</div>
-          </div>
-          <div class="goalrow">
-            <div class="gcheck" id="goal-5" onclick="toggleGoal(this,5)" aria-label="লক্ষ্য toggle করো"></div>
-            <div style="flex:1"><div style="font-size:13px;font-weight:600;color:var(--txt)" id="goal-5-text">Focus Session শেষ</div><div style="font-size:11px;color:var(--hint)">এখনো হয়নি</div></div>
-            <div style="font-size:12px;color:var(--hint)">—</div>
-          </div>
-        </div>
-
-        <!-- Streak -->
-        <div class="card">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
-            <div style="font-size:36px">🔥</div>
-            <div style="flex:1">
-              <div style="font-size:20px;font-weight:700;color:var(--txt)"><span id="streak-display">12</span> দিন</div>
-              <div style="font-size:11px;color:var(--hint)">পরের Badge: আরও <span id="streak-to-badge">9</span> দিন</div>
-              <div class="pb" style="margin-top:5px"><div class="pf" id="streak-pbar" style="width:57%;background:var(--a)"></div></div>
-            </div>
-          </div>
-          <div class="ct">এই মাসের Calendar</div>
-          <div class="scal" id="streak-cal"></div>
-          <div style="display:flex;gap:12px;margin-top:8px;font-size:11px;color:var(--sub)">
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:var(--p);display:inline-block"></span>পড়েছো</span>
-            <span style="display:flex;align-items:center;gap:4px"><span style="width:9px;height:9px;border-radius:50%;background:var(--bg);border:1px solid var(--bdr);display:inline-block"></span>মিস</span>
-          </div>
-        </div>
-
-        <!-- Badges -->
-        <div class="card">
-          <div class="ct">Badge সংগ্রহ</div>
-          <div class="bgrid">
-            <div class="bitem bearned"><i class="ti ti-flame" aria-hidden="true"></i><div class="bnm">৭ দিন</div></div>
-            <div class="bitem bearned"><i class="ti ti-star" aria-hidden="true"></i><div class="bnm">First Session</div></div>
-            <div class="bitem bearned"><i class="ti ti-trophy" aria-hidden="true"></i><div class="bnm">১০ দিন</div></div>
-            <div class="bitem blocked"><i class="ti ti-lock" aria-hidden="true"></i><div class="bnm">২১ দিন</div></div>
-            <div class="bitem blocked"><i class="ti ti-award" aria-hidden="true"></i><div class="bnm">৩০ দিন</div></div>
-            <div class="bitem blocked"><i class="ti ti-crown" aria-hidden="true"></i><div class="bnm">১০০ দিন</div></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ═══════════════ ANALYTICS ═══════════════ -->
-    <div class="tb" id="tb-analytics">
-      <div class="card">
-        <div class="ct">📉 দুর্বল বিষয় (AI বিশ্লেষণ)</div>
-        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;margin-bottom:8px;border-left:4px solid var(--r)">
-          <div class="anbar"><span class="anname">গণিত</span><div class="anpb"><div class="anfill" style="width:42%;background:var(--r)"></div></div><span style="font-size:11px;font-weight:700;color:var(--r);min-width:34px;text-align:right">42%</span></div>
-          <div style="font-size:11px;color:var(--sub)">Integration ও Differentiation এ দুর্বল</div>
-        </div>
-        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;border-left:4px solid var(--o)">
-          <div class="anbar"><span class="anname">রসায়ন</span><div class="anpb"><div class="anfill" style="width:58%;background:var(--o)"></div></div><span style="font-size:11px;font-weight:700;color:var(--o);min-width:34px;text-align:right">58%</span></div>
-          <div style="font-size:11px;color:var(--sub)">Organic Chemistry কঠিন লাগছে</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="ct">💪 শক্তিশালী বিষয়</div>
-        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;margin-bottom:8px;border-left:4px solid var(--g)">
-          <div class="anbar"><span class="anname">পদার্থ</span><div class="anpb"><div class="anfill" style="width:88%;background:var(--g)"></div></div><span style="font-size:11px;font-weight:700;color:var(--g);min-width:34px;text-align:right">88%</span></div>
-        </div>
-        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;margin-bottom:8px;border-left:4px solid var(--p)">
-          <div class="anbar"><span class="anname">জীববিজ্ঞান</span><div class="anpb"><div class="anfill" style="width:76%;background:var(--p)"></div></div><span style="font-size:11px;font-weight:700;color:var(--p);min-width:34px;text-align:right">76%</span></div>
-        </div>
-        <div style="background:var(--bg);border-radius:var(--rads);padding:10px;border-left:4px solid var(--g)">
-          <div class="anbar"><span class="anname">ইংরেজি</span><div class="anpb"><div class="anfill" style="width:82%;background:var(--g)"></div></div><span style="font-size:11px;font-weight:700;color:var(--g);min-width:34px;text-align:right">82%</span></div>
-        </div>
-      </div>
-      <div class="mgrid">
-        <div class="mc"><div class="l">মোট পড়া</div><div class="v">62h</div><div class="s">এই মাসে</div></div>
-        <div class="mc"><div class="l">Completion</div><div class="v">74%</div><div class="s">লক্ষ্যের তুলনায়</div></div>
-      </div>
-    </div>
-
-    <!-- ═══════════════ SETTINGS ═══════════════ -->
-    <div class="tb" id="tb-settings">
-      <div style="text-align:center;padding:20px 0 16px">
-        <div class="avt" style="width:72px;height:72px;font-size:22px;background:var(--pl);color:var(--pd);margin:0 auto 10px">তুমি</div>
-        <div style="font-size:18px;font-weight:700;color:var(--txt)">Ashraf Ahmed</div>
-        <div style="font-size:12px;color:var(--sub);margin-top:3px">HSC 2025 · সিলেট</div>
-        <div style="display:flex;justify-content:center;gap:24px;margin-top:12px">
-          <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--txt)">62h</div><div style="font-size:10px;color:var(--hint)">এই মাসে</div></div>
-          <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--txt)">48</div><div style="font-size:10px;color:var(--hint)">Sessions</div></div>
-          <div style="text-align:center"><div style="font-size:16px;font-weight:700;color:var(--txt)">12🔥</div><div style="font-size:10px;color:var(--hint)">Streak</div></div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="ct">App Settings</div>
-        <div class="setrow"><div><div style="font-size:13px;font-weight:700;color:var(--txt)">Notifications</div><div style="font-size:11px;color:var(--hint)">Study reminder চালু</div></div><button class="toggle on" id="toggle-notif" onclick="toggleSetting(this,'notif')" aria-label="Notifications toggle"></button></div>
-        <div class="setrow"><div><div style="font-size:13px;font-weight:700;color:var(--txt)">Daily Goal Reminder</div><div style="font-size:11px;color:var(--hint)">রাত ৯টায় reminder</div></div><button class="toggle on" id="toggle-goal-rem" onclick="toggleSetting(this,'goal_rem')" aria-label="Goal reminder toggle"></button></div>
-        <div class="setrow"><div><div style="font-size:13px;font-weight:700;color:var(--txt)">Focus Sound</div><div style="font-size:11px;color:var(--hint)">White noise চালু হবে</div></div><button class="toggle" id="toggle-sound" onclick="toggleSetting(this,'sound')" aria-label="Sound toggle"></button></div>
-      </div>
-
-      <div class="card">
-        <div class="ct">Focus Password</div>
-        <div class="setrow"><div style="font-size:13px;font-weight:700;color:var(--txt)">Password পরিবর্তন করো</div><button onclick="showChangePwModal()" style="padding:6px 14px;background:var(--pl);color:var(--pd);border:none;border-radius:var(--rads);font-size:12px;font-weight:700;cursor:pointer">পরিবর্তন করো</button></div>
-        <div class="setrow" style="border:none"><div style="font-size:13px;font-weight:700;color:var(--txt)">Emergency Exit Penalty</div><button class="toggle on" id="toggle-penalty" onclick="toggleSetting(this,'penalty')" aria-label="Penalty toggle"></button></div>
-      </div>
-
-      <div class="card">
-        <div class="setrow"><div style="font-size:13px;font-weight:700;color:var(--txt)">Privacy Settings</div><i class="ti ti-chevron-right" style="color:var(--hint)" aria-hidden="true"></i></div>
-        <div class="setrow" style="border:none"><div style="font-size:13px;font-weight:700;color:var(--r)">Logout</div><i class="ti ti-logout" style="color:var(--r)" aria-hidden="true"></i></div>
-      </div>
-
-      <div style="text-align:center;padding:10px;font-size:11px;color:var(--hint)">BrightMesh Study v1.0 · Made with ❤️ in Bangladesh</div>
-    </div>
-
-  </div><!-- /content -->
-
-  <!-- BOTTOM NAV -->
-  <div class="bnav">
-    <button class="nb on" id="bn-focus" onclick="goTab('focus');setBn('bn-focus')" aria-label="Focus Lock">
-      <i class="ti ti-lock" aria-hidden="true"></i><span>Focus</span>
-    </button>
-    <button class="nb" id="bn-timer" onclick="goTab('timer');setBn('bn-timer')" aria-label="Timer">
-      <i class="ti ti-clock" aria-hidden="true"></i><span>Timer</span>
-    </button>
-    <button class="nbplus" onclick="goTab('focus');setBn('bn-focus')" aria-label="Focus Lock শুরু করো">
-      <i class="ti ti-lock" style="font-size:20px;color:#fff" aria-hidden="true"></i>
-    </button>
-    <button class="nb" id="bn-quiz" onclick="goTab('quiz');setBn('bn-quiz')" aria-label="Quiz">
-      <i class="ti ti-pencil-check" aria-hidden="true"></i><span>Quiz</span>
-    </button>
-    <button class="nb" id="bn-goal" onclick="goTab('goal');setBn('bn-goal')" aria-label="Daily Goal">
-      <i class="ti ti-target" aria-hidden="true"></i><span>Goal</span>
-    </button>
-  </div>
-
-</div><!-- /app -->
-
-<!-- ════════ MODALS ════════ -->
-
-<!-- EXIT MODAL -->
-<div class="overlay" id="exit-modal" style="display:none" role="dialog" aria-modal="true" aria-labelledby="exit-title">
-  <div class="mbox">
-    <div style="font-size:32px;margin-bottom:8px">⚠️</div>
-    <div style="font-size:15px;font-weight:700;color:var(--txt);margin-bottom:6px" id="exit-title">Focus বন্ধ করবে?</div>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:14px">Emergency exit করলে আজকের streak এ penalty যোগ হবে।</div>
-    <div class="pwdots" id="exit-dots">
-      <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
-    </div>
-    <div class="npad" id="exit-numpad"></div>
-    <div id="exit-error" style="display:none;color:var(--r);font-size:12px;font-weight:600;margin-top:8px;text-align:center">ভুল পাসওয়ার্ড!</div>
-    <button onclick="document.getElementById('exit-modal').style.display='none'" style="width:100%;padding:10px;margin-top:10px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);cursor:pointer;font-size:13px;font-weight:600">বাতিল</button>
-  </div>
-</div>
-
-<!-- CHANGE PASSWORD MODAL -->
-<div class="overlay" id="changepw-modal" style="display:none" role="dialog" aria-modal="true">
-  <div class="mbox">
-    <div style="font-size:15px;font-weight:700;color:var(--txt);margin-bottom:4px">নতুন পাসওয়ার্ড সেট করো</div>
-    <div style="font-size:12px;color:var(--sub);margin-bottom:10px">৪ সংখ্যার নতুন পাসওয়ার্ড দাও</div>
-    <div class="pwdots" id="newpw-dots">
-      <div class="pwd"></div><div class="pwd"></div><div class="pwd"></div><div class="pwd"></div>
-    </div>
-    <div class="npad" id="newpw-numpad"></div>
-    <button onclick="document.getElementById('changepw-modal').style.display='none'" style="width:100%;padding:10px;margin-top:10px;border:1px solid var(--bdr);border-radius:var(--rads);background:transparent;color:var(--sub);cursor:pointer;font-size:13px;font-weight:600">বাতিল</button>
-  </div>
-</div>
-
-<!-- ADD NOTE MODAL -->
-<div class="msheet" id="note-modal" style="display:none" role="dialog" aria-modal="true">
-  <div class="mshin">
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid var(--bdr);flex-shrink:0">
-      <div style="font-size:15px;font-weight:700;color:var(--txt)">নতুন Note</div>
-      <button onclick="document.getElementById('note-modal').style.display='none'" style="border:none;background:transparent;font-size:20px;cursor:pointer;color:var(--hint)" aria-label="বন্ধ করো">✕</button>
-    </div>
-    <div style="padding:14px;overflow-y:auto">
-      <select class="sel" id="note-subject" aria-label="বিষয়">
-        <option>পদার্থবিজ্ঞান</option><option>রসায়ন</option><option>গণিত</option><option>জীববিজ্ঞান</option><option>বাংলা</option><option>ইংরেজি</option>
-      </select>
-      <input class="inp" type="text" id="note-title" placeholder="Title...">
-      <textarea style="width:100%;padding:10px 12px;border:1.5px solid var(--bdr);border-radius:var(--rads);font-size:13px;background:var(--card);color:var(--txt);outline:none;resize:none;min-height:100px;font-family:inherit;margin-bottom:10px" id="note-body" placeholder="Note লিখো..."></textarea>
-      <button class="btn-p" onclick="saveNote()">Note সেভ করো</button>
-    </div>
-  </div>
-</div>
-
-<div id="toast" role="status" aria-live="polite"></div>
 
 <script>
-// ════════ STATE ════════
-const STATE = {
-  focusOn: false,
-  savedPw: '',
-  setupPw: '',
-  unlockPw: '',
-  exitPw: '',
-  newPw: '',
-  focusMin: 30,
-  focusSubj: 'পদার্থবিজ্ঞান',
-  focusInt: null,
-  totalSec: 0,
-  elapsedSec: 0,
-  streak: 12,
-  goalDone: [true, true, false, false, false],
-  quizScore: 0,
-  quizTotal: 0,
-  settings: { notif: true, goal_rem: true, sound: false, penalty: true },
-  sessions: JSON.parse(localStorage.getItem('bm_sessions') || '[]'),
-  bookmarks: JSON.parse(localStorage.getItem('bm_bookmarks') || '[]'),
-};
-
-// ════════ CLOCK ════════
-function tick() {
-  const n = new Date();
-  const t = String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
-  const el = document.getElementById('clk');
-  if (el) el.textContent = t;
-}
-tick(); setInterval(tick, 1000);
-
-// ════════ LOADING ════════
-window.addEventListener('load', () => {
-  setTimeout(() => {
-    const l = document.getElementById('ls');
-    l.classList.add('out');
-    setTimeout(() => l.remove(), 400);
-  }, 1200);
-  buildWeekChart([2,4,3,5,3.5,1,4], ['সোম','মঙ্গল','বুধ','বৃহ','শুক্র','শনি','রবি']);
-  buildStreakCal();
-  loadGoalState();
-  renderSessionHistory();
+// ---------- Tabs ----------
+document.querySelectorAll('.tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById(tab.dataset.tab).classList.add('active');
+    if(tab.dataset.tab==='countdown') renderCountdown();
+    if(tab.dataset.tab==='history') renderHistory();
+  });
 });
 
-// ════════ TABS ════════
-const ALL_TABS = ['focus','timer','pdf','notes','quiz','goal','analytics','settings'];
-function goTab(id, btn) {
-  // Focus lock — disabled tabs
-  const LOCKED = ['pdf','notes','quiz','goal','analytics'];
-  if (STATE.focusOn && LOCKED.includes(id)) {
-    showToast('🔒 Focus চলছে! আনলক করো।');
+// ---------- Storage helpers ----------
+function load(key, fallback){
+  try{
+    const v = localStorage.getItem(key);
+    return v ? JSON.parse(v) : fallback;
+  }catch(e){ return fallback; }
+}
+function save(key, val){
+  localStorage.setItem(key, JSON.stringify(val));
+}
+
+// ---------- Timer ----------
+let timerInterval = null;
+let elapsedMs = load('bm_timer_elapsed', 0);
+let running = false;
+
+const timerDisplay = document.getElementById('timerDisplay');
+const startBtn = document.getElementById('startBtn');
+const pauseBtn = document.getElementById('pauseBtn');
+const resetBtn = document.getElementById('resetBtn');
+const timerSubject = document.getElementById('timerSubject');
+timerSubject.value = load('bm_timer_subject', '');
+
+function formatTime(ms){
+  const totalSec = Math.floor(ms/1000);
+  const h = String(Math.floor(totalSec/3600)).padStart(2,'0');
+  const m = String(Math.floor((totalSec%3600)/60)).padStart(2,'0');
+  const s = String(totalSec%60).padStart(2,'0');
+  return `${h}:${m}:${s}`;
+}
+function updateDisplay(){
+  timerDisplay.textContent = formatTime(elapsedMs);
+}
+updateDisplay();
+
+let lastTick = null;
+function tick(){
+  const now = Date.now();
+  elapsedMs += now - lastTick;
+  lastTick = now;
+  updateDisplay();
+}
+
+startBtn.addEventListener('click', ()=>{
+  if(running) return;
+  running = true;
+  lastTick = Date.now();
+  timerInterval = setInterval(tick, 1000);
+  startBtn.disabled = true;
+  pauseBtn.disabled = false;
+  timerDisplay.classList.add('running');
+});
+
+pauseBtn.addEventListener('click', ()=>{
+  if(!running) return;
+  running = false;
+  clearInterval(timerInterval);
+  save('bm_timer_elapsed', elapsedMs);
+  startBtn.disabled = false;
+  pauseBtn.disabled = true;
+  timerDisplay.classList.remove('running');
+});
+
+resetBtn.addEventListener('click', ()=>{
+  const subject = timerSubject.value.trim() || 'নাম দেওয়া হয়নি';
+  if(elapsedMs > 0){
+    const history = load('bm_history', []);
+    history.unshift({
+      subject: subject,
+      duration: formatTime(elapsedMs),
+      date: new Date().toLocaleString('bn-BD', {dateStyle:'medium', timeStyle:'short'})
+    });
+    save('bm_history', history);
+  }
+  running = false;
+  clearInterval(timerInterval);
+  elapsedMs = 0;
+  save('bm_timer_elapsed', 0);
+  updateDisplay();
+  startBtn.disabled = false;
+  pauseBtn.disabled = true;
+  timerDisplay.classList.remove('running');
+});
+
+timerSubject.addEventListener('input', ()=>{
+  save('bm_timer_subject', timerSubject.value);
+});
+
+// ---------- Todo lists (generic) ----------
+function setupTodo(key, inputId, addId, listId){
+  const input = document.getElementById(inputId);
+  const addBtn = document.getElementById(addId);
+  const listEl = document.getElementById(listId);
+
+  function render(){
+    const items = load(key, []);
+    listEl.innerHTML = '';
+    if(items.length === 0){
+      listEl.innerHTML = '<div class="empty">এখনো কিছু যোগ করা হয়নি</div>';
+      return;
+    }
+    items.forEach((item, idx)=>{
+      const row = document.createElement('div');
+      row.className = 'todo-item';
+      row.innerHTML = `
+        <input type="checkbox" ${item.done ? 'checked' : ''} data-idx="${idx}">
+        <span class="todo-text ${item.done ? 'done' : ''}">${escapeHtml(item.text)}</span>
+        <button class="del-btn" data-idx="${idx}">✕</button>
+      `;
+      listEl.appendChild(row);
+    });
+
+    listEl.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+      cb.addEventListener('change', ()=>{
+        const items = load(key, []);
+        items[cb.dataset.idx].done = cb.checked;
+        save(key, items);
+        render();
+      });
+    });
+    listEl.querySelectorAll('.del-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const items = load(key, []);
+        items.splice(btn.dataset.idx, 1);
+        save(key, items);
+        render();
+      });
+    });
+  }
+
+  function addItem(){
+    const text = input.value.trim();
+    if(!text) return;
+    const items = load(key, []);
+    items.push({text, done:false});
+    save(key, items);
+    input.value = '';
+    render();
+  }
+
+  addBtn.addEventListener('click', addItem);
+  input.addEventListener('keypress', (e)=>{
+    if(e.key === 'Enter') addItem();
+  });
+
+  render();
+}
+
+function escapeHtml(str){
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+setupTodo('bm_todo_daily', 'todo1Input', 'todo1Add', 'todo1List');
+setupTodo('bm_todo_exam', 'todo2Input', 'todo2Add', 'todo2List');
+
+// ---------- History ----------
+function renderHistory(){
+  const listEl = document.getElementById('historyList');
+  const history = load('bm_history', []);
+  if(history.length === 0){
+    listEl.innerHTML = '<div class="empty">এখনো কোনো স্টাডি সেশন সেভ হয়নি। টাইমার রিসেট করলে এখানে যোগ হবে।</div>';
     return;
   }
-  ALL_TABS.forEach(t => {
-    const e = document.getElementById('tb-' + t);
-    if (e) { e.style.display = 'none'; e.classList.remove('on'); }
-  });
-  const tgt = document.getElementById('tb-' + id);
-  if (tgt) { tgt.style.display = 'flex'; tgt.classList.add('on'); }
-  document.querySelectorAll('#main-tabs .tab').forEach(t => t.classList.remove('on'));
-  if (btn) btn.classList.add('on');
-  else {
-    const all = document.querySelectorAll('#main-tabs .tab');
-    const idx = ALL_TABS.indexOf(id);
-    if (all[idx]) all[idx].classList.add('on');
-  }
-  updateFocusLockUI();
+  listEl.innerHTML = history.map(h=>`
+    <div class="history-item">
+      <div class="h-top"><span>${escapeHtml(h.subject)}</span><span>${h.duration}</span></div>
+      <div class="h-sub">${h.date}</div>
+    </div>
+  `).join('');
 }
-function setBn(id) {
-  document.querySelectorAll('.bnav .nb').forEach(b => b.classList.remove('on'));
-  const e = document.getElementById(id);
-  if (e) e.classList.add('on');
-}
+renderHistory();
 
-// ════════ FOCUS LOCK UI ════════
-function updateFocusLockUI() {
-  const LOCKED = ['pdf','notes','quiz','goal','analytics'];
-  const tabs = document.querySelectorAll('#main-tabs .tab');
-  tabs.forEach((tab, i) => {
-    const tabId = ALL_TABS[i];
-    if (STATE.focusOn && LOCKED.includes(tabId)) {
-      tab.classList.add('disabled-tab');
-    } else {
-      tab.classList.remove('disabled-tab');
-    }
-  });
-  // Bottom nav
-  const lockableBtns = ['bn-quiz','bn-goal'];
-  lockableBtns.forEach(id => {
-    const btn = document.getElementById(id);
-    if (btn) btn.classList.toggle('dis', STATE.focusOn);
-  });
-  // Overlays
-  LOCKED.forEach(id => {
-    const overlay = document.getElementById(id + '-lock-overlay');
-    const content = document.getElementById(id + '-content');
-    if (overlay) overlay.style.display = STATE.focusOn ? 'block' : 'none';
-    if (content) content.style.display = STATE.focusOn ? 'none' : 'block';
-  });
-  // Banner
-  const banner = document.getElementById('focus-banner');
-  if (STATE.focusOn) {
-    banner.classList.add('show');
+// ---------- Countdown ----------
+const examNameInput = document.getElementById('examName');
+const examDateInput = document.getElementById('examDate');
+const examSaveBtn = document.getElementById('examSave');
+const examClearBtn = document.getElementById('examClear');
+const countdownResult = document.getElementById('countdownResult');
+const cdProgress = document.getElementById('cdProgress');
+
+function renderCountdown(){
+  const exam = load('bm_exam', null);
+  if(!exam){
+    countdownResult.style.display = 'none';
+    return;
+  }
+  const now = new Date();
+  const target = new Date(exam.date + 'T00:00:00');
+  const diffMs = target - now;
+  const diffDays = Math.ceil(diffMs / (1000*60*60*24));
+
+  document.getElementById('cdName').textContent = exam.name;
+  const cdDays = document.getElementById('cdDays');
+  const cdLabel = document.getElementById('cdLabel');
+
+  if(diffDays > 0){
+    cdDays.textContent = diffDays;
+    cdLabel.textContent = 'দিন বাকি';
+    // color urgency: red <7, gold <30, teal beyond
+    let color = 'var(--teal)';
+    let pct = 100;
+    if(diffDays <= 7){ color = 'var(--danger)'; pct = (diffDays/7)*20; }
+    else if(diffDays <= 30){ color = 'var(--gold)'; pct = 20 + ((30-diffDays)/23)*40; }
+    else { color = 'var(--teal)'; pct = Math.max(60, 100 - diffDays/3); }
+    cdDays.style.color = color;
+    cdProgress.style.width = Math.min(100, pct) + '%';
+  } else if(diffDays === 0){
+    cdDays.textContent = '🔥';
+    cdDays.style.color = 'var(--danger)';
+    cdLabel.textContent = 'আজই পরীক্ষা!';
+    cdProgress.style.width = '100%';
   } else {
-    banner.classList.remove('show');
+    cdDays.textContent = '✓';
+    cdDays.style.color = 'var(--green)';
+    cdLabel.textContent = 'পরীক্ষা শেষ হয়ে গেছে';
+    cdProgress.style.width = '100%';
   }
+  countdownResult.style.display = 'block';
 }
 
-// ════════ NUMPAD BUILDER ════════
-function buildNumpad(containerId, pwVar, dotsId, onComplete, onError) {
-  const el = document.getElementById(containerId);
-  if (!el || el.dataset.built) return;
-  el.dataset.built = '1';
-  STATE[pwVar] = '';
-  [1,2,3,4,5,6,7,8,9,'',0,'⌫'].forEach(n => {
-    const b = document.createElement('div');
-    b.className = 'nk' + (n === '' ? ' emp' : '');
-    b.textContent = n;
-    if (n !== '') b.onclick = () => {
-      if (n === '⌫') {
-        STATE[pwVar] = STATE[pwVar].slice(0, -1);
-      } else if (STATE[pwVar].length < 4) {
-        STATE[pwVar] += n;
-      }
-      updateDots(dotsId, STATE[pwVar]);
-      if (STATE[pwVar].length === 4 && onComplete) onComplete();
-    };
-    el.appendChild(b);
-  });
-}
-function updateDots(id, pw) {
-  document.querySelectorAll('#' + id + ' .pwd').forEach((d, i) => {
-    d.classList.toggle('f', i < pw.length);
-  });
-}
-function resetNumpad(pwVar, dotsId) {
-  STATE[pwVar] = '';
-  updateDots(dotsId, '');
-}
-
-// Build all numpads
-buildNumpad('setup-numpad', 'setupPw', 'setup-dots', null, null);
-buildNumpad('unlock-numpad', 'unlockPw', 'unlock-dots', () => {
-  if (STATE.unlockPw === STATE.savedPw) {
-    stopFocus(false);
-  } else {
-    const errEl = document.getElementById('unlock-error');
-    const dotsEl = document.getElementById('unlock-dots');
-    dotsEl.classList.add('shake');
-    setTimeout(() => dotsEl.classList.remove('shake'), 300);
-    if (errEl) errEl.style.display = 'block';
-    setTimeout(() => { if (errEl) errEl.style.display = 'none'; }, 2000);
-    resetNumpad('unlockPw', 'unlock-dots');
+examSaveBtn.addEventListener('click', ()=>{
+  const name = examNameInput.value.trim();
+  const date = examDateInput.value;
+  if(!name || !date){
+    alert('পরীক্ষার নাম এবং তারিখ দুটোই দাও');
+    return;
   }
-}, null);
-buildNumpad('exit-numpad', 'exitPw', 'exit-dots', () => {
-  if (STATE.exitPw === STATE.savedPw) {
-    document.getElementById('exit-modal').style.display = 'none';
-    stopFocus(true);
-  } else {
-    const errEl = document.getElementById('exit-error');
-    const dotsEl = document.getElementById('exit-dots');
-    dotsEl.classList.add('shake');
-    setTimeout(() => dotsEl.classList.remove('shake'), 300);
-    if (errEl) errEl.style.display = 'block';
-    setTimeout(() => { if (errEl) errEl.style.display = 'none'; }, 2000);
-    resetNumpad('exitPw', 'exit-dots');
-  }
-}, null);
-buildNumpad('newpw-numpad', 'newPw', 'newpw-dots', () => {
-  STATE.savedPw = STATE.newPw;
-  localStorage.setItem('bm_pw', STATE.savedPw);
-  document.getElementById('changepw-modal').style.display = 'none';
-  showToast('✅ পাসওয়ার্ড পরিবর্তন হয়েছে!');
-  resetNumpad('newPw', 'newpw-dots');
-}, null);
-
-// Restore saved PW
-const savedPw = localStorage.getItem('bm_pw');
-if (savedPw) STATE.savedPw = savedPw;
-
-// ════════ TIME SELECTION ════════
-function selTime(el, m) {
-  document.querySelectorAll('.topt').forEach(o => { o.classList.remove('on'); o.setAttribute('aria-checked','false'); });
-  el.classList.add('on'); el.setAttribute('aria-checked','true');
-  STATE.focusMin = m;
-  document.getElementById('custom-time-row').style.display = m === 0 ? 'block' : 'none';
-}
-
-// ════════ START FOCUS ════════
-function startFocus() {
-  if (STATE.setupPw.length < 4) { showToast('৪ সংখ্যার পাসওয়ার্ড দাও!'); return; }
-  let mins = STATE.focusMin;
-  if (mins === 0) {
-    mins = parseInt(document.getElementById('custom-mins').value) || 30;
-    if (mins < 1 || mins > 300) { showToast('১–৩০০ মিনিটের মধ্যে দাও।'); return; }
-  }
-  STATE.savedPw = STATE.setupPw;
-  localStorage.setItem('bm_pw', STATE.savedPw);
-  STATE.focusSubj = document.getElementById('focus-subj').value;
-  STATE.focusOn = true;
-  STATE.totalSec = mins * 60;
-  STATE.elapsedSec = 0;
-
-  document.getElementById('focus-setup').style.display = 'none';
-  document.getElementById('focus-active').style.display = 'block';
-  document.getElementById('focus-complete').style.display = 'none';
-  document.getElementById('focus-subj-label').textContent = STATE.focusSubj;
-  document.getElementById('banner-subj').textContent = STATE.focusSubj;
-
-  updateFocusLockUI();
-  resetNumpad('unlockPw', 'unlock-dots');
-  if (document.getElementById('unlock-error')) document.getElementById('unlock-error').style.display = 'none';
-
-  STATE.focusInt = setInterval(focusTick, 1000);
-  showToast('🔒 Focus শুরু হয়েছে! মনোযোগ দিয়ে পড়ো।');
-}
-
-function focusTick() {
-  STATE.elapsedSec++;
-  const rem = STATE.totalSec - STATE.elapsedSec;
-  if (rem <= 0) { stopFocus(false); return; }
-  const m = String(Math.floor(rem / 60)).padStart(2, '0');
-  const s = String(rem % 60).padStart(2, '0');
-  const display = m + ':' + s;
-  const cdown = document.getElementById('focus-countdown');
-  const banner = document.getElementById('banner-timer');
-  const prog = document.getElementById('focus-progress');
-  const elbl = document.getElementById('focus-elapsed-lbl');
-  if (cdown) cdown.textContent = display;
-  if (banner) banner.textContent = display;
-  if (prog) prog.style.width = Math.round((STATE.elapsedSec / STATE.totalSec) * 100) + '%';
-  if (elbl) elbl.textContent = Math.floor(STATE.elapsedSec / 60) + ' মিনিট হয়েছে';
-}
-
-// ════════ STOP FOCUS ════════
-function stopFocus(isEmergency) {
-  clearInterval(STATE.focusInt);
-  STATE.focusOn = false;
-
-  const minsStudied = Math.round(STATE.elapsedSec / 60);
-  const sessData = {
-    subj: STATE.focusSubj,
-    mins: minsStudied,
-    time: new Date().toLocaleTimeString('bn-BD', {hour:'2-digit',minute:'2-digit'}),
-    emergency: isEmergency
-  };
-  STATE.sessions.unshift(sessData);
-  if (STATE.sessions.length > 20) STATE.sessions.pop();
-  localStorage.setItem('bm_sessions', JSON.stringify(STATE.sessions));
-
-  if (!isEmergency) {
-    STATE.streak++;
-    document.getElementById('streak-count').textContent = STATE.streak;
-    document.getElementById('streak-display').textContent = STATE.streak;
-    localStorage.setItem('bm_streak', STATE.streak);
-    toggleGoal(document.getElementById('goal-5'), 5, true);
-  } else {
-    showToast('⚠️ Emergency exit — Penalty যোগ হয়েছে!');
-  }
-
-  document.getElementById('focus-setup').style.display = 'none';
-  document.getElementById('focus-active').style.display = 'none';
-  document.getElementById('focus-complete').style.display = 'block';
-  document.getElementById('session-summary').textContent = minsStudied + ' মিনিট পড়েছো' + (isEmergency ? ' (Emergency Exit)' : ' — দারুণ!');
-  document.getElementById('sess-time').textContent = minsStudied + ' মিনিট';
-  document.getElementById('sess-subj').textContent = STATE.focusSubj;
-  document.getElementById('sess-streak').textContent = STATE.streak + ' দিন';
-
-  resetNumpad('setupPw', 'setup-dots');
-  resetNumpad('unlockPw', 'unlock-dots');
-  resetNumpad('exitPw', 'exit-dots');
-
-  updateFocusLockUI();
-  renderSessionHistory();
-  if (!isEmergency) showToast('🎉 Focus সম্পন্ন! ' + minsStudied + ' মিনিট পড়েছো।');
-}
-
-function resetFocus() {
-  document.getElementById('focus-setup').style.display = 'block';
-  document.getElementById('focus-active').style.display = 'none';
-  document.getElementById('focus-complete').style.display = 'none';
-}
-
-function showExitModal() {
-  resetNumpad('exitPw', 'exit-dots');
-  if (document.getElementById('exit-error')) document.getElementById('exit-error').style.display = 'none';
-  document.getElementById('exit-modal').style.display = 'flex';
-}
-
-// ════════ CHARTS ════════
-function buildWeekChart(data, labels) {
-  const wc = document.getElementById('report-chart');
-  const wl = document.getElementById('report-labels');
-  if (!wc) return;
-  wc.innerHTML = ''; wl.innerHTML = '';
-  const mx = Math.max(...data);
-  data.forEach((h, i) => {
-    const wrap = document.createElement('div');
-    wrap.className = 'wbw';
-    const b = document.createElement('div');
-    b.className = 'wb';
-    b.style.cssText = 'height:' + Math.round((h / mx) * 68 + 4) + 'px;background:' + (i === 0 ? 'var(--p)' : 'var(--bg)') + ';border:1px solid var(--bdr)';
-    wrap.appendChild(b);
-    wc.appendChild(wrap);
-    const lbl = document.createElement('span');
-    lbl.style.cssText = 'font-size:9px;color:var(--hint);font-weight:600';
-    lbl.textContent = labels[i];
-    wl.appendChild(lbl);
-  });
-}
-const reportData = {
-  daily: { data: [1.5,0.5,2,0,1,0.5,1.5], labels: ['৬টা','৭টা','৮টা','৯টা','১০টা','১১টা','১২টা'] },
-  weekly: { data: [2,4,3,5,3.5,1,4], labels: ['সোম','মঙ্গল','বুধ','বৃহ','শুক্র','শনি','রবি'] },
-  monthly: { data: [18,22,16,28,24,20,26,18,30,24,20,16], labels: ['১','৫','৯','১৩','১৭','২১','২৫','২৯','৩৩'] }
-};
-function setReport(type, el) {
-  el.parentElement.querySelectorAll('button').forEach(b => {
-    b.style.background = 'transparent'; b.style.color = 'var(--sub)'; b.style.borderColor = 'var(--bdr)';
-  });
-  el.style.background = 'var(--p)'; el.style.color = '#fff'; el.style.borderColor = 'var(--p)';
-  const d = reportData[type];
-  buildWeekChart(d.data, d.labels);
-}
-
-// ════════ STREAK CALENDAR ════════
-function buildStreakCal() {
-  const studied = [1,2,3,4,5,7,8,9,10,11,12,14,15,17,18,19,20,22];
-  const sc = document.getElementById('streak-cal');
-  if (!sc) return;
-  for (let d = 1; d <= 23; d++) {
-    const c = document.createElement('div');
-    c.className = 'cday ' + (studied.includes(d) ? 'std' : 'msd');
-    c.textContent = d;
-    sc.appendChild(c);
-  }
-}
-
-// ════════ GOALS ════════
-function loadGoalState() {
-  const saved = JSON.parse(localStorage.getItem('bm_goals') || 'null');
-  if (saved) STATE.goalDone = saved;
-  STATE.goalDone.forEach((done, i) => {
-    const el = document.getElementById('goal-' + (i + 1));
-    if (!el) return;
-    if (done) {
-      el.classList.add('done');
-      el.innerHTML = '<i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i>';
-    } else {
-      el.classList.remove('done');
-      el.innerHTML = '';
-    }
-  });
-  updateGoalCounter();
-}
-function toggleGoal(el, idx, forceOn = false) {
-  if (!el) return;
-  const i = idx - 1;
-  if (forceOn) {
-    STATE.goalDone[i] = true;
-    el.classList.add('done');
-    el.innerHTML = '<i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i>';
-  } else {
-    STATE.goalDone[i] = !STATE.goalDone[i];
-    el.classList.toggle('done', STATE.goalDone[i]);
-    el.innerHTML = STATE.goalDone[i] ? '<i class="ti ti-check" style="font-size:13px;color:#fff" aria-hidden="true"></i>' : '';
-  }
-  localStorage.setItem('bm_goals', JSON.stringify(STATE.goalDone));
-  updateGoalCounter();
-}
-function updateGoalCounter() {
-  const done = STATE.goalDone.filter(Boolean).length;
-  const total = STATE.goalDone.length;
-  const pct = Math.round((done / total) * 100);
-  const counter = document.getElementById('goal-counter');
-  const pbar = document.getElementById('goal-pbar');
-  if (counter) counter.textContent = done + '/' + total + ' সম্পন্ন';
-  if (pbar) pbar.style.width = pct + '%';
-  if (done === total) showToast('🎉 সব লক্ষ্য পূরণ হয়েছে! দারুণ!');
-}
-
-// ════════ QUIZ ════════
-let quizAnswered = false;
-function setQuizType(el) {
-  el.parentElement.querySelectorAll('button').forEach(b => {
-    b.style.background = 'transparent'; b.style.color = 'var(--sub)'; b.style.borderColor = 'var(--bdr)';
-  });
-  el.style.background = 'var(--p)'; el.style.color = '#fff'; el.style.borderColor = 'var(--p)';
-  resetQuiz();
-}
-function answerQ(el, type, correct) {
-  if (quizAnswered) return;
-  quizAnswered = true;
-  document.querySelectorAll('#q-options .qopt').forEach(b => { b.disabled = true; b.style.opacity = '.7'; });
-  el.style.opacity = '1';
-  el.classList.add(type);
-  const result = document.getElementById('q-result');
-  if (result) {
-    result.style.display = 'block';
-    result.style.background = type === 'correct' ? 'var(--gl)' : 'var(--rl)';
-    result.style.color = type === 'correct' ? 'var(--gd)' : 'var(--r)';
-    result.textContent = type === 'correct' ? '✅ সঠিক উত্তর! F = ma' : '❌ ভুল! সঠিক উত্তর: F = ma (Newton\'s 2nd Law)';
-  }
-  if (type === 'correct') STATE.quizScore++;
-  STATE.quizTotal++;
-  const scoreEl = document.getElementById('my-quiz-score');
-  if (scoreEl) scoreEl.textContent = Math.round((STATE.quizScore / Math.max(1, STATE.quizTotal)) * 100) + '/100';
-  const nextBtn = document.getElementById('next-q-btn');
-  if (nextBtn) nextBtn.style.display = 'block';
-}
-function nextQuestion() {
-  resetQuiz();
-  showToast('পরের প্রশ্ন লোড হচ্ছে...');
-}
-function resetQuiz() {
-  quizAnswered = false;
-  document.querySelectorAll('#q-options .qopt').forEach(b => {
-    b.disabled = false; b.style.opacity = '1'; b.classList.remove('correct','wrong');
-  });
-  const result = document.getElementById('q-result');
-  if (result) result.style.display = 'none';
-  const nextBtn = document.getElementById('next-q-btn');
-  if (nextBtn) nextBtn.style.display = 'none';
-}
-
-// ════════ PDF ════════
-function setPdfFilter(el) {
-  el.parentElement.querySelectorAll('button').forEach(b => {
-    b.style.background = 'transparent'; b.style.color = 'var(--sub)'; b.style.borderColor = 'var(--bdr)';
-  });
-  el.style.background = 'var(--p)'; el.style.color = '#fff'; el.style.borderColor = 'var(--p)';
-  showToast('Filter applied!');
-}
-function openPdf(name) {
-  showToast('📄 ' + name + ' খুলছে...');
-}
-function downloadPdf(name) {
-  showToast('⬇️ ' + name + ' ডাউনলোড শুরু হয়েছে...');
-}
-function bookmarkPdf(btn, name) {
-  const icon = btn.querySelector('i');
-  const idx = STATE.bookmarks.indexOf(name);
-  if (idx === -1) {
-    STATE.bookmarks.push(name);
-    icon.style.color = 'var(--p)';
-    icon.classList.remove('ti-bookmark'); icon.classList.add('ti-bookmark-filled');
-    showToast('🔖 ' + name + ' bookmarked!');
-  } else {
-    STATE.bookmarks.splice(idx, 1);
-    icon.style.color = 'var(--hint)';
-    icon.classList.remove('ti-bookmark-filled'); icon.classList.add('ti-bookmark');
-    showToast('Bookmark সরানো হয়েছে।');
-  }
-  localStorage.setItem('bm_bookmarks', JSON.stringify(STATE.bookmarks));
-}
-
-// ════════ NOTES ════════
-function showAddNoteModal() {
-  document.getElementById('note-modal').style.display = 'flex';
-}
-function saveNote() {
-  const subj = document.getElementById('note-subject').value;
-  const title = document.getElementById('note-title').value.trim();
-  const body = document.getElementById('note-body').value.trim();
-  if (!title) { showToast('Title দাও!'); return; }
-  const list = document.getElementById('notes-list');
-  const card = document.createElement('div');
-  card.className = 'note-card';
-  card.onclick = () => showToast('Note খুলছে...');
-  const colors = { 'পদার্থবিজ্ঞান': 'var(--pl),var(--pd)', 'রসায়ন': 'var(--gl),var(--gd)', 'গণিত': 'var(--al),var(--ad)', 'জীববিজ্ঞান': '#E1F5EE,#065F46', 'বাংলা': '#FCEBEB,#A32D2D', 'ইংরেজি': '#EEEDFE,#3C3489' };
-  const [bg, clr] = (colors[subj] || 'var(--pl),var(--pd)').split(',');
-  card.innerHTML = `<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px"><span class="note-tag" style="background:${bg};color:${clr}">${subj}</span><span style="font-size:10px;color:var(--hint)">এইমাত্র</span></div><div style="font-size:13px;font-weight:700;color:var(--txt);margin-bottom:4px">${title}</div><div style="font-size:12px;color:var(--sub);line-height:1.5">${body.substring(0,80)}${body.length > 80 ? '...' : ''}</div>`;
-  list.insertBefore(card, list.firstChild);
-  document.getElementById('note-modal').style.display = 'none';
-  document.getElementById('note-title').value = '';
-  document.getElementById('note-body').value = '';
-  showToast('✅ Note সেভ হয়েছে!');
-}
-
-// ════════ SESSION HISTORY ════════
-function renderSessionHistory() {
-  const card = document.getElementById('session-history-card');
-  const list = document.getElementById('session-history-list');
-  if (!card || !list) return;
-  const todaySessions = STATE.sessions.slice(0, 5);
-  if (todaySessions.length === 0) { card.style.display = 'none'; return; }
-  card.style.display = 'block';
-  list.innerHTML = '';
-  todaySessions.forEach(s => {
-    const row = document.createElement('div');
-    row.className = 'row';
-    row.innerHTML = `<i class="ti ti-clock" style="font-size:16px;color:var(--p)" aria-hidden="true"></i><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--txt)">${s.subj}</div><div style="font-size:10px;color:var(--hint)">${s.time}${s.emergency ? ' — Emergency' : ''}</div></div><div style="font-size:12px;font-weight:700;color:var(--p)">${s.mins}m</div>`;
-    list.appendChild(row);
-  });
-}
-
-// ════════ SETTINGS ════════
-function toggleSetting(el, key) {
-  el.classList.toggle('on');
-  STATE.settings[key] = el.classList.contains('on');
-  localStorage.setItem('bm_settings', JSON.stringify(STATE.settings));
-  showToast(el.classList.contains('on') ? '✅ চালু হয়েছে' : 'বন্ধ হয়েছে');
-}
-function showChangePwModal() {
-  resetNumpad('newPw', 'newpw-dots');
-  document.getElementById('changepw-modal').style.display = 'flex';
-}
-
-// ════════ TOAST ════════
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
-  clearTimeout(window._toastT);
-  window._toastT = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(20px)';
-  }, 2500);
-}
-
-// ════════ MODAL CLOSE ════════
-document.querySelectorAll('.overlay,.msheet').forEach(m => {
-  m.addEventListener('click', e => {
-    if (e.target === m) m.style.display = 'none';
-  });
+  save('bm_exam', {name, date});
+  renderCountdown();
 });
 
-// ════════ LOAD SAVED STATE ════════
-const savedStreak = localStorage.getItem('bm_streak');
-if (savedStreak) {
-  STATE.streak = parseInt(savedStreak);
-  document.getElementById('streak-count').textContent = STATE.streak;
-}
-const savedSettings = JSON.parse(localStorage.getItem('bm_settings') || 'null');
-if (savedSettings) {
-  STATE.settings = { ...STATE.settings, ...savedSettings };
-  Object.keys(STATE.settings).forEach(k => {
-    const el = document.getElementById('toggle-' + k.replace('_','-'));
-    if (el) el.classList.toggle('on', STATE.settings[k]);
-  });
-}
+examClearBtn.addEventListener('click', ()=>{
+  localStorage.removeItem('bm_exam');
+  examNameInput.value = '';
+  examDateInput.value = '';
+  renderCountdown();
+});
+
+(function(){
+  const exam = load('bm_exam', null);
+  if(exam){
+    examNameInput.value = exam.name;
+    examDateInput.value = exam.date;
+  }
+  renderCountdown();
+})();
 </script>
 </body>
 </html>
-HTMLEOF
-echo "Done! $(wc -c < /home/claude/brightmesh_study.html) bytes, $(wc -l < /home/claude/brightmesh_study.html) lines"
-Output
-
-Done! 83360 bytes, 1357 lines
